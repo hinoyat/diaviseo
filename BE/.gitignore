@@ -179,6 +179,9 @@ Temporary Items
 
 # Gradle 빌드 캐시
 .gradle/
+**/build/
+**/tmp/
+**/out/
 
 
 # End of https://www.toptal.com/developers/gitignore/api/java,macos,intellij
