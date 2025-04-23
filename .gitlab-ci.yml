@@ -12,11 +12,11 @@ check_approvals:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
   script:
-    # ① MR approvals API 호출
-    - 'RESPONSE=$(curl --silent --header "PRIVATE-TOKEN: $PRIVATE_TOKEN" "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID/approvals")'
+    # 1) Deploy Token 인증으로 MR approvals API 호출
+    - 'RESPONSE=$(curl --silent -u "$DEPLOY_USER:$DEPLOY_TOKEN" "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID/approvals")'
 
-    # ② 승인 수 추출
+    # 2) 승인 수 파싱
     - 'APPROVED=$(echo "$RESPONSE" | jq ".approved_by | length")'
 
-    # ③ 승인 수 검사(2 미만이면 exit 1)
+    # 3) 2명 미만이면 실패
     - 'if [ "$APPROVED" -lt 2 ]; then echo "ERROR: 최소 2개의 승인이 필요합니다. 현재 승인 수: $APPROVED"; exit 1; fi'
