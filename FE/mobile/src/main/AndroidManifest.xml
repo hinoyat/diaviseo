@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!--앱의 구성요소를 등록하기 위한 태그, 안드로이드 컴포넌트 클래스(생명주기를 시스템이 관리)를 등록-->
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.DiaViseo"
+        tools:targetApi="31">
+
+        <!--컴포넌트에 해당하는 activity, meta-data, provider, receiver가 추가됨, name 생략 불가능-->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+<!--            앱을 실행 시켰을 때 처음으로 진입하는 진입점-->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
