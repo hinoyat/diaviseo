@@ -53,6 +53,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.activity:activity-compose")
+    implementation("androidx.compose.foundation:foundation")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
