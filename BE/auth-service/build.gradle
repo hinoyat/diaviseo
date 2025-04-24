@@ -23,7 +23,7 @@ ext {
 
 dependencies {
 	// common-module
-	implementation files('../common-module/build/libs/common-module-0.0.1-SNAPSHOT.jar')
+	implementation files('../common-module/build/libs/common-module-0.0.1-SNAPSHOT-plain.jar')
 
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
