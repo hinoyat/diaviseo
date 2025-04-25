@@ -31,12 +31,12 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.pager.ExperimentalPagerApi
+import androidx.navigation.NavController
 
 
-import androidx.core.view.WindowCompat
 
 @Composable
-fun SignupScreen() {
+fun SignupScreen(navController: NavController) {
     val images = listOf(
         R.drawable.image1,
         R.drawable.image2,
@@ -56,8 +56,6 @@ fun SignupScreen() {
             pagerState.animateScrollToPage(nextPage)
         }
     }
-
-    TransparentStatusBar()
 
     Column(
         modifier = Modifier
@@ -93,27 +91,15 @@ fun SignupScreen() {
         Spacer(modifier = Modifier.height(24.dp))
 
         // 소셜 로그인 버튼들
-        SocialLoginButtons()
-    }
-}
-
-@Composable
-fun TransparentStatusBar() {
-    val view = LocalView.current
-    val activity = view.context as? Activity
-    SideEffect {
-        activity?.window?.let { window ->
-            WindowCompat.setDecorFitsSystemWindows(window, false)
-            window.statusBarColor = android.graphics.Color.TRANSPARENT
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                window.insetsController?.setSystemBarsAppearance(
-                    0,
-                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                )
-            } else {
-                WindowInsetsControllerCompat(window, view).isAppearanceLightStatusBars = true
+//        SocialLoginButtons { provider ->
+//            println("로그인 성공한 소셜: $provider")
+//            // TODO: 네비게이션 이동 (예: InputNameScreen으로 넘어가기)
+//        }
+        SocialLoginButtons(
+            onLoginSuccess = { socialType ->
+                // 로그인 성공 후 다음 화면으로 이동
+                navController.navigate("inputName")
             }
-        }
+        )
     }
 }

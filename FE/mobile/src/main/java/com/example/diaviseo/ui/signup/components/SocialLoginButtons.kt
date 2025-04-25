@@ -16,7 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import com.example.diaviseo.R
 
 @Composable
-fun SocialLoginButtons() {
+fun SocialLoginButtons(onLoginSuccess: (String) -> Unit) {
     Column(
         modifier = Modifier.padding(top = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -25,9 +25,9 @@ fun SocialLoginButtons() {
             horizontalArrangement = Arrangement.spacedBy(24.dp),
             modifier = Modifier.padding(16.dp)
         ) {
-            SocialButton(R.drawable.kakao_icon) { /* TODO: Kakao Login */ }
-            SocialButton(R.drawable.naver_icon) { /* TODO: Naver Login */ }
-            SocialButton(R.drawable.google_icon) { /* TODO: Google Login */ }
+            SocialButton(R.drawable.kakao_icon) { onLoginSuccess("kakao") }
+            SocialButton(R.drawable.naver_icon) { onLoginSuccess("naver") }
+            SocialButton(R.drawable.google_icon) { onLoginSuccess("google") }
         }
 
         Text(
