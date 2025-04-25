@@ -2,10 +2,8 @@ package com.example.diaviseo.ui.signup
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -15,10 +13,27 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.activity.ComponentActivity
+import android.os.Build
+import android.app.Activity
+import android.view.WindowInsetsController
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.core.view.WindowInsetsControllerCompat
+//import coil.compose.rememberAsyncImagePainter
+import com.google.accompanist.pager.*
 import com.example.diaviseo.R
 import com.example.diaviseo.ui.signup.components.SocialLoginButtons
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.HorizontalPagerIndicator
+import com.google.accompanist.pager.rememberPagerState
+import com.google.accompanist.pager.ExperimentalPagerApi
+
+
+import androidx.core.view.WindowCompat
 
 @Composable
 fun SignupScreen() {
@@ -30,58 +45,75 @@ fun SignupScreen() {
         R.drawable.image5
     )
 
-    var currentPage by remember { mutableStateOf(0) }
+    val pagerState = rememberPagerState(initialPage = 0)
     val coroutineScope = rememberCoroutineScope()
 
-    // 자동 슬라이드 타이머
+    // 자동 슬라이드 효과
     LaunchedEffect(Unit) {
         while (true) {
             delay(2000)
-            currentPage = (currentPage + 1) % images.size
+            val nextPage = (pagerState.currentPage + 1) % images.size
+            pagerState.animateScrollToPage(nextPage)
         }
     }
+
+    TransparentStatusBar()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(bottom = 24.dp),
+            .background(Color.White)
+            .padding(bottom = 120.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 이미지 캐러젤
-        Box(
+        HorizontalPager(
+            count = images.size,
+            state = pagerState,
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(0.6f),
-            contentAlignment = Alignment.Center
-        ) {
+                .weight(0.6f)
+        ) { page ->
             Image(
-                painter = painterResource(id = images[currentPage]),
-                contentDescription = "Carousel Image",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
+                painter = painterResource(id = images[page]),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize().padding(bottom = 8.dp),
+                contentScale = ContentScale.Crop
             )
         }
 
-        // 페이지 인디케이터 (회색 점)
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
+        HorizontalPagerIndicator(
+            pagerState = pagerState,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp)
-        ) {
-            repeat(images.size) { index ->
-                val color = if (index == currentPage) Color.Black else Color.LightGray
-                Box(
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .size(10.dp)
-                        .background(color, shape = CircleShape)
-                )
-            }
-        }
+                .align(Alignment.CenterHorizontally)
+                .padding(8.dp),
+            activeColor = Color.Black,
+            inactiveColor = Color.LightGray
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         // 소셜 로그인 버튼들
         SocialLoginButtons()
+    }
+}
+
+@Composable
+fun TransparentStatusBar() {
+    val view = LocalView.current
+    val activity = view.context as? Activity
+    SideEffect {
+        activity?.window?.let { window ->
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            window.statusBarColor = android.graphics.Color.TRANSPARENT
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.insetsController?.setSystemBarsAppearance(
+                    0,
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                )
+            } else {
+                WindowInsetsControllerCompat(window, view).isAppearanceLightStatusBars = true
+            }
+        }
     }
 }

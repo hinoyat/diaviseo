@@ -12,11 +12,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.Text
+import androidx.compose.ui.text.style.TextAlign
 import com.example.diaviseo.R
 
 @Composable
 fun SocialLoginButtons() {
     Column(
+        modifier = Modifier.padding(top = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
@@ -29,8 +31,10 @@ fun SocialLoginButtons() {
         }
 
         Text(
-            text = "내 손 안에 똑똑한 건강관리\n디아버서 시작하기 👣",
-            fontSize = 14.sp,
+            modifier = Modifier.padding(top = 18.dp),
+            textAlign = TextAlign.Center,
+            text = "내 손 안에 똑똑한 건강관리\n디아비서 시작하기 🌟",
+            fontSize = 16.sp,
             color = Color.Black
         )
     }
