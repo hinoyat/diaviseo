@@ -9,9 +9,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class ExerciseListResponse {
-    private Long exerciseId;
-    private Long userId;
-    private Long exerciseTypeId;
+    private Integer exerciseId;
+    private Integer userId;
+    private Integer exerciseTypeId;
     private String exerciseName; // ExerciseType 에서 조회
     private String exerciseCategoryName; // ExerciseCategory 에서 조회
     private LocalDateTime exerciseDate;

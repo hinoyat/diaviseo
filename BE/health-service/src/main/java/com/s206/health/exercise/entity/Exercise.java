@@ -19,19 +19,22 @@ public class Exercise {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "exercise_id")
-    private Long exerciseId;
+    private Integer exerciseId;
 
     @Column(name = "user_id", nullable = false)
-    private Long userId;
+    private Integer userId;
 
     @Column(name = "exercise_type_id", nullable = false)
-    private Long exerciseTypeId;
+    private Integer exerciseTypeId;
 
     @Column(name = "exercise_date", nullable = false)
     private LocalDateTime exerciseDate;
 
     @Column(name = "exercise_time", nullable = false)
     private Integer exerciseTime;
+
+    @Column(name = "exercise_calorie", nullable = false)
+    private Integer exerciseCalorie;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

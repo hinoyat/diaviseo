@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
+public interface ExerciseRepository extends JpaRepository<Exercise, Integer> {
 
     // Exercise 전체 조회 (삭제되지 않은 것만)
     List<Exercise> findByIsDeletedFalse();
