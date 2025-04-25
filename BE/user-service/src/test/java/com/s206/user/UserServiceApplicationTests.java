@@ -1,4 +1,4 @@
-package com.s206.userservice;
+package com.s206.user;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
