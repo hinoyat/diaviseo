@@ -19,7 +19,7 @@ public class ExerciseCategory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "exercise_category_id", nullable = false)
-    private Long exerciseCategoryId;
+    private Integer exerciseCategoryId;
 
     @Column(name = "exercise_category_name", nullable = false, length = 50)
     private String exerciseCategoryName;
