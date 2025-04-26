@@ -4,9 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
-import com.example.diaviseo.ui.component.BottomNavigationBar
+import com.example.diaviseo.ui.components.BottomNavigationBar
 import androidx.compose.foundation.layout.padding
 
 import androidx.compose.ui.graphics.Color
