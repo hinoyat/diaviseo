@@ -53,6 +53,12 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.activity:activity-compose")
+    implementation("androidx.compose.foundation:foundation")
+
+    implementation("com.google.accompanist:accompanist-pager:0.34.0")
+    implementation("com.google.accompanist:accompanist-pager-indicators:0.34.0")
+
+    implementation("androidx.navigation:navigation-compose:2.7.7")   // Jetpack Navigation
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
