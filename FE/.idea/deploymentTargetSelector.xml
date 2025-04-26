@@ -4,7 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="DiaViseo.mobile">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-04-25T05:19:33.939659700Z">
+        <DropdownSelection timestamp="2025-04-25T06:25:30.097816700Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="PhysicalDevice" identifier="serial=R39M30JTXQM" />

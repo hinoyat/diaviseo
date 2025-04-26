@@ -1,5 +1,6 @@
 package com.example.diaviseo.ui.main
 
+import androidx.compose.foundation.background
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -7,6 +8,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.example.diaviseo.ui.component.BottomNavigationBar
 import androidx.compose.foundation.layout.padding
+
+import androidx.compose.ui.graphics.Color
 @Composable
 fun MainScreen() {
     // 화면 이동을 관리해주는 내비게이션 컨트롤러
@@ -14,6 +17,7 @@ fun MainScreen() {
 
     // Scaffold 를 사용해 하단바 포함한 기본 화면 구성
     Scaffold (
+        modifier = Modifier.background(Color.White),
         bottomBar = {
             BottomNavigationBar(navController = navController)
         }
