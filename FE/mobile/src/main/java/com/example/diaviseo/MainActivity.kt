@@ -4,6 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 
+import com.example.diaviseo.ui.signup.SignupNavGraph
+import com.example.diaviseo.ui.components.TransparentStatusBar
+import androidx.navigation.compose.rememberNavController
+
 import com.example.diaviseo.ui.main.MainScreen
 
 class MainActivity : ComponentActivity() {
@@ -13,8 +17,7 @@ class MainActivity : ComponentActivity() {
         TransparentStatusBar(window)
 
         setContent {
-                MainScreen()
-            }
+            MainScreen()
             val navController = rememberNavController()
             SignupNavGraph(navController)
         }
