@@ -33,5 +33,13 @@ public class UserController {
         return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "회원 조회 성공", user));
     }
 
+    @GetMapping("/exist")
+    public ResponseEntity<ResponseDto<Boolean>> checkUserExists(
+            @RequestParam("email") String email,
+            @RequestParam("provider") String provider) {
 
+        boolean exists = userService.existsByEmail(email);
+        log.info("exists: {}", exists);
+        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "회원 존재 조회 성공", exists));
+    }
 }
