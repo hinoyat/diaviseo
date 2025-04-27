@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -16,6 +19,14 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // local.properties 읽기
+        val localProperties = Properties()
+        localProperties.load(FileInputStream(rootProject.file("local.properties")))
+        val serverClientId = localProperties.getProperty("GOOGLE_SERVER_CLIENT_ID") ?: ""
+
+        // BuildConfig에 추가
+        buildConfigField("String", "GOOGLE_SERVER_CLIENT_ID", serverClientId)
     }
 
     buildTypes {
@@ -40,6 +51,7 @@ android {
         compose = true
         buildConfig = true
         dataBinding = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.15"
@@ -48,17 +60,21 @@ android {
 
 // 외부 라이브러리를 이용 시 gradle 파일의 dependencies 등록
 dependencies {
-//    implementation(platform(libs.firebase.bom)) // BOM을 사용해 의존성 버전 관리
-    implementation(platform("androidx.compose:compose-bom:2025.04.01"))
+    implementation(platform("androidx.compose:compose-bom:2025.03.01"))
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.activity:activity-compose")
     implementation("androidx.compose.foundation:foundation")
 
-    implementation("com.google.accompanist:accompanist-pager:0.34.0")
-    implementation("com.google.accompanist:accompanist-pager-indicators:0.34.0")
 
     implementation("androidx.navigation:navigation-compose:2.7.7")   // Jetpack Navigation
+
+    implementation("androidx.credentials:credentials-play-services-auth:1.5.0")
+    implementation("androidx.credentials:credentials:1.5.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")   // 코루틴
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
