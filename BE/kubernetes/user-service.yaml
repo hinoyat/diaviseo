@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: user-service
-          image: hongbeom1/${IMAGE_NAME}:${TAG}
+          image: hongbeom1/user-service:latest
           ports:
             - containerPort: 8082
 ---
