@@ -23,6 +23,13 @@ public class ExerciseController {
         return ResponseEntity.ok(exercises);
     }
 
+    // 운동 기록 상세 조회
+    @GetMapping("/{exerciseId}")
+    public ResponseEntity<ExerciseListResponse> getExerciseById(@PathVariable Integer exerciseId) {
+        ExerciseListResponse exercise = exerciseService.getExerciseById(exerciseId);
+        return ResponseEntity.ok(exercise);
+    }
+
     // 운동 기록 생성
     @PostMapping
     public ResponseEntity<ExerciseListResponse> createExercise(@RequestBody ExerciseCreateRequest request) {
