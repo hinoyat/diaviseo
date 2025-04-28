@@ -5,6 +5,7 @@ import com.s206.health.exercise.dto.response.ExerciseListResponse;
 import com.s206.health.exercise.entity.Exercise;
 import com.s206.health.exercise.entity.ExerciseCategory;
 import com.s206.health.exercise.entity.ExerciseType;
+import com.s206.health.exercise.mapper.ExerciseMapper;
 import com.s206.health.exercise.repository.ExerciseCategoryRepository;
 import com.s206.health.exercise.repository.ExerciseRepository;
 import com.s206.health.exercise.repository.ExerciseTypeRepository;
@@ -24,7 +25,9 @@ public class ExerciseService {
     private final ExerciseRepository exerciseRepository;
     private final ExerciseTypeRepository exerciseTypeRepository;
     private final ExerciseCategoryRepository exerciseCategoryRepository;
+    private final ExerciseMapper exerciseMapper;
 
+    // 운동 기록 전체 조회
     @Transactional(readOnly = true)
     public List<ExerciseListResponse> getAllExercises() {
         List<Exercise> exercises = exerciseRepository.findByIsDeletedFalse();
@@ -40,45 +43,52 @@ public class ExerciseService {
         // 운동 기록과 운동 유형, 카테고리 정보를 조합하여 응답 DTO 생성
         return exercises.stream()
                 .map(exercise -> {
-                    // 운동 유형 정보 조회
+                    // 운동 유형 및 카테고리 정보 조회
                     ExerciseType exerciseType = exerciseTypeMap.get(exercise.getExerciseTypeId());
-                    String exerciseName = "";
-                    String exerciseCategoryName = "";
+                    ExerciseCategory exerciseCategory = null;
 
                     if (exerciseType != null) {
-                        exerciseName = exerciseType.getExerciseName();
-
-                        // 카테고리 정보 조회
-                        ExerciseCategory exerciseCategory = exerciseCategoryMap.get(exerciseType.getExerciseCategoryId());
-                        if (exerciseCategory != null) {
-                            exerciseCategoryName = exerciseCategory.getExerciseCategoryName();
-                        }
+                        exerciseCategory = exerciseCategoryMap.get(exerciseType.getExerciseCategoryId());
                     }
 
-                    return ExerciseListResponse.builder()
-                            .exerciseId(exercise.getExerciseId())
-                            .userId(exercise.getUserId())
-                            .exerciseTypeId(exercise.getExerciseTypeId())
-                            .exerciseName(exerciseName)
-                            .exerciseCategoryName(exerciseCategoryName)
-                            .exerciseDate(exercise.getExerciseDate())
-                            .exerciseTime(exercise.getExerciseTime())
-                            .exerciseCalorie(exercise.getExerciseCalorie())
-                            .createdAt(exercise.getCreatedAt())
-                            .build();
+                    // 매퍼를 사용하여 DTO 변환
+                    return exerciseMapper.toListResponse(exercise, exerciseType, exerciseCategory);
                 })
                 .collect(Collectors.toList());
     }
 
+    // 운동 기록 상세 조회
+    @Transactional(readOnly = true)
+    public ExerciseListResponse getExerciseById(Integer exerciseId) {
+        // 1. 운동 기록 조회
+        Exercise exercise = exerciseRepository.findById(exerciseId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 운동 기록입니다."));
+
+        // 삭제된 운동 기록인 경우 예외 발생
+        if (exercise.getIsDeleted()) {
+            throw new IllegalArgumentException("삭제된 운동 기록입니다.");
+        }
+
+        // 2. 운동 종류 정보 조회
+        ExerciseType exerciseType = exerciseTypeRepository.findById(exercise.getExerciseTypeId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 운동 종류입니다."));
+
+        // 3. 운동 카테고리 정보 조회
+        ExerciseCategory exerciseCategory = exerciseCategoryRepository.findById(exerciseType.getExerciseCategoryId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 운동 카테고리입니다."));
+
+        // 4. 매퍼를 사용하여 응답 DTO 생성 및 반환
+        return exerciseMapper.toListResponse(exercise, exerciseType, exerciseCategory);
+    }
+
+    // 운동 기록 생성
     @Transactional
     public ExerciseListResponse createExercise(ExerciseCreateRequest request) {
         // 1. 운동 종류 존재 여부 확인
         ExerciseType exerciseType = exerciseTypeRepository.findById(request.getExerciseTypeId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 운동 입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 운동 종류입니다."));
 
         // 2. 운동 기록 생성 (운동 시간에 비례한 칼로리 계산)
-        // 분당 소모 칼로리 = 운동 종류의 기본 칼로리 값
-        // 총 소모 칼로리 = 분당 소모 칼로리 × 운동 시간(분)
         Integer totalCalorie = exerciseType.getExerciseCalorie() * request.getExerciseTime();
 
         Exercise exercise = Exercise.builder()
@@ -99,22 +109,7 @@ public class ExerciseService {
         ExerciseCategory exerciseCategory = exerciseCategoryRepository.findById(exerciseType.getExerciseCategoryId())
                 .orElse(null);
 
-        String exerciseCategoryName = "";
-        if (exerciseCategory != null) {
-            exerciseCategoryName = exerciseCategory.getExerciseCategoryName();
-        }
-
-        // 5. 응답 DTO 생성 및 반환
-        return ExerciseListResponse.builder()
-                .exerciseId(savedExercise.getExerciseId())
-                .userId(savedExercise.getUserId())
-                .exerciseTypeId(savedExercise.getExerciseTypeId())
-                .exerciseName(exerciseType.getExerciseName())
-                .exerciseCategoryName(exerciseCategoryName)
-                .exerciseDate(savedExercise.getExerciseDate())
-                .exerciseTime(savedExercise.getExerciseTime())
-                .exerciseCalorie(savedExercise.getExerciseCalorie())
-                .createdAt(savedExercise.getCreatedAt())
-                .build();
+        // 5. 매퍼를 사용하여 응답 DTO 생성 및 반환
+        return exerciseMapper.toListResponse(savedExercise, exerciseType, exerciseCategory, totalCalorie);
     }
 }
