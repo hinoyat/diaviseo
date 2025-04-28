@@ -1,0 +1,39 @@
+package com.s206.auth.controller;
+
+import com.s206.auth.dto.response.ReissueResponse;
+import com.s206.auth.service.AuthService;
+import com.s206.common.dto.ResponseDto;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/auth")
+@Slf4j
+public class AuthController {
+
+    private final AuthService authService;
+
+    @PostMapping("/reissue")
+    public ResponseEntity<ResponseDto<ReissueResponse>> reissue(@RequestHeader("Authorization") String authorizationHeader) {
+        log.info("[reissue] Authorization Header = {}", authorizationHeader);
+        ReissueResponse reissueResponse = authService.reissue(authorizationHeader);
+        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "토큰 재발급 성공", reissueResponse));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ResponseDto<Void>> logout(
+            @RequestHeader("Authorization") String accessTokenHeader,
+            @RequestHeader("Refresh-Token") String refreshTokenHeader
+    ) {
+        log.info("[Logout] AccessToken {}, RefreshToken{}", accessTokenHeader, refreshTokenHeader);
+
+        authService.logout(accessTokenHeader, refreshTokenHeader);
+
+        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "로그아웃 성공", null));
+    }
+
+}
