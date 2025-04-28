@@ -18,7 +18,7 @@ public class UserServiceClient {
     private static final String USER_SERVICE_BASE_URL = "http://user-service";
 
 
-    public boolean checkUserExists(String email, String provider) {
+    public UserExistResponse getUserInfo(String email, String provider) {
         ResponseDto<UserExistResponse> response = loadBalancedWebClientBuilder
                 .baseUrl(USER_SERVICE_BASE_URL)
                 .build()
@@ -32,7 +32,11 @@ public class UserServiceClient {
                 .bodyToMono(new ParameterizedTypeReference<ResponseDto<UserExistResponse>>() {})
                 .block(); // 동기 호출
 
-        return response != null && response.getData() != null && response.getData().isExists();
+        if (response == null || response.getData() == null) {
+            throw new RuntimeException("UserService 응답이 올바르지 않습니다.");
+        }
+
+        return response.getData();
     }
 
 }
