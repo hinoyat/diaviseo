@@ -75,6 +75,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.3.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")   // 코루틴
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.35.0-alpha") // System UI 제어
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
