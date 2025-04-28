@@ -9,6 +9,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import kotlinx.coroutines.*
 import androidx.credentials.exceptions.GetCredentialException
+import com.example.diaviseo.network.RetrofitInstance
 
 object GoogleLoginManager {
 
@@ -50,6 +51,7 @@ object GoogleLoginManager {
         result: GetCredentialResponse,
         onSuccess: (email: String, name: String) -> Unit
     ) {
+        println(result)
         val credential = result.credential
         val TAG = "GoogleLogin"
 
@@ -63,6 +65,24 @@ object GoogleLoginManager {
                         Log.d(TAG, "email: $email, name: $name")
                         onSuccess(email, name)
                         // 백엔드 통신 로직 호출 넣기
+
+                        // 지울 것
+                        println("여기까진 와???")
+                        val response = RetrofitInstance.api.loginWithGoogle("1")
+                        if (response.isSuccessful) {
+                            val body = response.body()
+                            if (body != null) {
+                                Log.d("retrofit test", "userId: ${body.userId}")
+                                Log.d("retrofit test", "id: ${body.id}")
+                                Log.d("retrofit test", "title: ${body.title}")
+                                Log.d("retrofit test", "name: ${body.name}")
+                            } else {
+                                Log.e("LoginError", "Response body is null")
+                            }
+                        } else {
+                            Log.e("LoginError", "Response failed: ${response.code()} ${response.message()}")
+                        }
+
                     } catch (e: GoogleIdTokenParsingException) {
                         Log.e(TAG, "Invalid google id token", e)
                         throw e
