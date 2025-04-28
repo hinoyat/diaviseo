@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class SocialLoginViewModel : ViewModel() {
+class AuthViewModel : ViewModel() {
     private val _email = MutableStateFlow("")
     val email: StateFlow<String> = _email
 
