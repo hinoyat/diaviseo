@@ -1,9 +1,8 @@
 package com.example.diaviseo.network
 
-import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.Response
-import retrofit2.http.Query
+
 
 // 요청할 때 보낼 데이터
 data class GoogleLoginRequest(
@@ -15,14 +14,12 @@ data class GoogleLoginResponse(
     val userId: Number,
     val id: Number,
     val title: String,
-    val name: Boolean
+    val completed: Boolean
 )
 
 interface AuthApiService {
 //    @GET("/auth/oauth/google")
-    @GET("/post")
-//    suspend fun loginWithGoogle(
-    fun loginWithGoogle(
-        @Query("idToken") idToken: String
+    @GET("/todos/1")
+    suspend fun loginWithGoogle(
     ): Response<GoogleLoginResponse>
 }
