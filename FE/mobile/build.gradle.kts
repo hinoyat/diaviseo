@@ -24,11 +24,11 @@ android {
         val localProperties = Properties()
         localProperties.load(FileInputStream(rootProject.file("local.properties")))
         val serverClientId = localProperties.getProperty("GOOGLE_SERVER_CLIENT_ID") ?: ""
-        val BASE_URL = localProperties.getProperty("BASE_URL") ?:""
+        val baseUrl = localProperties.getProperty("BASE_URL") ?:""
 
         // BuildConfig에 추가
         buildConfigField("String", "GOOGLE_SERVER_CLIENT_ID", serverClientId)
-        buildConfigField("String", "GOOGLE_SERVER_CLIENT_ID", serverClientId)
+        buildConfigField("String", "BASE_URL", baseUrl)
     }
 
     buildTypes {
