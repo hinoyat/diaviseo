@@ -1,22 +1,30 @@
-// SocialLoginButtons.kt
 package com.example.diaviseo.ui.signup.components
 
+import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material3.Text
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.Color
 import com.example.diaviseo.R
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
-fun SocialLoginButtons(onLoginSuccess: (String) -> Unit) {
+fun SocialLoginButtons(
+    onGoogleLoginClicked: (Activity) -> Unit,
+    onKakaoLoginClicked: () -> Unit,
+    onNaverLoginClicked: () -> Unit
+) {
+    val context = LocalContext.current
+    val activity = context as Activity
+
     Column(
         modifier = Modifier.padding(top = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -25,9 +33,15 @@ fun SocialLoginButtons(onLoginSuccess: (String) -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(24.dp),
             modifier = Modifier.padding(16.dp)
         ) {
-            SocialButton(R.drawable.kakao_icon) { onLoginSuccess("kakao") }
-            SocialButton(R.drawable.naver_icon) { onLoginSuccess("naver") }
-            SocialButton(R.drawable.google_icon) { onLoginSuccess("google") }
+            SocialButton(R.drawable.kakao_icon) {
+                onKakaoLoginClicked()
+            }
+            SocialButton(R.drawable.naver_icon) {
+                onNaverLoginClicked()
+            }
+            SocialButton(R.drawable.google_icon) {
+                onGoogleLoginClicked(activity)
+            }
         }
 
         Text(
@@ -41,7 +55,10 @@ fun SocialLoginButtons(onLoginSuccess: (String) -> Unit) {
 }
 
 @Composable
-fun SocialButton(iconRes: Int, onClick: () -> Unit) {
+private fun SocialButton(
+    iconRes: Int,
+    onClick: () -> Unit
+) {
     Image(
         painter = painterResource(id = iconRes),
         contentDescription = "social icon",
