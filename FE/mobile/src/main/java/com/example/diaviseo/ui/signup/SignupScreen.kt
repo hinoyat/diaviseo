@@ -119,6 +119,7 @@ fun SignupScreen(navController: NavController) {
                         onSuccess = { email, name ->
                             authViewModel.setEmail(email ?: "") // Null 처리 추가
                             authViewModel.setName(name ?: "") // Null 처리 추가
+                            authViewModel.setProvider("google")
                             navController.navigate("inputName")
                         },
                         onError = { e ->
