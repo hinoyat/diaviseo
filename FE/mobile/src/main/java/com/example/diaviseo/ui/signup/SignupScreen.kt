@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager // 변경된 import
 import androidx.compose.foundation.pager.rememberPagerState // 변경된 import
 import androidx.compose.foundation.shape.CircleShape // Indicator에 사용
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,22 +16,20 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext // Activity Context 얻기 위해 필요할 수 있음
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.diaviseo.R
 import com.example.diaviseo.ui.signup.components.SocialLoginButtons
 import com.example.diaviseo.ui.signup.socialSignup.GoogleLoginManager
-import com.example.diaviseo.viewmodel.SocialLoginViewModel
+import com.example.diaviseo.viewmodel.AuthViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 // @OptIn(ExperimentalPagerApi::class) // 더 이상 필요 없음 (필요시 ExperimentalFoundationApi 사용)
 // import androidx.compose.foundation.ExperimentalFoundationApi // 필요시 추가
 
 @Composable
 fun SignupScreen(navController: NavController) {
-    val socialLoginViewModel: SocialLoginViewModel = viewModel()
+    val authViewModel: AuthViewModel = viewModel()
     val context = LocalContext.current // Activity Context 필요 시
 
     val images = remember { // 불필요한 recomposition 방지
@@ -120,8 +117,9 @@ fun SignupScreen(navController: NavController) {
                     GoogleLoginManager.performLogin(
                         activity = activity,
                         onSuccess = { email, name ->
-                            socialLoginViewModel.setEmail(email ?: "") // Null 처리 추가
-                            socialLoginViewModel.setName(name ?: "") // Null 처리 추가
+                            authViewModel.setEmail(email ?: "") // Null 처리 추가
+                            authViewModel.setName(name ?: "") // Null 처리 추가
+                            authViewModel.setProvider("google")
                             navController.navigate("phoneAuth")
                         },
                         onError = { e ->

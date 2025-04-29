@@ -3,6 +3,7 @@ package com.s206.user.user.controller;
 import com.s206.common.dto.ResponseDto;
 import com.s206.user.user.dto.request.UserCreateRequest;
 import com.s206.user.user.dto.response.UserDetailResponse;
+import com.s206.user.user.dto.response.UserExistResponse;
 import com.s206.user.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,12 +35,12 @@ public class UserController {
     }
 
     @GetMapping("/exist")
-    public ResponseEntity<ResponseDto<Boolean>> checkUserExists(
+    public ResponseEntity<ResponseDto<UserExistResponse>> checkUserExists(
             @RequestParam("email") String email,
             @RequestParam("provider") String provider) {
 
-        boolean exists = userService.existsByEmail(email);
-        log.info("exists: {}", exists);
-        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "회원 존재 조회 성공", exists));
+        UserExistResponse response = userService.existsByEmail(email, provider);
+        log.info("exists: {}", response.toString());
+        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "회원 존재 조회 성공", response));
     }
 }
