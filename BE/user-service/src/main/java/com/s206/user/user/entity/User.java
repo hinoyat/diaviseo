@@ -41,6 +41,9 @@ public class User {
     @Column(nullable = false, length = 50)
     private String email;
 
+    @Column(nullable = false, length = 50)
+    private String provider;
+
     @Column(nullable = false)
     private Boolean consentPersonal;
 

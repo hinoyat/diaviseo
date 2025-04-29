@@ -21,6 +21,8 @@ public class UserCreateRequest {
 
     private String email;
 
+    private String provider;
+
     private Boolean consentPersonal;
 
     private Boolean locationPersonal;
