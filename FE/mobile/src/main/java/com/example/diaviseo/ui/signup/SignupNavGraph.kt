@@ -20,5 +20,8 @@ fun SignupNavGraph(navController: NavHostController) {
         composable("inputBirth") {
             InputBirthScreen(navController)
         }
+        composable("phoneAuth") {
+            PhoneAuthScreen(navController) // 소셜 로그인 이후 휴대폰 인증
+        }
     }
 }
