@@ -15,6 +15,7 @@ import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,6 @@ public class AuthService {
     private final TokenBlacklistService tokenBlacklistService;
     private final UserServiceClient userServiceClient;
     private final GoogleTokenVerifier googleTokenVerifier;
-
 
 
     public OAuthLoginResponse oauthLogin(OAuthLoginRequest request) {
@@ -72,7 +72,7 @@ public class AuthService {
     }
 
 
-
+    @Transactional
     public ReissueResponse reissue(String authorizationHeader) {
         String refreshToken = extractToken(authorizationHeader);
 
@@ -110,6 +110,7 @@ public class AuthService {
     }
 
 
+    @Transactional
     public void logout(String accessTokenHeader, String refreshTokenHeader) {
         // 헤더에서 토큰 추출 Bearer 제거
         String accessToken = extractToken(accessTokenHeader);
