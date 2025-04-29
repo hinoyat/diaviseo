@@ -39,10 +39,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         // 앱 켤 때마다 토큰 초기화 (테스트용)
-//        val context = this.applicationContext
-//        CoroutineScope(Dispatchers.IO).launch {
-//            com.example.diaviseo.datastore.TokenDataStore.clearAccessToken(context)
-//        }
+        val context = this.applicationContext
+        CoroutineScope(Dispatchers.IO).launch {
+            com.example.diaviseo.datastore.TokenDataStore.clearAccessToken(context)
+        }
 
         setContent {
             DiaViseoTheme {
@@ -61,7 +61,6 @@ class MainActivity : ComponentActivity() {
 
             testViewModel.printAccessToken(this)
 
-            val navController = rememberNavController()
             NavHost(navController, startDestination = "splash") {
                 composable("splash") { SplashScreen(navController) }
                 signupNavGraph(navController)
