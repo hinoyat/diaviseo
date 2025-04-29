@@ -120,7 +120,7 @@ fun SignupScreen(navController: NavController) {
                             authViewModel.setEmail(email ?: "") // Null 처리 추가
                             authViewModel.setName(name ?: "") // Null 처리 추가
                             authViewModel.setProvider("google")
-                            navController.navigate("inputName")
+                            navController.navigate("phoneAuth")
                         },
                         onError = { e ->
                             e.printStackTrace() // 에러 로깅
