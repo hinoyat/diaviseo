@@ -1,9 +1,14 @@
 package com.s206.auth.service;
 
+import com.s206.auth.client.UserServiceClient;
+import com.s206.auth.client.dto.UserExistResponse;
+import com.s206.auth.dto.request.OAuthLoginRequest;
+import com.s206.auth.dto.response.OAuthLoginResponse;
 import com.s206.auth.jwt.JwtProvider;
 import com.s206.auth.jwt.blacklist.TokenBlacklistService;
 import com.s206.auth.jwt.refreshtoken.RefreshTokenRedisRepository;
 import com.s206.auth.dto.response.ReissueResponse;
+import com.s206.auth.security.google.GoogleTokenVerifier;
 import com.s206.common.exception.types.BadRequestException;
 import com.s206.common.exception.types.UnauthorizedException;
 import io.jsonwebtoken.Claims;
@@ -22,6 +27,51 @@ public class AuthService {
     private final JwtProvider jwtProvider;
     private final RefreshTokenRedisRepository refreshTokenRedisRepository;
     private final TokenBlacklistService tokenBlacklistService;
+    private final UserServiceClient userServiceClient;
+    private final GoogleTokenVerifier googleTokenVerifier;
+
+
+
+    public OAuthLoginResponse oauthLogin(OAuthLoginRequest request) {
+        String provider = request.getProvider();
+        String idToken = request.getIdToken();
+
+        // 1. 소셜 토큰 검증
+        String email;
+        String name;
+        if ("google".equalsIgnoreCase(provider)) {
+            var userInfo = googleTokenVerifier.verify(idToken);
+            email = userInfo.getEmail();
+            name = userInfo.getName();
+        } else {
+            throw new UnauthorizedException("지원하지 않는 소셜 로그인 방식입니다: " + provider);
+        }
+
+        // 2. user-service 회원 존재 여부 조회
+        UserExistResponse userExistResponse = userServiceClient.getUserInfo(email, provider);
+
+        // 3. 회원 존재 여부에 따라 처리
+        if (userExistResponse.getExists()) {
+            // 기존 회원 - JWT 발급
+            String accessToken = jwtProvider.createAccessToken(
+                    userExistResponse.getUserId(),
+                    userExistResponse.getName(),
+                    List.of("ROLE_USER")
+            );
+            String refreshToken = jwtProvider.createRefreshToken(
+                    userExistResponse.getUserId(),
+                    userExistResponse.getName()
+            );
+
+            // 기존 회원
+            return new OAuthLoginResponse(false, accessToken, refreshToken);
+        } else {
+            // 신규 회원
+            return new OAuthLoginResponse(true, null, null);
+        }
+    }
+
+
 
     public ReissueResponse reissue(String authorizationHeader) {
         String refreshToken = extractToken(authorizationHeader);
