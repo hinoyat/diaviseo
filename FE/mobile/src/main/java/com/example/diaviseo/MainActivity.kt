@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
             // 로그인, 회원가입된 사용자 -> MainScreen으로
             // 회원가입해야하는 신규 유저 -> SignupNavGraph로 이동하도록 수정 필요
 
-            MainScreen() // 추후에 로직 구현 이후 주석 제거
+            MainScreen() 
             SignupNavGraph(navController)
         }
     }
