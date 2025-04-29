@@ -122,7 +122,7 @@ fun SignupScreen(navController: NavController) {
                         onSuccess = { email, name ->
                             socialLoginViewModel.setEmail(email ?: "") // Null 처리 추가
                             socialLoginViewModel.setName(name ?: "") // Null 처리 추가
-                            navController.navigate("inputName")
+                            navController.navigate("phoneAuth")
                         },
                         onError = { e ->
                             e.printStackTrace() // 에러 로깅
