@@ -1,7 +1,9 @@
 package com.example.diaviseo.ui.signup.socialSignup
 
 import android.app.Activity
+
 import android.util.Log
+import android.widget.Toast
 import androidx.credentials.*
 import com.example.diaviseo.BuildConfig
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
@@ -9,6 +11,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import kotlinx.coroutines.*
 import androidx.credentials.exceptions.GetCredentialException
+import com.example.diaviseo.network.RetrofitInstance
 
 object GoogleLoginManager {
 
@@ -17,7 +20,6 @@ object GoogleLoginManager {
         onSuccess: (email: String, name: String) -> Unit,
         onError: (Throwable) -> Unit
     ) {
-        println("performLogin은 들어왔냐")
         val credentialManager = CredentialManager.create(activity)
 
         val googleIdOption = GetGoogleIdOption.Builder()
@@ -34,12 +36,11 @@ object GoogleLoginManager {
 
         scope.launch {
             try {
-                println("코루틴 여기도 들어왔냐")
                 val result = credentialManager.getCredential(
                     request = request,
                     context = activity,
                 )
-                handleSignIn(result, onSuccess)
+                handleSignIn(activity, result, onSuccess)
             } catch (e : GetCredentialException) {
                 onError(e)
             }
@@ -47,6 +48,7 @@ object GoogleLoginManager {
     }
 
     private fun handleSignIn(
+        activity: Activity,
         result: GetCredentialResponse,
         onSuccess: (email: String, name: String) -> Unit
     ) {
@@ -60,9 +62,38 @@ object GoogleLoginManager {
                         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
                         val email = googleIdTokenCredential.id
                         val name = googleIdTokenCredential.displayName ?: ""
-                        Log.d(TAG, "email: $email, name: $name")
+                        val idToken = googleIdTokenCredential.idToken
+                        Log.d(TAG, "email: $email, name: $name, idToken: $idToken")
                         onSuccess(email, name)
+
                         // 백엔드 통신 로직 호출 넣기
+                        val scope = CoroutineScope(Dispatchers.IO)
+                        scope.launch {
+                            // 백엔드 코드 만들어지면 loginWithGoogle에 idToken 넣어보내기
+                            val response = RetrofitInstance.api.loginWithGoogle()
+                            if (response.isSuccessful) {
+                                val body = response.body()
+                                if (body != null) {
+                                    Log.d("LoginSuccess", "accessToken: ${body.userId}")
+                                    Log.d("LoginSuccess", "email: ${body.title}")
+
+                                    // 메인스레드에서 Toast 띄우기
+                                    withContext(Dispatchers.Main) {
+                                        Toast.makeText(activity, "환영합니다, ${body.userId}님!", Toast.LENGTH_SHORT).show()
+                                    }
+                                } else {
+                                    withContext(Dispatchers.Main) {
+                                        Toast.makeText(activity, "응답 본문이 비어있습니다", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            } else {
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(activity, "로그인 실패: ${response.code()}", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+
+                        }
+
                     } catch (e: GoogleIdTokenParsingException) {
                         Log.e(TAG, "Invalid google id token", e)
                         throw e

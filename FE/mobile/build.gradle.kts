@@ -24,9 +24,11 @@ android {
         val localProperties = Properties()
         localProperties.load(FileInputStream(rootProject.file("local.properties")))
         val serverClientId = localProperties.getProperty("GOOGLE_SERVER_CLIENT_ID") ?: ""
+        val baseUrl = localProperties.getProperty("BASE_URL") ?:""
 
         // BuildConfig에 추가
         buildConfigField("String", "GOOGLE_SERVER_CLIENT_ID", serverClientId)
+        buildConfigField("String", "BASE_URL", baseUrl)
     }
 
     buildTypes {
@@ -75,6 +77,13 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.3.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")   // 코루틴
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.35.0-alpha") // System UI 제어
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation(platform("com.squareup.okhttp3:okhttp-bom:4.12.0"))
+    implementation("com.squareup.okhttp3:okhttp")
+    implementation("com.squareup.okhttp3:logging-interceptor")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

@@ -4,10 +4,13 @@ import com.s206.common.exception.types.ConflictException;
 import com.s206.common.exception.types.NotFoundException;
 import com.s206.user.user.dto.request.UserCreateRequest;
 import com.s206.user.user.dto.response.UserDetailResponse;
+import com.s206.user.user.dto.response.UserExistResponse;
 import com.s206.user.user.entity.User;
 import com.s206.user.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +30,7 @@ public class UserService {
                 .birthday(userCreateRequest.getBirthday())
                 .phone(userCreateRequest.getPhone())
                 .email(userCreateRequest.getEmail())
+                .provider(userCreateRequest.getProvider())
                 .consentPersonal(userCreateRequest.getConsentPersonal())
                 .locationPersonal(userCreateRequest.getLocationPersonal())
                 .build();
@@ -43,8 +47,17 @@ public class UserService {
     }
 
 
-    public boolean existsByEmail(String email) {
-        return userRepository.existsByEmail(email);
+    public UserExistResponse existsByEmail(String email, String provider) {
+
+        Optional<User> Optionaluser = userRepository.findByEmailAndProvider(email, provider);
+
+        if (Optionaluser.isPresent()) {
+            User user = Optionaluser.get();
+            return UserExistResponse.toDto(user, true);
+        } else {
+            return UserExistResponse.toDto(false);
+        }
+
     }
 
 }
