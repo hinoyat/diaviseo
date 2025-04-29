@@ -1,7 +1,7 @@
 package com.example.diaviseo.ui.signup.socialSignup
 
 import android.app.Activity
-
+import android.app.Application
 import android.util.Log
 import android.widget.Toast
 import androidx.credentials.*
@@ -11,6 +11,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import kotlinx.coroutines.*
 import androidx.credentials.exceptions.GetCredentialException
+import com.example.diaviseo.datastore.TokenDataStore
 import com.example.diaviseo.network.RetrofitInstance
 
 object GoogleLoginManager {
@@ -71,16 +72,26 @@ object GoogleLoginManager {
                         scope.launch {
                             // 백엔드 코드 만들어지면 loginWithGoogle에 idToken 넣어보내기
                             val response = RetrofitInstance.api.loginWithGoogle()
+
+                            // response 성공적이고 response.body().isNewUser가 false일 때로 추후 변경
+                            // 만약 이미 있는 회원이면
                             if (response.isSuccessful) {
                                 val body = response.body()
+                                val context = activity.applicationContext
+
                                 if (body != null) {
                                     Log.d("LoginSuccess", "accessToken: ${body.userId}")
                                     Log.d("LoginSuccess", "email: ${body.title}")
 
+//                                    TokenDataStore.saveAccessToken(context, body.accessToken)
+//                                    TokenDataStore.saveRefreshToken(context, body.refreshToken)
+                                    TokenDataStore.saveAccessToken(context, "1234")
+                                    TokenDataStore.saveRefreshToken(context, "1234") // 선택적 저장
+
                                     // 메인스레드에서 Toast 띄우기
-                                    withContext(Dispatchers.Main) {
-                                        Toast.makeText(activity, "환영합니다, ${body.userId}님!", Toast.LENGTH_SHORT).show()
-                                    }
+//                                    withContext(Dispatchers.Main) {
+//                                        Toast.makeText(activity, "환영합니다, ${body.userId}님!", Toast.LENGTH_SHORT).show()
+//                                    }
                                 } else {
                                     withContext(Dispatchers.Main) {
                                         Toast.makeText(activity, "응답 본문이 비어있습니다", Toast.LENGTH_SHORT).show()
