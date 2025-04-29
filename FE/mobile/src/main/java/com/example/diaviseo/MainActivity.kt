@@ -11,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.graphics.Color
 
 import com.example.diaviseo.ui.main.MainScreen
+import com.example.diaviseo.ui.theme.DiaViseoTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 class MainActivity : ComponentActivity() {
@@ -20,6 +21,7 @@ class MainActivity : ComponentActivity() {
 //        TransparentStatusBar(window)
 
         setContent {
+            DiaViseoTheme {
             val systemUiController = rememberSystemUiController()
             val navController = rememberNavController()
             SideEffect {
@@ -36,5 +38,6 @@ class MainActivity : ComponentActivity() {
             MainScreen() // 추후에 로직 구현 이후 주석 제거
             SignupNavGraph(navController)
         }
+    }
     }
 }
