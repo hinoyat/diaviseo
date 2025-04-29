@@ -3,23 +3,26 @@ package com.s206.auth.security.google;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.s206.common.exception.types.UnauthorizedException;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Component
+@RequiredArgsConstructor
 public class GoogleTokenVerifier {
 
-    private static final String GOOGLE_TOKEN_INFO_URL = "https://oauth2.googleapis.com/tokeninfo?id_token=";
+    private static final String GOOGLE_TOKEN_INFO_URL = "https://oauth2.googleapis.com/tokeninfo";
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final WebClient.Builder externalWebClientBuilder;
 
     public GoogleUserInfo verify(String idToken) {
         try {
-            GoogleUserInfo userInfo = restTemplate.getForObject(GOOGLE_TOKEN_INFO_URL + idToken, GoogleUserInfo.class);
-            if (userInfo == null || userInfo.getEmail() == null) {
-                throw new UnauthorizedException("구글 토큰 검증 실패");
-            }
-            return userInfo;
+            return externalWebClientBuilder.build()
+                    .get()
+                    .uri(GOOGLE_TOKEN_INFO_URL + "?id_token=" + idToken)
+                    .retrieve()
+                    .bodyToMono(GoogleUserInfo.class)
+                    .block(); // 결과 대기
         } catch (Exception e) {
             throw new UnauthorizedException("구글 토큰 검증 실패");
         }
