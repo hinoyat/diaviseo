@@ -89,9 +89,9 @@ object GoogleLoginManager {
                                     TokenDataStore.saveRefreshToken(context, "1234") // 선택적 저장
 
                                     // 메인스레드에서 Toast 띄우기
-                                    withContext(Dispatchers.Main) {
-                                        Toast.makeText(activity, "환영합니다, ${body.userId}님!", Toast.LENGTH_SHORT).show()
-                                    }
+//                                    withContext(Dispatchers.Main) {
+//                                        Toast.makeText(activity, "환영합니다, ${body.userId}님!", Toast.LENGTH_SHORT).show()
+//                                    }
                                 } else {
                                     withContext(Dispatchers.Main) {
                                         Toast.makeText(activity, "응답 본문이 비어있습니다", Toast.LENGTH_SHORT).show()
