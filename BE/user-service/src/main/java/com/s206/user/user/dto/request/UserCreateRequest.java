@@ -2,10 +2,12 @@ package com.s206.user.user.dto.request;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.time.LocalDate;
 
 @Getter
+@ToString
 @Builder
 public class UserCreateRequest {
 
