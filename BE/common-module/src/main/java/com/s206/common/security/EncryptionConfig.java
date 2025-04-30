@@ -7,7 +7,7 @@ import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 @Configuration
-public class SecurityConfig {
+public class EncryptionConfig {
  
 	@Value("${security.encryption.password}")
 	private String encryptionPassword;
