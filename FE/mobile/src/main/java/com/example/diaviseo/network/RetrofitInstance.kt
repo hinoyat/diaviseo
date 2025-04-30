@@ -4,30 +4,26 @@ import android.util.Log
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import com.example.diaviseo.BuildConfig
+
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import okhttp3.Interceptor
 
 object RetrofitInstance {
-
-    // RetrofitInstance.api.어떤api요청() 형식으로 사용 가능
-    val authApiService: AuthApiService by lazy {
-        Retrofit.Builder()
-            .baseUrl(BuildConfig.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(AuthApiService::class.java)
+    // 1. 로그용 Interceptor
+    val logging = HttpLoggingInterceptor { message ->
+        Log.d("RetrofitLog", message)  // 로그 태그 설정 가능
+    }.apply {
+        level = HttpLoggingInterceptor.Level.BODY // JSON 본문까지 다 출력
     }
 
-    private val retro: Retrofit by lazy {
-        Retrofit.Builder()
-            .baseUrl(BuildConfig.BASE_URL)// 공통 base URL
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(OkHttpClient.Builder().addInterceptor { chain ->
-                val newRequest = chain.request().newBuilder()
-                    .addHeader("Authorization", "Bearer token")  // 공통 헤더
-                    .build()
-                val response = chain.proceed(newRequest)
-
-//                // 401 오류가 나면 자동으로 토큰 갱신 요청 => 우왕 나중에 써야지
+    // 2. 헤더/응답코드 확인용 Interceptor
+    val authInterceptor = Interceptor { chain ->
+        val newRequest = chain.request().newBuilder()
+            .addHeader("Authorization", "Bearer token")
+            .build()
+        val response = chain.proceed(newRequest)
+        // 401 오류가 나면 자동으로 토큰 갱신 요청 => 우왕 나중에 써야지
 //                if (response.code == 401) {
 //                    val newToken = refreshAuthToken() // 새로운 토큰을 갱신하는 함수
 //                    val newRequest = request.newBuilder()
@@ -36,10 +32,34 @@ object RetrofitInstance {
 //
 //                    // 새 토큰으로 요청 다시 보내기
 //                    return@addInterceptor chain.proceed(newRequest)
+        Log.d("Network", "Response Code: ${response.code}")
+        response
+    }
 
-                Log.d("Network", "Response Code: ${response.code}")
-                response
-            }.build())
+    // 3. OkHttpClient 구성
+    val client = OkHttpClient.Builder()
+        .addInterceptor(authInterceptor)
+        .addInterceptor(logging) // 이 순서도 중요함!
+        .build()
+
+    // RetrofitInstance.api.어떤api요청() 형식으로 사용 가능
+    val authApiService: AuthApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl(BuildConfig.BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(OkHttpClient.Builder()
+                .addInterceptor(logging)
+                .build())
+            .build()
+            .create(AuthApiService::class.java)
+    }
+
+    private val retro: Retrofit by lazy {
+        // 4. Retrofit 구성
+        Retrofit.Builder()
+            .baseUrl(BuildConfig.BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(client)
             .build()
     }
 

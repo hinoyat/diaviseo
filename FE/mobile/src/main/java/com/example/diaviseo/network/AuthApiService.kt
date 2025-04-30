@@ -12,12 +12,15 @@ data class GoogleLoginRequest(
 
 // 서버 응답받을 데이터
 data class GoogleLoginResponse(
-    val body: GoogleLoginResponseData
+    val timestamp: String,
+    val status: String,
+    val message: String,
+    val data: GoogleLoginResponseData?
 )
 
 data class GoogleLoginResponseData(
-    val accessToken: String,
-    val refreshToken: String,
+    val accessToken: String?,
+    val refreshToken: String?,
     val newUser: Boolean
 )
 
