@@ -1,6 +1,7 @@
 package com.s206.auth.controller;
 
 import com.s206.auth.dto.request.OAuthLoginRequest;
+import com.s206.auth.dto.request.TestLoginRequest;
 import com.s206.auth.dto.response.OAuthLoginResponse;
 import com.s206.auth.dto.response.ReissueResponse;
 import com.s206.auth.service.AuthService;
@@ -43,6 +44,13 @@ public class AuthController {
         log.info("[OAuth Login] provider: {}, idToken: {}", request.getProvider(), request.getIdToken());
         OAuthLoginResponse response = authService.oauthLogin(request);
         return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "소셜 로그인 성공", response));
+    }
+
+    @PostMapping("/test/login")
+    public ResponseEntity<ResponseDto<OAuthLoginResponse>> testLogin(@RequestBody TestLoginRequest request) {
+        log.info("[Test Login] provider: {}, idToken: {}", request.getEmail(), request.getProvider());
+        OAuthLoginResponse response = authService.testLogin(request);
+        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "테스트 로그인 성공", response));
     }
 
 
