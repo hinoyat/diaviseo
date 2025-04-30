@@ -4,6 +4,7 @@ import com.s206.gateway.util.GatewayResponseUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -18,7 +19,7 @@ public class GlobalErrorHandlingFilter implements GlobalFilter, Ordered {
     private final GatewayResponseUtil gatewayResponseUtil;
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, org.springframework.cloud.gateway.filter.GatewayFilterChain chain) {
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         return chain.filter(exchange)
                 .onErrorResume(throwable -> {
                     log.error("[Gateway 예외 처리] 예외 발생: {}", throwable.getMessage(), throwable);

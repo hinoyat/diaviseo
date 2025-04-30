@@ -2,6 +2,7 @@ package com.s206.gateway.filter.global;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
@@ -14,7 +15,7 @@ public class ResponseTimeFilter implements GlobalFilter, Ordered {
     private static final String START_TIME_ATTRIBUTE = "startTime";
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, org.springframework.cloud.gateway.filter.GatewayFilterChain chain) {
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         // 요청 시작 시간 기록
         exchange.getAttributes().put(START_TIME_ATTRIBUTE, System.currentTimeMillis());
 
