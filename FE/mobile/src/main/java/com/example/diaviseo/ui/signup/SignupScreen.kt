@@ -1,6 +1,7 @@
 package com.example.diaviseo.ui.signup
 
 import android.app.Activity
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -28,9 +29,10 @@ import kotlinx.coroutines.delay
 // import androidx.compose.foundation.ExperimentalFoundationApi // 필요시 추가
 
 @Composable
-fun SignupScreen(navController: NavController) {
+fun SignupScreen(navController: NavController, viewModel: AuthViewModel = viewModel()) {
     val authViewModel: AuthViewModel = viewModel()
     val context = LocalContext.current // Activity Context 필요 시
+    val isLoading = viewModel.isLoading
 
     val images = remember { // 불필요한 recomposition 방지
         listOf(
@@ -116,11 +118,22 @@ fun SignupScreen(navController: NavController) {
                 if (activity != null) {
                     GoogleLoginManager.performLogin(
                         activity = activity,
-                        onSuccess = { email, name ->
+                        onSuccess = { email, name, idToken, activity ->
                             authViewModel.setEmail(email ?: "") // Null 처리 추가
                             authViewModel.setName(name ?: "") // Null 처리 추가
                             authViewModel.setProvider("google")
-                            navController.navigate("phoneAuth")
+
+                            viewModel.loginWithGoogle(idToken, activity) { success, isNewUser ->
+                                if (success) {
+                                    if (isNewUser) {
+                                        navController.navigate("phoneAuth")
+                                    } else {
+                                        navController.navigate("main")
+                                    }
+                                } else {
+                                    Log.d("signupscreen", "로그인 실패")
+                                }
+                            }
                         },
                         onError = { e ->
                             e.printStackTrace() // 에러 로깅
