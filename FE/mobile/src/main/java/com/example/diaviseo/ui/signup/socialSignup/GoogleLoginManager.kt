@@ -12,6 +12,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingExcept
 import kotlinx.coroutines.*
 import androidx.credentials.exceptions.GetCredentialException
 import com.example.diaviseo.datastore.TokenDataStore
+import com.example.diaviseo.network.GoogleLoginRequest
 import com.example.diaviseo.network.RetrofitInstance
 
 object GoogleLoginManager {
@@ -71,17 +72,20 @@ object GoogleLoginManager {
                         val scope = CoroutineScope(Dispatchers.IO)
                         scope.launch {
                             // 백엔드 코드 만들어지면 loginWithGoogle에 idToken 넣어보내기
-                            val response = RetrofitInstance.api.loginWithGoogle()
+                            val request = GoogleLoginRequest(provider = "google", idToken = idToken)
+                            Log.d("BASE_URL", BuildConfig.BASE_URL)
+                            val response = RetrofitInstance.authApiService.loginWithGoogle(request)
+                            Log.d(TAG, "googe api response : $response")
 
-                            // response 성공적이고 response.body().isNewUser가 false일 때로 추후 변경
+                            // response 성공적이고 response.body().data.newUser가 false일 때로 추후 변경
                             // 만약 이미 있는 회원이면
                             if (response.isSuccessful) {
                                 val body = response.body()
                                 val context = activity.applicationContext
 
                                 if (body != null) {
-                                    Log.d("LoginSuccess", "accessToken: ${body.userId}")
-                                    Log.d("LoginSuccess", "email: ${body.title}")
+//                                    Log.d("LoginSuccess", "accessToken: ${body.userId}")
+//                                    Log.d("LoginSuccess", "email: ${body.title}")
 
 //                                    TokenDataStore.saveAccessToken(context, body.accessToken)
 //                                    TokenDataStore.saveRefreshToken(context, body.refreshToken)
