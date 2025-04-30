@@ -28,7 +28,7 @@ android {
 
         // BuildConfig에 추가
         buildConfigField("String", "GOOGLE_SERVER_CLIENT_ID", serverClientId)
-        buildConfigField("String", "BASE_URL", baseUrl)
+        buildConfigField("String", "BASE_URL", "\"${baseUrl}\"")
     }
 
     buildTypes {
@@ -78,7 +78,7 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")   // 코루틴
 
-    implementation("androidx.datastore:datastore-preferences:1.1.5")    // datastore
+    implementation("androidx.datastore:datastore-preferences:1.1.0")    // datastore
 
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.35.0-alpha") // System UI 제어
 
