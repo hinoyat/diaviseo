@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter
@@ -18,6 +19,10 @@ public class UserCreateRequest {
     private String gender;
 
     private LocalDate birthday;
+
+    private BigDecimal height;
+
+    private BigDecimal weight;
 
     private String phone;
 

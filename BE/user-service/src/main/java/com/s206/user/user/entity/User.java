@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -28,6 +29,12 @@ public class User {
 
     @Column(nullable = false, length = 50)
     private String nickname;
+
+    @Column(nullable = false, precision = 6, scale = 2)
+    private BigDecimal height;
+
+    @Column(nullable = false, precision = 6, scale = 2)
+    private BigDecimal weight;
 
     @Column(nullable = false, columnDefinition = "char(1)")
     private String gender;      // M: 남자 F: 여자
@@ -68,5 +75,35 @@ public class User {
     @Column(nullable = false)
     @Builder.Default
     private Boolean notificationEnabled = true;
+
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void updatePhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void updateHeight(BigDecimal height) {
+        this.height = height;
+    }
+
+    public void updateWeight(BigDecimal weight) {
+        this.weight = weight;
+    }
+
+    public void updateBirthday(LocalDate birthday) {
+        this.birthday = birthday;
+    }
+
+    public void updateNotificationEnabled(Boolean notificationEnabled) {
+        this.notificationEnabled = notificationEnabled;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
+    }
 
 }
