@@ -30,30 +30,32 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun PhoneAuthScreen(navController: NavController) {
-    var carrierExpanded by remember { mutableStateOf(false) }
-    var carrier by remember { mutableStateOf("010") }
-    var phoneNumber by remember { mutableStateOf("") }
-    var authCode by remember { mutableStateOf("") }
-    val focusManager = LocalFocusManager.current
-    var timer by remember { mutableStateOf(180) }
-    var timerStarted by remember { mutableStateOf(false) }
+    // --- 상태 관리 ---
+    var carrierExpanded by remember { mutableStateOf(false) } // 앞번호 드롭다운 확장 여부
+    var carrier by remember { mutableStateOf("010") } // 선택된 앞번호
+    var phoneNumber by remember { mutableStateOf("") } // 전화번호 입력 값
+    var authCode by remember { mutableStateOf("") } // 인증번호 입력 값
+    val focusManager = LocalFocusManager.current // 포커스 해제용
+    var timer by remember { mutableStateOf(180) } // 타이머 (초 단위)
+    var timerStarted by remember { mutableStateOf(false) } // 타이머 작동 여부
+    var allChecked by remember { mutableStateOf(false) } // 전체 약관 동의 여부
+    var showTermsDetail by remember { mutableStateOf(true) } // 하위 약관 보기 여부
+    var requestClicked by remember { mutableStateOf(false) } // 요청 버튼 눌렀는지 여부
 
-    var allChecked by remember { mutableStateOf(false) }
-    var showTermsDetail by remember { mutableStateOf(true) }
-    var requestClicked by remember { mutableStateOf(false) }
-
+    // --- 약관 리스트 ---
     val termList = listOf(
         "휴대폰 본인 인증 서비스 이용약관 동의 (필수)",
         "휴대폰 통신사 이용약관 동의 (필수)",
         "개인정보 제공 및 이용 동의 (필수)",
         "고유식별정보 처리 (필수)"
     )
-
+    // --- 전체 동의 토글 시 하위 항목 숨기기/펼치기 ---
     fun toggleAllChecked() {
         allChecked = !allChecked
         showTermsDetail = !allChecked
     }
 
+    // --- 타이머 카운트 다운 ---
     LaunchedEffect(timerStarted) {
         if (timerStarted) {
             while (timer > 0) {
@@ -64,6 +66,7 @@ fun PhoneAuthScreen(navController: NavController) {
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
+        // --- 배경 이미지 ---
         Image(
             painter = painterResource(id = R.drawable.gradient_background),
             contentDescription = null,
@@ -79,7 +82,7 @@ fun PhoneAuthScreen(navController: NavController) {
                 .padding(horizontal = 24.dp)
         ) {
             Spacer(modifier = Modifier.height(26.dp))
-
+            // --- 상단 안내 문구 ---
             Text(
                 text = "회원 정보를 확인하기 위해\n문자 인증을 진행해 주세요.",
                 fontSize = 24.sp,
@@ -89,7 +92,7 @@ fun PhoneAuthScreen(navController: NavController) {
             )
 
             Spacer(modifier = Modifier.height(24.dp))
-
+            // --- 약관 동의 영역 ---
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -97,6 +100,7 @@ fun PhoneAuthScreen(navController: NavController) {
                     .padding(vertical = 16.dp)
                     .padding(start = 3.dp, end = 3.dp)
             ) {
+                // 전체 동의 항목
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -119,7 +123,7 @@ fun PhoneAuthScreen(navController: NavController) {
                         fontWeight = FontWeight.SemiBold
                     )
                 }
-
+                // 하위 약관 리스트 (펼쳐져 있을 경우만)
                 if (showTermsDetail) {
                     Spacer(modifier = Modifier.height(8.dp))
                     termList.forEach { term ->
@@ -153,7 +157,7 @@ fun PhoneAuthScreen(navController: NavController) {
             if (!showTermsDetail) {
                 Spacer(modifier = Modifier.height(26.dp))
             }
-
+            // --- 문자인증 섹션 ---
             Text(
                 text = "문자인증을 진행해주세요",
                 fontSize = 18.sp,
@@ -163,10 +167,12 @@ fun PhoneAuthScreen(navController: NavController) {
             )
             Spacer(modifier = Modifier.height(15.dp))
 
+            // 휴대폰 번호 입력 행 (앞번호 + 전화번호)
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
+                // 앞번호 드롭다운
                 Box(modifier = Modifier.weight(1f)) {
                     OutlinedTextField(
                         value = carrier,
@@ -189,6 +195,7 @@ fun PhoneAuthScreen(navController: NavController) {
                             unfocusedIndicatorColor = Color(0xFF939292)
                         )
                     )
+                    // 드롭다운 메뉴
                     DropdownMenu(
                         expanded = carrierExpanded,
                         onDismissRequest = { carrierExpanded = false },
@@ -207,7 +214,7 @@ fun PhoneAuthScreen(navController: NavController) {
                 }
 
                 Spacer(modifier = Modifier.width(8.dp))
-
+                // 전화번호 입력
                 OutlinedTextField(
                     value = phoneNumber,
                     onValueChange = { phoneNumber = it },
@@ -218,6 +225,7 @@ fun PhoneAuthScreen(navController: NavController) {
                     shape = RoundedCornerShape(12.dp),
                     trailingIcon = {
                         if (!requestClicked) {
+                            // 요청 버튼
                             Text(
                                 text = "요청",
                                 fontSize = 14.sp,
@@ -255,7 +263,7 @@ fun PhoneAuthScreen(navController: NavController) {
             }
 
             Spacer(modifier = Modifier.height(15.dp))
-
+            // 인증번호 입력창 + 타이머
             OutlinedTextField(
                 value = authCode,
                 onValueChange = { authCode = it },
@@ -281,7 +289,7 @@ fun PhoneAuthScreen(navController: NavController) {
                     unfocusedIndicatorColor = Color(0xFF939292)
                 )
             )
-
+            // 하단 버튼 영역
             Spacer(modifier = Modifier.height(WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 40.dp))
 
             BottomButtonSection(
