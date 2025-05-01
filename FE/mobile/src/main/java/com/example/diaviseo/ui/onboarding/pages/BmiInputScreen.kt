@@ -12,7 +12,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.diaviseo.R
 import com.example.diaviseo.ui.components.BottomButtonSection
@@ -27,13 +26,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 
 @Composable
 fun BmiInputScreen(
-    navController: NavController,
-    authViewModel: AuthViewModel = viewModel()
+    navController: NavController, viewModel: AuthViewModel
 ) {
-    val gender by authViewModel.gender.collectAsState()
-    val birthday by authViewModel.birthday.collectAsState()
-    val height by authViewModel.height.collectAsState()
-    val weight by authViewModel.weight.collectAsState()
+    val name by viewModel.name.collectAsState()
+
+    val gender by viewModel.gender.collectAsState()
+    val birthday by viewModel.birthday.collectAsState()
+    val height by viewModel.height.collectAsState()
+    val weight by viewModel.weight.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
         // 배경 이미지
@@ -68,19 +68,29 @@ fun BmiInputScreen(
                     modifier = Modifier.padding(top = 8.dp)
                 )
 
-                Spacer(modifier = Modifier.height(60.dp))
+                Spacer(modifier = Modifier.height(30.dp))
+
+//                Text(
+//                    text = "${name.ifBlank { "회원" }}님에게 알맞은 안내를 위해\n" +
+//                            "간단한 정보를 알려주세요.",
+//                    fontSize = 18.sp,
+//                    fontWeight = FontWeight.SemiBold,
+//                    color = Color.Black
+//                )
+//                Spacer(modifier = Modifier.height(30.dp))
 
                 // 성별
                 Text(
-                    text = "성별을 선택해주세요",
+                    text = "아래의 정보를 입력해주시면\n" +
+                            "${name.ifBlank { "회원" }}님의 현재의 BMI를 계산해드릴게요.",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color.Black
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    GenderChip("남성", gender == "M") { authViewModel.setGender("M") }
-                    GenderChip("여성", gender == "F") { authViewModel.setGender("F") }
+                    GenderChip("남성", gender == "M") { viewModel.setGender("M") }
+                    GenderChip("여성", gender == "F") { viewModel.setGender("F") }
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))
@@ -88,7 +98,7 @@ fun BmiInputScreen(
                 // 생년월일
                 OutlinedTextField(
                     value = birthday,
-                    onValueChange = { authViewModel.setBirthday(it) },
+                    onValueChange = { viewModel.setBirthday(it) },
                     placeholder = { Text("예: 2000-01-01") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -106,7 +116,7 @@ fun BmiInputScreen(
                 // 키 입력
                 OutlinedTextField(
                     value = height,
-                    onValueChange = { authViewModel.setHeight(it) },
+                    onValueChange = { viewModel.setHeight(it) },
                     placeholder = { Text("키 (cm)") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -124,7 +134,7 @@ fun BmiInputScreen(
                 // 몸무게 입력
                 OutlinedTextField(
                     value = weight,
-                    onValueChange = { authViewModel.setWeight(it) },
+                    onValueChange = { viewModel.setWeight(it) },
                     placeholder = { Text("몸무게 (kg)") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -140,11 +150,11 @@ fun BmiInputScreen(
 
             // 다음 버튼
             BottomButtonSection(
-                text = "다음",
+                text = "BMI 계산 결과 보기",
                 enabled = gender.isNotBlank() && birthday.isNotBlank() &&
                         height.isNotBlank() && weight.isNotBlank(),
                 onClick = {
-                    navController.navigate("onboarding/next") // 다음 화면으로 이동
+                    navController.navigate("onboarding/goal") // 다음 화면으로 이동
                 }
             )
         }
