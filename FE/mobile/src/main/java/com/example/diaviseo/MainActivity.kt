@@ -39,44 +39,43 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         // 앱 켤 때마다 토큰 초기화 (테스트용)
-        val context = this.applicationContext
-        CoroutineScope(Dispatchers.IO).launch {
-            com.example.diaviseo.datastore.TokenDataStore.clearAccessToken(context)
-        }
+//        val context = this.applicationContext
+//        CoroutineScope(Dispatchers.IO).launch {
+//            com.example.diaviseo.datastore.TokenDataStore.clearAccessToken(context)
+//        }
 
         setContent {
             DiaViseoTheme {
-            val systemUiController = rememberSystemUiController()
-            val navController = rememberNavController()
-            SideEffect {
-                systemUiController.setStatusBarColor(
-                    color = Color.Transparent,
-                    darkIcons = true // 글씨와 아이콘을 검은색으로
-                )
-            }
-            TransparentStatusBar(window) // setContent {} 안에서 호출
-            // 회원가입 & 로그인 로직 구현 이후
-            // 로그인, 회원가입된 사용자 -> MainScreen으로
-            // 회원가입해야하는 신규 유저 -> SignupNavGraph로 이동하도록 수정 필요
+                val systemUiController = rememberSystemUiController()
+                val navController = rememberNavController()
+                SideEffect {
+                    systemUiController.setStatusBarColor(
+                        color = Color.Transparent,
+                        darkIcons = true // 글씨와 아이콘을 검은색으로
+                    )
+                }
+                TransparentStatusBar(window) // setContent {} 안에서 호출
+                // 회원가입 & 로그인 로직 구현 이후
+                // 로그인, 회원가입된 사용자 -> MainScreen으로
+                // 회원가입해야하는 신규 유저 -> SignupNavGraph로 이동하도록 수정 필요
 
-            testViewModel.printAccessToken(this)
+                testViewModel.printAccessToken(this)
 
-            NavHost(navController, startDestination = "splash") {
-                composable("splash") { SplashScreen(navController) }
-                signupNavGraph(navController)
-                composable("main") { MainScreen() }
+                NavHost(navController, startDestination = "splash") {
+                    composable("splash") { SplashScreen(navController) }
+                    signupNavGraph(navController)
+                    composable("main") { MainScreen() }
+                }
             }
         }
     }
-}
 
-class TestViewModel : ViewModel() {
-
-    fun printAccessToken(context: Context) {
-        viewModelScope.launch {
-            val token = TokenDataStore.getAccessToken(context).first() // 🔥 바로 첫 번째 데이터만 읽기
-            Log.d("TestViewModel", "저장된 accessToken: $token")
+    class TestViewModel : ViewModel() {
+        fun printAccessToken(context: Context) {
+            viewModelScope.launch {
+                val token = TokenDataStore.getAccessToken(context).first() // 🔥 바로 첫 번째 데이터만 읽기
+                Log.d("TestViewModel", "저장된 accessToken: $token")
+            }
         }
-    }
     }
 }
