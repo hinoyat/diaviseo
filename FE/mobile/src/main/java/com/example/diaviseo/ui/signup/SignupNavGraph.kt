@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.diaviseo.ui.onboarding.pages.NameInputScreen
+import com.example.diaviseo.ui.onboarding.pages.BmiInputScreen
 
 @Composable
 fun SignupNavGraph(navController: NavHostController) {
@@ -23,5 +25,11 @@ fun SignupNavGraph(navController: NavHostController) {
         composable("phoneAuth") {
             PhoneAuthScreen(navController) // 소셜 로그인 이후 휴대폰 인증
         }
-    }
-}
+        composable("onboarding/name") {
+            NameInputScreen(navController)
+        }
+        composable ("onboarding/Bmiinput") {
+            BmiInputScreen(navController)
+        }
+
+}}
