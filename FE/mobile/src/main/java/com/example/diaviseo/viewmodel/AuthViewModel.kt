@@ -57,6 +57,7 @@ class AuthViewModel : ViewModel() {
     private val _isAuthenticated = MutableStateFlow(true)
     val isAuthenticated: StateFlow<Boolean> = _isAuthenticated
 
+    
     fun setEmail(email: String) {
         _email.value = email
     }
