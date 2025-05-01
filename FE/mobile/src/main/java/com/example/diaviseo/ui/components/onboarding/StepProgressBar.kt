@@ -26,6 +26,15 @@ fun StepProgressBar(
             .fillMaxWidth()
             .height(4.dp)
     ) {
+        if (progressRatio >= 1f) {
+            // 🎯 100%일 경우 전체 파란색으로 채우기
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(DiaViseoColors.Main1)
+            )
+        } else {
         Box(
             modifier = Modifier
                 .weight(progressRatio)
@@ -41,4 +50,4 @@ fun StepProgressBar(
                 .background(DiaViseoColors.Deactive)
         )
     }
-}
+}}
