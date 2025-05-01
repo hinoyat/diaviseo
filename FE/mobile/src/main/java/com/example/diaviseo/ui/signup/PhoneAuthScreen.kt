@@ -2,6 +2,7 @@ package com.example.diaviseo.ui.signup
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,37 +24,38 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.diaviseo.R
+import com.example.diaviseo.ui.components.BottomButtonSection
 import com.example.diaviseo.ui.theme.DiaViseoColors
 import kotlinx.coroutines.delay
-import androidx.compose.foundation.clickable
-
+import com.example.diaviseo.viewmodel.AuthViewModel
 @Composable
-fun PhoneAuthScreen(navController: NavController) {
-    // === 상태값 선언 영역 ===
-    var carrierExpanded by remember { mutableStateOf(false) } // 010 선택 드롭다운 열림 여부
-    var carrier by remember { mutableStateOf("010") } // 선택된 휴대폰 앞번호
-    var phoneNumber by remember { mutableStateOf("") } // 전화번호 입력값
-    var authCode by remember { mutableStateOf("") } // 인증번호 입력값
-    val focusManager = LocalFocusManager.current // 포커스 매니저 (터치 시 키보드 내리기)
-    var timer by remember { mutableStateOf(180) } // 인증 타이머 (초 단위, 3분)
-    var timerStarted by remember { mutableStateOf(false) } // 타이머 시작 여부
-
+fun PhoneAuthScreen(navController: NavController, viewModel: AuthViewModel) {
+    // --- 상태 관리 ---
+    var carrierExpanded by remember { mutableStateOf(false) } // 앞번호 드롭다운 확장 여부
+    var carrier by remember { mutableStateOf("010") } // 선택된 앞번호
+    var phoneNumber by remember { mutableStateOf("") } // 전화번호 입력 값
+    var authCode by remember { mutableStateOf("") } // 인증번호 입력 값
+    val focusManager = LocalFocusManager.current // 포커스 해제용
+    var timer by remember { mutableStateOf(180) } // 타이머 (초 단위)
+    var timerStarted by remember { mutableStateOf(false) } // 타이머 작동 여부
     var allChecked by remember { mutableStateOf(false) } // 전체 약관 동의 여부
-    var requestClicked by remember { mutableStateOf(false) } // 인증 요청 버튼 클릭 여부
+    var showTermsDetail by remember { mutableStateOf(true) } // 하위 약관 보기 여부
+    var requestClicked by remember { mutableStateOf(false) } // 요청 버튼 눌렀는지 여부
 
-    // 약관 리스트
+    // --- 약관 리스트 ---
     val termList = listOf(
         "휴대폰 본인 인증 서비스 이용약관 동의 (필수)",
         "휴대폰 통신사 이용약관 동의 (필수)",
         "개인정보 제공 및 이용 동의 (필수)",
         "고유식별정보 처리 (필수)"
     )
-    // 전체 약관 동의 토글 함수
+    // --- 전체 동의 토글 시 하위 항목 숨기기/펼치기 ---
     fun toggleAllChecked() {
         allChecked = !allChecked
+        showTermsDetail = !allChecked
     }
 
-    // 타이머 작동
+    // --- 타이머 카운트 다운 ---
     LaunchedEffect(timerStarted) {
         if (timerStarted) {
             while (timer > 0) {
@@ -63,9 +65,8 @@ fun PhoneAuthScreen(navController: NavController) {
         }
     }
 
-    // === UI 시작 ===
     Box(modifier = Modifier.fillMaxSize()) {
-        // 배경 이미지 (그라데이션 배경)
+        // --- 배경 이미지 ---
         Image(
             painter = painterResource(id = R.drawable.gradient_background),
             contentDescription = null,
@@ -81,25 +82,25 @@ fun PhoneAuthScreen(navController: NavController) {
                 .padding(horizontal = 24.dp)
         ) {
             Spacer(modifier = Modifier.height(26.dp))
-
-            // 상단 안내 문구
+            // --- 상단 안내 문구 ---
             Text(
-                text = "본인확인을 위해\n인증을 진행해 주세요",
-                fontSize = 25.sp,
+                text = "회원 정보를 확인하기 위해\n문자 인증을 진행해 주세요.",
+                fontSize = 24.sp,
                 color = Color.Black,
-                lineHeight = 30.sp
+                lineHeight = 30.sp,
+                modifier = Modifier.align(Alignment.Start)
             )
 
             Spacer(modifier = Modifier.height(24.dp))
-
-            // === 약관 동의 영역 ===
+            // --- 약관 동의 영역 ---
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.White, shape = RoundedCornerShape(12.dp))
-                    .padding(vertical = 16.dp, horizontal = 6.dp)
+                    .padding(vertical = 16.dp)
+                    .padding(start = 3.dp, end = 3.dp)
             ) {
-                // 전체 동의
+                // 전체 동의 항목
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -112,8 +113,7 @@ fun PhoneAuthScreen(navController: NavController) {
                             id = if (allChecked) R.drawable.checked_square else R.drawable.not_checked_square
                         ),
                         contentDescription = null,
-                        modifier = Modifier
-                            .size(22.dp) // 아이콘 사이즈 조정
+                        modifier = Modifier.size(22.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -123,49 +123,56 @@ fun PhoneAuthScreen(navController: NavController) {
                         fontWeight = FontWeight.SemiBold
                     )
                 }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // 개별 약관 항목 리스트
-                termList.forEachIndexed { index, term ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = term,
-                            fontSize = 14.sp,
-                            color = Color(0xFF939292)                                                                                                                                             ,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Image(
-                            painter = painterResource(id = R.drawable.right_gray_arrow),
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
-                        )
+                // 하위 약관 리스트 (펼쳐져 있을 경우만)
+                if (showTermsDetail) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    termList.forEach { term ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = term,
+                                fontSize = 14.sp,
+                                color = Color(0xFF939292),
+                                modifier = Modifier.weight(1f)
+                            )
+                            Image(
+                                painter = painterResource(id = R.drawable.right_gray_arrow),
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
+
+                    Spacer(modifier = Modifier.height(18.dp))
+                    Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)
+                    Spacer(modifier = Modifier.height(18.dp))
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // === 휴대폰 번호 입력 영역 ===
+            if (!showTermsDetail) {
+                Spacer(modifier = Modifier.height(26.dp))
+            }
+            // --- 문자인증 섹션 ---
             Text(
-                text = "휴대폰번호",
-                fontSize = 16.sp,
+                text = "문자인증을 진행해주세요",
+                fontSize = 18.sp,
                 color = Color.Black,
-                fontWeight = FontWeight.SemiBold
-                )
-            Spacer(modifier = Modifier.height(8.dp))
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.align(Alignment.Start)
+            )
+            Spacer(modifier = Modifier.height(15.dp))
 
+            // 휴대폰 번호 입력 행 (앞번호 + 전화번호)
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // 휴대폰 앞 번호 선택 박스
+                // 앞번호 드롭다운
                 Box(modifier = Modifier.weight(1f)) {
                     OutlinedTextField(
                         value = carrier,
@@ -180,8 +187,7 @@ fun PhoneAuthScreen(navController: NavController) {
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { carrierExpanded = true } // 전체 박스 클릭 가능
-                        ,
+                            .clickable { carrierExpanded = true },
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color.Transparent,
                             unfocusedContainerColor = Color.Transparent,
@@ -208,7 +214,7 @@ fun PhoneAuthScreen(navController: NavController) {
                 }
 
                 Spacer(modifier = Modifier.width(8.dp))
-                // 전화번호 입력창
+                // 전화번호 입력
                 OutlinedTextField(
                     value = phoneNumber,
                     onValueChange = { phoneNumber = it },
@@ -217,7 +223,6 @@ fun PhoneAuthScreen(navController: NavController) {
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     placeholder = { Text("12345678", fontSize = 15.sp, color = Color(0xFFB0B0B0)) },
                     shape = RoundedCornerShape(12.dp),
-                    // 휴대폰 번호 입력창
                     trailingIcon = {
                         if (!requestClicked) {
                             // 요청 버튼
@@ -240,16 +245,14 @@ fun PhoneAuthScreen(navController: NavController) {
                                     }
                             )
                         } else {
-                            // 요청 후 '재요청' 표시 (TODO: 이후에 재요청 하는 로직 등 버튼으로 사용)
                             Text(
                                 text = "재요청",
                                 fontSize = 14.sp,
-                                color = Color(0xFF939292), // 회색
+                                color = Color(0xFF939292),
                                 modifier = Modifier.padding(end = 8.dp)
                             )
                         }
                     },
-
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
@@ -257,64 +260,43 @@ fun PhoneAuthScreen(navController: NavController) {
                         unfocusedIndicatorColor = Color(0xFF939292)
                     )
                 )
-
-                Spacer(modifier = Modifier.width(8.dp))
             }
 
             Spacer(modifier = Modifier.height(15.dp))
-
-            // === 인증번호 입력 영역 ===
-                OutlinedTextField(
-                    value = authCode,
-                    onValueChange = { authCode = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(end = 8.dp),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    shape = RoundedCornerShape(12.dp),
-                    trailingIcon = {
-                        // 남은 인증 타이머
+            // 인증번호 입력창 + 타이머
+            OutlinedTextField(
+                value = authCode,
+                onValueChange = { authCode = it },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                placeholder = { Text("인증 번호 입력", fontSize = 15.sp, color = Color(0xFFB0B0B0)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                shape = RoundedCornerShape(12.dp),
+                trailingIcon = {
+                    if (requestClicked) {
                         Text(
                             text = String.format("%02d:%02d", timer / 60, timer % 60),
                             color = if (timer == 0) Color.Red else DiaViseoColors.Main1,
                             fontSize = 14.sp,
                             modifier = Modifier.padding(end = 12.dp)
                         )
-                    },
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedIndicatorColor = DiaViseoColors.Main1.copy(alpha = 0.8f),
-                        unfocusedIndicatorColor = Color(0xFF939292)
-                    )
-                )
-
-            Spacer(
-                modifier = Modifier.height(
-                    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 40.dp
+                    }
+                },
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedIndicatorColor = DiaViseoColors.Main1.copy(alpha = 0.8f),
+                    unfocusedIndicatorColor = Color(0xFF939292)
                 )
             )
+            // 하단 버튼 영역
+            Spacer(modifier = Modifier.height(WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 40.dp))
 
-            // === 다음 버튼 ===
-            Button(
-                onClick = { /* 완료 */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                enabled = false,
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = DiaViseoColors.Main1,
-                    contentColor = Color.White,
-                    disabledContainerColor = DiaViseoColors.Main1,
-                    disabledContentColor = Color.White
-                )
-            ) {
-                Text(text = "다음")
-            }
+            BottomButtonSection(
+                text = "다음",
+                onClick = { navController.navigate("onboarding/name")
+                }
+            )
         }
     }
 }
-
-
