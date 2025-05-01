@@ -37,6 +37,34 @@ fun MainScreen() {
                 )
         ) {
             MainHeader(userNickname, navController)
+
+            WeightPredictionSection(
+                calorieDifference = -50 // 예시 데이터
+            )
+
+            CaloriesGaugeSection(
+                consumedCalorie = 1080,
+                remainingCalorie = 150,
+                burnedCalorie = 180,
+                extraBurned = 100,
+                navController = navController
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+//            SummaryCardSection(navController = navController)
+
+//            AiAssistantCard(navController = navController)
+
+//            StepCountCard(
+//                stepsToday = 6118,
+//                stepsYesterday = 5115
+//            )
+
+//            BloodSugarCard(
+//                latestSugar = 89,
+//                navController = navController
+//            )
         }
     }
 }
