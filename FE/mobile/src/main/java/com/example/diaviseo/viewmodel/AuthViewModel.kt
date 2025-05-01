@@ -16,6 +16,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.getValue
+import com.example.diaviseo.network.TestLoginRequest
+
 
 class AuthViewModel : ViewModel() {
     private val _email = MutableStateFlow("")
@@ -96,8 +99,13 @@ class AuthViewModel : ViewModel() {
         viewModelScope.launch {
             isLoading = true  // 💡 스피너 ON
 
-            val request = GoogleLoginRequest("google", idToken)
-            val response = RetrofitInstance.authApiService.loginWithGoogle(request)
+            // 진짜 구글 로그인일 경우
+//            val request = GoogleLoginRequest("google", idToken)
+//            val response = RetrofitInstance.authApiService.loginWithGoogle(request)
+
+            // 테스트 경우
+            val request = TestLoginRequest("s12c1s206@gmail.com", "google")
+            val response = RetrofitInstance.authApiService.loginWithTest(request)
 
             if (response.isSuccessful) {
                 val body = response.body()

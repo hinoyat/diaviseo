@@ -10,6 +10,11 @@ data class GoogleLoginRequest(
     val idToken: String
 )
 
+data class TestLoginRequest(
+    val email: String,
+    val provider: String
+)
+
 // 서버 응답받을 데이터
 data class GoogleLoginResponse(
     val timestamp: String,
@@ -29,5 +34,10 @@ interface AuthApiService {
     @POST("auth/oauth/login")
     suspend fun loginWithGoogle(
         @Body request: GoogleLoginRequest
+    ): Response<GoogleLoginResponse>
+
+    @POST("auth/test/login")
+    suspend fun loginWithTest(
+        @Body request: TestLoginRequest
     ): Response<GoogleLoginResponse>
 }
