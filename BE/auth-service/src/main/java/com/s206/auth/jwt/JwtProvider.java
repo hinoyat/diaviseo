@@ -5,6 +5,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Base64;
 import java.util.UUID;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtProvider {
@@ -47,6 +49,7 @@ public class JwtProvider {
 
         Date now = new Date();
 
+        log.info("access token 발급 완료: {}", claims.getSubject());
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
@@ -71,9 +74,9 @@ public class JwtProvider {
                 .setExpiration(validity)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
-
+        
+        log.info("access token 발급 완료 redis 저장 시작: {}", claims.getSubject());
         refreshTokenRedisRepository.save(refreshToken, userId, name, refreshTokenValidity);
-
         return refreshToken;
     }
 

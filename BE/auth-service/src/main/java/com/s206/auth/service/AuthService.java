@@ -3,6 +3,7 @@ package com.s206.auth.service;
 import com.s206.auth.client.UserServiceClient;
 import com.s206.auth.client.dto.UserExistResponse;
 import com.s206.auth.dto.request.OAuthLoginRequest;
+import com.s206.auth.dto.request.TestLoginRequest;
 import com.s206.auth.dto.response.OAuthLoginResponse;
 import com.s206.auth.jwt.JwtProvider;
 import com.s206.auth.jwt.blacklist.TokenBlacklistService;
@@ -52,6 +53,49 @@ public class AuthService {
 
         // 3. 회원 존재 여부에 따라 처리
         if (userExistResponse.getExists()) {
+
+            // 기존 리프레쉬 토큰 삭제
+            Integer userId = userExistResponse.getUserId();
+            refreshTokenRedisRepository.deleteAllByUserId(userId);
+
+            // 기존 회원 - JWT 발급
+            String accessToken = jwtProvider.createAccessToken(
+                    userExistResponse.getUserId(),
+                    userExistResponse.getName(),
+                    List.of("ROLE_USER")
+            );
+            String refreshToken = jwtProvider.createRefreshToken(
+                    userExistResponse.getUserId(),
+                    userExistResponse.getName()
+            );
+
+            // 기존 회원
+            return new OAuthLoginResponse(false, accessToken, refreshToken);
+        } else {
+            // 신규 회원
+            return new OAuthLoginResponse(true, null, null);
+        }
+    }
+
+
+    public OAuthLoginResponse testLogin(TestLoginRequest request) {
+
+        String email = request.getEmail();
+        String provider = request.getProvider();
+
+        UserExistResponse userExistResponse = userServiceClient.getUserInfo(email, provider);
+
+
+        log.info("[Test-Login] userExistResponse: {}", userExistResponse);
+
+        // 3. 회원 존재 여부에 따라 처리
+        if (userExistResponse.getExists()) {
+            
+            // 기존 리프레쉬 토큰 삭제
+            Integer userId = userExistResponse.getUserId();
+            log.info("[Test-Login] 기존 refresh 토큰 삭제: {}", userExistResponse);
+            refreshTokenRedisRepository.deleteAllByUserId(userId);
+            
             // 기존 회원 - JWT 발급
             String accessToken = jwtProvider.createAccessToken(
                     userExistResponse.getUserId(),

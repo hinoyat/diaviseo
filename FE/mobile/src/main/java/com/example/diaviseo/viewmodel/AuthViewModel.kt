@@ -1,8 +1,24 @@
 package com.example.diaviseo.viewmodel
 
+import android.app.Activity
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
+import com.example.diaviseo.datastore.TokenDataStore
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.withContext
+
+//채현 추가
+import com.example.diaviseo.network.GoogleLoginRequest
+import com.example.diaviseo.network.RetrofitInstance
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.getValue
+import com.example.diaviseo.network.TestLoginRequest
+
 
 class AuthViewModel : ViewModel() {
     private val _email = MutableStateFlow("")
@@ -76,4 +92,43 @@ class AuthViewModel : ViewModel() {
         _locationPersonal.value = consent
     }
 
+    var isLoading by mutableStateOf(false)
+        private set
+
+    fun loginWithGoogle(idToken: String, activity: Activity, onResult: (Boolean, Boolean) -> Unit) {
+        viewModelScope.launch {
+            isLoading = true  // 💡 스피너 ON
+
+            // 진짜 구글 로그인일 경우
+//            val request = GoogleLoginRequest("google", idToken)
+//            val response = RetrofitInstance.authApiService.loginWithGoogle(request)
+
+            // 테스트 경우
+            val request = TestLoginRequest("s12c1s206@gmail.com", "google")
+            val response = RetrofitInstance.authApiService.loginWithTest(request)
+
+            if (response.isSuccessful) {
+                val body = response.body()
+                val isNewUser = body?.data?.newUser ?: true
+                val context = activity.applicationContext
+                onResult(true, isNewUser)
+
+                TokenDataStore.saveAccessToken(context, body?.data?.accessToken?:"")
+                TokenDataStore.saveRefreshToken(context, body?.data?.refreshToken?:"") // 선택적 저장
+
+                // 메인스레드에서 Toast 띄우 기
+//                  withContext(Dispatchers.Main) {
+//                      Toast.makeText(activity, "환영합니다, ${body.userId}님!", Toast.LENGTH_SHORT).show()
+//                  }
+
+            } else {
+                onResult(false, false)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(activity, "로그인 실패: ${response.code()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            isLoading = false // 💡 스피너 OFF
+        }
+    }
 }

@@ -23,6 +23,7 @@ public class UserController {
     public ResponseEntity<ResponseDto<UserDetailResponse>> createUser(
             @RequestBody UserCreateRequest userCreateRequest
     ) {
+        log.info("Creating user: {}", userCreateRequest.toString());
         UserDetailResponse userDetailResponse = userService.createUser(userCreateRequest);
 
         return ResponseEntity.ok(ResponseDto.success(HttpStatus.CREATED, "회원가입 성공", userDetailResponse));
