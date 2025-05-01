@@ -9,9 +9,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.diaviseo.ui.components.BottomNavigationBar
 import com.example.diaviseo.ui.main.components.*
+import com.example.diaviseo.R
 
 @Composable
 fun MainScreen() {
@@ -56,7 +58,7 @@ fun MainScreen() {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-//            SummaryCardSection(navController = navController)
+            SummaryCardSection(navController = navController)
 
 //            AiAssistantCard(navController = navController)
 
@@ -70,5 +72,36 @@ fun MainScreen() {
 //                navController = navController
 //            )
         }
+    }
+}
+
+@Composable
+fun SummaryCardSection(navController: NavHostController) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        SummaryCard(
+            title = "오늘 활동 칼로리",
+            iconResId = R.drawable.main_exercise,
+            current = 96,   // 예시
+            goal = 256,   // 예시
+            goalExceeded = false,
+            destinationRoute = "exerciseDetail",
+            navController = navController,
+            modifier = Modifier.weight(1f)
+        )
+
+        SummaryCard(
+            title = "오늘 섭취 칼로리",
+            iconResId = R.drawable.main_diet,
+            current = 1796,   // 예시
+            goal = 1533,   // 예시
+            goalExceeded = 1796 > 1533,
+            destinationRoute = "dietDetail",
+            navController = navController,
+            modifier = Modifier.weight(1f)
+        )
     }
 }
