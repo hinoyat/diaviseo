@@ -86,11 +86,14 @@ public class AuthService {
         UserExistResponse userExistResponse = userServiceClient.getUserInfo(email, provider);
 
 
+        log.info("[Test-Login] userExistResponse: {}", userExistResponse);
+
         // 3. 회원 존재 여부에 따라 처리
         if (userExistResponse.getExists()) {
             
             // 기존 리프레쉬 토큰 삭제
             Integer userId = userExistResponse.getUserId();
+            log.info("[Test-Login] 기존 refresh 토큰 삭제: {}", userExistResponse);
             refreshTokenRedisRepository.deleteAllByUserId(userId);
             
             // 기존 회원 - JWT 발급

@@ -13,11 +13,23 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Slf4j
 public class RedisConfig {
 
+    @Value("${spring.data.redis.host}")
+    private String redisHost;
+
+    @Value("${spring.data.redis.port}")
+    private int redisPort;
+
+    @Value("${spring.data.redis.password}")
+    private String redisPassword; // 비밀번호 추가
+
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-//        log.info("Redis 연결 설정: {}:{}", redisHost, redisPort);
-        return new LettuceConnectionFactory();
+        LettuceConnectionFactory factory = new LettuceConnectionFactory(redisHost, redisPort);
+        factory.setPassword(redisPassword); // 여기까지 해야 완성
+        log.info("Redis connection factory created");
+        return factory;
     }
+
 
     @Bean
     public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory connectionFactory) {

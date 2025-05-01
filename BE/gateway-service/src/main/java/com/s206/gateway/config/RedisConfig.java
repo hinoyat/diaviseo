@@ -23,12 +23,16 @@ public class RedisConfig {
     @Value("${spring.data.redis.port}")
     private int redisPort;
 
+    @Value("${spring.data.redis.password}")
+    private String redisPassword; // 비밀번호 추가
 
     @Bean
     @Primary
     public ReactiveRedisConnectionFactory reactiveRedisConnectionFactory() {
         log.info("Redis 연결 설정: {}:{}", redisHost, redisPort);
         RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration(redisHost, redisPort);
+        redisConfig.setPassword(redisPassword);
+        log.info("Redis connection factory created");
         return new LettuceConnectionFactory(redisConfig);
     }
 
