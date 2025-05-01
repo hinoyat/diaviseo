@@ -5,6 +5,7 @@ import com.s206.health.bodyinfo.dto.response.BodyInfoResponse;
 import com.s206.health.bodyinfo.entity.BodyInfo;
 
 import com.s206.health.bodyinfo.entity.InputType;
+import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -28,5 +29,11 @@ public class BodyMapper {
 				.muscleMass(bodyInfo.getMuscleMass())
 				.createdAt(bodyInfo.getCreatedAt())
 				.build();
+	}
+
+	public List<BodyInfoResponse> toDtoList(List<BodyInfo> bodyInfos) {
+		return bodyInfos.stream()
+				.map(this::toDto)
+				.toList();
 	}
 }
