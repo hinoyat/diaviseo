@@ -1,6 +1,7 @@
 package com.s206.user.user.dto.response;
 
 import com.s206.user.user.entity.User;
+import com.s206.user.user.enums.Gender;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -15,7 +16,7 @@ public class UserDetailResponse {
 
     private String nickname;
 
-    private String gender;
+    private Gender gender;
 
     private LocalDate birthday;
 
