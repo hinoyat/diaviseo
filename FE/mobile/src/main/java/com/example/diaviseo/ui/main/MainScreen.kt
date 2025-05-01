@@ -38,9 +38,13 @@ fun MainScreen() {
         ) {
             MainHeader(userNickname, navController)
 
+            Spacer(modifier = Modifier.height(24.dp))
+
             WeightPredictionSection(
                 calorieDifference = -50 // 예시 데이터
             )
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             CaloriesGaugeSection(
                 consumedCalorie = 1080,
