@@ -19,9 +19,6 @@ fun NavGraphBuilder.signupNavGraph(navController: NavHostController) {
         route = "signupGraph"
     ) {
         composable("signup") { SignupScreen(navController) }
-//        composable("inputName") { InputNameScreen(navController) }
-//        composable("selectGender") { SelectGenderScreen(navController) }
-//        composable("inputBirth") { InputBirthScreen(navController) }\
         
         // 휴대폰 인증
         composable("phoneAuth") { backStackEntry ->
