@@ -23,6 +23,12 @@ class AuthViewModel : ViewModel() {
     private val _phone = MutableStateFlow("01012345678")
     val phone: StateFlow<String> = _phone
 
+    private val _height = MutableStateFlow("")
+    val height: StateFlow<String> = _height
+
+    private val _weight = MutableStateFlow("")
+    val weight: StateFlow<String> = _weight
+
     private val _provider = MutableStateFlow("")
     val provider: StateFlow<String> = _provider
 
@@ -46,4 +52,28 @@ class AuthViewModel : ViewModel() {
     fun setProvider(provider: String) {
         _provider.value = provider
     }
+    fun setGender(gender: String) {
+        _gender.value = gender
+    }
+
+    fun setBirthday(birthday: String) {
+        _birthday.value = birthday
+    }
+
+    fun setHeight(height: String) {
+        _height.value = height
+    }
+
+    fun setWeight(weight: String) {
+        _weight.value = weight
+    }
+
+    fun setConsentPersonal(consent: Boolean) {
+        _consentPersonal.value = consent
+    }
+
+    fun setLocationPersonal(consent: Boolean) {
+        _locationPersonal.value = consent
+    }
+
 }
