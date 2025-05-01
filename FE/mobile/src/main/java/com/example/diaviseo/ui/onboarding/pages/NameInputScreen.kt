@@ -28,10 +28,9 @@ import com.example.diaviseo.ui.components.BottomButtonSection
 
 @Composable
 fun NameInputScreen(
-    navController: NavController,
-    authViewModel: AuthViewModel = viewModel()
+    navController: NavController, viewModel: AuthViewModel
 ) {
-    var name by remember { mutableStateOf(authViewModel.name.value) }
+    var name by remember { mutableStateOf(viewModel.name.value) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         // 배경 이미지
@@ -109,7 +108,7 @@ fun NameInputScreen(
                 text="다음",
                 enabled = name.isNotBlank(),
                 onClick = {
-                    authViewModel.setName(name)
+                    viewModel.setName(name)
                     navController.navigate("onboarding/Bmiinput")
                 }
             )
