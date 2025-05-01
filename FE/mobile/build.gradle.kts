@@ -28,7 +28,7 @@ android {
 
         // BuildConfig에 추가
         buildConfigField("String", "GOOGLE_SERVER_CLIENT_ID", serverClientId)
-        buildConfigField("String", "BASE_URL", baseUrl)
+        buildConfigField("String", "BASE_URL", "\"${baseUrl}\"")
     }
 
     buildTypes {
