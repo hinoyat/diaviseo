@@ -56,6 +56,9 @@ dependencies {
 
     // (선택) Mockito JUnit 5 확장 지원
     testImplementation 'org.mockito:mockito-junit-jupiter:5.11.0'
+
+    // RabbitMQ 의존성 추가
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
 }
 
 dependencyManagement {

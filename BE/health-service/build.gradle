@@ -47,6 +47,8 @@ dependencies {
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+	// RabbitMQ 의존성 추가
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
 }
 
 dependencyManagement {
