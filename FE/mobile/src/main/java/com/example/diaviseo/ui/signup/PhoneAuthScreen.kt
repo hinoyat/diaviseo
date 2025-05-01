@@ -27,9 +27,9 @@ import com.example.diaviseo.R
 import com.example.diaviseo.ui.components.BottomButtonSection
 import com.example.diaviseo.ui.theme.DiaViseoColors
 import kotlinx.coroutines.delay
-
+import com.example.diaviseo.viewmodel.AuthViewModel
 @Composable
-fun PhoneAuthScreen(navController: NavController) {
+fun PhoneAuthScreen(navController: NavController, viewModel: AuthViewModel) {
     // --- 상태 관리 ---
     var carrierExpanded by remember { mutableStateOf(false) } // 앞번호 드롭다운 확장 여부
     var carrier by remember { mutableStateOf("010") } // 선택된 앞번호
@@ -294,7 +294,8 @@ fun PhoneAuthScreen(navController: NavController) {
 
             BottomButtonSection(
                 text = "다음",
-                onClick = { navController.navigate("onboarding/name") }
+                onClick = { navController.navigate("onboarding/name")
+                }
             )
         }
     }
