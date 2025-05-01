@@ -60,7 +60,11 @@ fun MainScreen() {
 
             SummaryCardSection(navController = navController)
 
-//            AiAssistantCard(navController = navController)
+            Spacer(modifier = Modifier.height(12.dp))
+
+            AiAssistantCard(navController = navController)
+
+            Spacer(modifier = Modifier.height(12.dp))
 
 //            StepCountCard(
 //                stepsToday = 6118,
