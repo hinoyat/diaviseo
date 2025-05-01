@@ -1,5 +1,6 @@
 package com.s206.user.user.entity;
 
+import com.s206.user.user.enums.Gender;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,8 +37,9 @@ public class User {
     @Column(nullable = false, precision = 6, scale = 2)
     private BigDecimal weight;
 
-    @Column(nullable = false, columnDefinition = "char(1)")
-    private String gender;      // M: 남자 F: 여자
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 1)
+    private Gender gender;    // M: 남자 F: 여자
 
     @Column(nullable = false)
     private LocalDate birthday;

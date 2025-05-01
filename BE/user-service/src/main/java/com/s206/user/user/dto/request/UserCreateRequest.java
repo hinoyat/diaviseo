@@ -1,5 +1,6 @@
 package com.s206.user.user.dto.request;
 
+import com.s206.user.user.enums.Gender;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
@@ -16,7 +17,7 @@ public class UserCreateRequest {
 
     private String nickname;
 
-    private String gender;
+    private Gender gender;
 
     private LocalDate birthday;
 
