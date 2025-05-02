@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/favorites")
+@RequestMapping("/api/foods/favorites")
 @RequiredArgsConstructor
 @Slf4j
 public class FavoriteController {
