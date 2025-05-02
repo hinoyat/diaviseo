@@ -64,10 +64,10 @@ android {
 dependencies {
     implementation(platform("androidx.compose:compose-bom:2025.03.01"))
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.activity:activity-compose")
     implementation("androidx.compose.foundation:foundation")
-
 
     implementation("androidx.navigation:navigation-compose:2.7.7")   // Jetpack Navigation
 
@@ -81,6 +81,8 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.1.5")    // datastore
 
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.35.0-alpha") // System UI 제어
+
+    implementation("androidx.health.connect:connect-client:1.1.0-alpha05")   // 걸음 수
 
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
