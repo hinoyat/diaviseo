@@ -20,7 +20,7 @@ public class FoodService {
     private final FoodRepository foodRepository;
     private final FavoriteFoodRepository favoriteFoodRepository;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<FoodListResponse> getFoodList(Integer userId) {
         return foodRepository.findAll().stream()
                 .map(food -> FoodListResponse.toDto(food,
@@ -28,7 +28,7 @@ public class FoodService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public FoodDetailResponse getFoodDetail(Integer foodId, Integer userId) {
         Food food = foodRepository.findById(foodId)
                 .orElseThrow(() -> new NotFoundException("해당 음식을 찾을 수 없습니다."));
