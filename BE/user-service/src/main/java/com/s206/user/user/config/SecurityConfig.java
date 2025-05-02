@@ -17,7 +17,10 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
             .sessionManagement(session -> session
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("api/users/**").permitAll()
+                    .requestMatchers(
+                            "api/users/**",
+                            "/actuator/**"
+                    ).permitAll()
                     .anyRequest().authenticated());
 
     return http.build();
