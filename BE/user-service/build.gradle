@@ -50,6 +50,10 @@ dependencies {
 
 	// RabbitMQ 의존성 추가
 	implementation 'org.springframework.boot:spring-boot-starter-amqp'
+
+	// Prometheus 메트릭 수집을 위한 의존성
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
 }
 
 dependencyManagement {
