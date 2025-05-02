@@ -26,6 +26,7 @@ public class FavoriteService {
     @Transactional
     public FavoriteToggleResponse toggleFavorite(Integer userId, Integer foodId) {
         FavoriteFood favorite = favoriteFoodRepository.findByUserIdAndFoodFoodId(userId, foodId).orElse(null);
+        // TODO: ifPresent or map 등을 활용해 코드 흐름 개선
 
         if (favorite != null) {
             favoriteFoodRepository.delete(favorite);
