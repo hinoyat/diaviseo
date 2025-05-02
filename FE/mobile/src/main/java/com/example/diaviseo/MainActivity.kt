@@ -1,10 +1,8 @@
 package com.example.diaviseo
 
-import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 
@@ -32,6 +30,15 @@ import com.example.diaviseo.ui.theme.DiaViseoTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 
+import android.os.Bundle
+import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
+import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.permission.HealthPermission
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.diaviseo.viewmodel.StepViewModel
+
+
 class MainActivity : ComponentActivity() {
     val testViewModel = TestViewModel()
 
@@ -44,8 +51,20 @@ class MainActivity : ComponentActivity() {
 //            com.example.diaviseo.datastore.TokenDataStore.clearAccessToken(context)
 //        }
 
+        // 초기화
+        val healthConnectClient = HealthConnectClient.getOrCreate(this)
+
+//        val stepViewModel: StepViewModel = viewModel()
+//        DisposableEffect(Unit) {
+//            stepViewModel.startListening()
+//            onDispose {
+//                stepViewModel.stopListening()
+//            }
+//        }
+
         setContent {
             DiaViseoTheme {
+                val stepViewModel: StepViewModel = viewModel()
                 val systemUiController = rememberSystemUiController()
                 val navController = rememberNavController()
                 SideEffect {
@@ -59,6 +78,7 @@ class MainActivity : ComponentActivity() {
                 // 로그인, 회원가입된 사용자 -> MainScreen으로
                 // 회원가입해야하는 신규 유저 -> SignupNavGraph로 이동하도록 수정 필요
 
+                stepViewModel.initHealthConnect(this)
                 testViewModel.printAccessToken(this)
 
                 NavHost(navController, startDestination = "splash") {

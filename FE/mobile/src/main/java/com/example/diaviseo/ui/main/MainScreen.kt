@@ -34,7 +34,7 @@ fun MainScreen() {
                         start = 16.dp,
                         top = innerPadding.calculateTopPadding() + 36.dp,
                         end = 16.dp,
-                        bottom = innerPadding.calculateBottomPadding()
+                        bottom = 360.dp
                     )
                 )
         ) {
@@ -66,10 +66,10 @@ fun MainScreen() {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-//            StepCountCard(
+            StepCountCard(
 //                stepsToday = 6118,
-//                stepsYesterday = 5115
-//            )
+                stepsYesterday = 5115
+            )
 
 //            BloodSugarCard(
 //                latestSugar = 89,
