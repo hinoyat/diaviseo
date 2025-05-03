@@ -62,10 +62,10 @@ fun NavGraphBuilder.signupNavGraph(navController: NavHostController) {
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry("signupGraph")
             }
-
+            val authViewModel = viewModel<AuthViewModel>(parentEntry)
             val goalViewModel = viewModel<GoalViewModel>(parentEntry)
 
-            FinalGuideScreen(navController , goalViewModel)
+            FinalGuideScreen(navController , goalViewModel, authViewModel)
         }
 
     }
