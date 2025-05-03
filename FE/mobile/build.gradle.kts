@@ -78,7 +78,8 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")   // 코루틴
 
-    implementation("androidx.datastore:datastore-preferences:1.1.5")    // datastore
+    implementation("androidx.datastore:datastore-preferences:1.1.0")    // datastore
+    implementation("androidx.work:work-runtime-ktx:2.8.1")    // WorkManager
 
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.35.0-alpha") // System UI 제어
 

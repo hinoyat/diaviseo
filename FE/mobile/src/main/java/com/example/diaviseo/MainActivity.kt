@@ -28,15 +28,22 @@ import com.example.diaviseo.ui.theme.DiaViseoTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 import android.os.Bundle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.diaviseo.viewmodel.StepViewModel
 
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.result.contract.ActivityResultContracts // 최신 방식 권한 요청
-import androidx.appcompat.app.AppCompatActivity // 또는 androidx.fragment.app.Fragment
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+
+import androidx.activity.compose.setContent
+import androidx.work.*
+import com.example.diaviseo.ui.theme.DiaViseoTheme
+import com.example.diaviseo.worker.StepResetWorker
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : ComponentActivity() {
@@ -66,6 +73,9 @@ class MainActivity : ComponentActivity() {
 //            com.example.diaviseo.datastore.TokenDataStore.clearAccessToken(context)
 //        }
 
+        // WorkManager에 자정 스케줄 예약
+        scheduleMidnightWorker()
+
         setContent {
             DiaViseoTheme {
                 val systemUiController = rememberSystemUiController()
@@ -91,6 +101,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        // 권한 체크 및 센서 리스너 시작
         checkAndRequestPermission()
 
         // stepViewModel의 stepCount 관찰 (UI 업데이트 등)
@@ -99,6 +110,23 @@ class MainActivity : ComponentActivity() {
         //         // UI 업데이트
         //     }
         // }
+    }
+
+    // 자정 직후에 한 번, 그리고 24시간 주기로 실행되도록 설정
+    private fun scheduleMidnightWorker() {
+        val now = LocalDateTime.now()
+        val tomorrowMidnight = now.toLocalDate().atTime(LocalTime.MIDNIGHT).plusDays(1)
+        val initialDelay = Duration.between(now, tomorrowMidnight).toMinutes()
+
+        val work = PeriodicWorkRequestBuilder<StepResetWorker>(24, TimeUnit.HOURS)
+            .setInitialDelay(initialDelay, TimeUnit.MINUTES)
+            .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "StepReset",
+            ExistingPeriodicWorkPolicy.UPDATE,
+            work
+        )
     }
 
     private fun checkAndRequestPermission() {
