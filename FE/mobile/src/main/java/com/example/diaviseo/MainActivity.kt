@@ -21,29 +21,44 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.diaviseo.datastore.TokenDataStore
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 import com.example.diaviseo.ui.theme.DiaViseoTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
-
 import android.os.Bundle
-import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
-import androidx.health.connect.client.HealthConnectClient
-import androidx.health.connect.client.permission.HealthPermission
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.diaviseo.viewmodel.StepViewModel
+
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.result.contract.ActivityResultContracts // 최신 방식 권한 요청
+import androidx.appcompat.app.AppCompatActivity // 또는 androidx.fragment.app.Fragment
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 
 
 class MainActivity : ComponentActivity() {
     val testViewModel = TestViewModel()
+    private lateinit var stepViewModel: StepViewModel // ViewModel 인스턴스 가져오기
+
+    // 최신 권한 요청 방식 사용
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                Log.d("Permission", "ACTIVITY_RECOGNITION permission granted.")
+                // 권한이 부여되었으므로 ViewModel에 센서 시작 요청
+                stepViewModel.startListening()
+            } else {
+                Log.w("Permission", "ACTIVITY_RECOGNITION permission denied.")
+                // 권한 거부 처리 (예: 사용자에게 알림)
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        stepViewModel = ViewModelProvider(this).get(StepViewModel::class.java)
 
         // 앱 켤 때마다 토큰 초기화 (테스트용)
 //        val context = this.applicationContext
@@ -51,20 +66,8 @@ class MainActivity : ComponentActivity() {
 //            com.example.diaviseo.datastore.TokenDataStore.clearAccessToken(context)
 //        }
 
-        // 초기화
-        val healthConnectClient = HealthConnectClient.getOrCreate(this)
-
-//        val stepViewModel: StepViewModel = viewModel()
-//        DisposableEffect(Unit) {
-//            stepViewModel.startListening()
-//            onDispose {
-//                stepViewModel.stopListening()
-//            }
-//        }
-
         setContent {
             DiaViseoTheme {
-                val stepViewModel: StepViewModel = viewModel()
                 val systemUiController = rememberSystemUiController()
                 val navController = rememberNavController()
                 SideEffect {
@@ -78,7 +81,6 @@ class MainActivity : ComponentActivity() {
                 // 로그인, 회원가입된 사용자 -> MainScreen으로
                 // 회원가입해야하는 신규 유저 -> SignupNavGraph로 이동하도록 수정 필요
 
-                stepViewModel.initHealthConnect(this)
                 testViewModel.printAccessToken(this)
 
                 NavHost(navController, startDestination = "splash") {
@@ -88,14 +90,63 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+        checkAndRequestPermission()
+
+        // stepViewModel의 stepCount 관찰 (UI 업데이트 등)
+        // lifecycleScope.launch {
+        //     viewModel.stepCount.collect { steps ->
+        //         // UI 업데이트
+        //     }
+        // }
     }
 
-    class TestViewModel : ViewModel() {
-        fun printAccessToken(context: Context) {
-            viewModelScope.launch {
-                val token = TokenDataStore.getAccessToken(context).first() // 🔥 바로 첫 번째 데이터만 읽기
-                Log.d("TestViewModel", "저장된 accessToken: $token")
+    private fun checkAndRequestPermission() {
+        when {
+            ContextCompat.checkSelfPermission(
+                this, // Activity/Fragment의 Context 사용
+                Manifest.permission.ACTIVITY_RECOGNITION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                // 권한이 이미 있음
+                Log.d("Permission", "ACTIVITY_RECOGNITION permission already granted.")
+                stepViewModel.startListening() // ViewModel에 센서 시작 요청
             }
+            shouldShowRequestPermissionRationale(Manifest.permission.ACTIVITY_RECOGNITION) -> {
+                // 사용자에게 권한이 필요한 이유 설명 (예: AlertDialog)
+                Log.d("Permission", "Showing rationale for ACTIVITY_RECOGNITION.")
+                // 설명 후 권한 요청
+                // showRationaleDialog { requestPermissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION) }
+                // 간단히 바로 요청
+                requestPermissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
+            }
+            else -> {
+                // 권한 요청
+                Log.d("Permission", "Requesting ACTIVITY_RECOGNITION permission.")
+                requestPermissionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 필요하다면 onResume에서 다시 권한 확인 후 센서 재시작
+        // (예: 사용자가 설정에서 권한을 껐다가 다시 켠 경우)
+        // checkAndRequestPermission() -> 이미 onCreate에서 호출했다면 중복될 수 있으니 로직 확인 필요
+        // 또는 ViewModel에서 리스너 등록 상태를 관리하고 필요 시 재등록
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Activity가 보이지 않을 때 센서 리스너 해제 (배터리 절약)
+         stepViewModel.stopListening()
+    }
+}
+
+class TestViewModel : ViewModel() {
+    fun printAccessToken(context: Context) {
+        viewModelScope.launch {
+            val token = TokenDataStore.getAccessToken(context).first() // 🔥 바로 첫 번째 데이터만 읽기
+            Log.d("TestViewModel", "저장된 accessToken: $token")
         }
     }
 }
