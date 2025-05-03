@@ -69,6 +69,7 @@ dependencies {
     implementation("androidx.activity:activity-compose")
     implementation("androidx.compose.foundation:foundation")
 
+
     implementation("androidx.navigation:navigation-compose:2.7.7")   // Jetpack Navigation
 
     implementation("androidx.credentials:credentials-play-services-auth:1.5.0")
@@ -82,8 +83,6 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.8.1")    // WorkManager
 
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.35.0-alpha") // System UI 제어
-
-    implementation("androidx.health.connect:connect-client:1.1.0-alpha05")   // 걸음 수
 
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
