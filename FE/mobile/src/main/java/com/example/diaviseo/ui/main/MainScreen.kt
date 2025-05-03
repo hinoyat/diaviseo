@@ -68,7 +68,7 @@ fun MainScreen() {
 
             StepCountCard(
 //                stepsToday = 6118,
-                stepsYesterday = 5115
+                yesterdaySteps = 5115
             )
 
 //            BloodSugarCard(

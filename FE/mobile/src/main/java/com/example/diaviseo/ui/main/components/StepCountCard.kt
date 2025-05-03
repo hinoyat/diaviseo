@@ -1,5 +1,8 @@
 package com.example.diaviseo.ui.main.components
 
+import android.annotation.SuppressLint
+import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,19 +14,27 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.diaviseo.viewmodel.StepViewModel
 
+@SuppressLint("ContextCastToActivity")
 @Composable
 fun StepCountCard(
-    yesterdaySteps: Int = 5000,
-    viewModel: StepViewModel = viewModel()
+    yesterdaySteps: Int,
+//    viewModel: StepViewModel = viewModel()
 ) {
-    val todaySteps by viewModel.stepCount.collectAsState()
+    // 현재 컴포넌트가 실행되고 있는 context를 가지고옴(mainactivity를 가지고옴)
+    val activity = LocalContext.current as ComponentActivity
+    val stepViewModel: StepViewModel = viewModel(activity)
 
-    val diff = todaySteps - yesterdaySteps
+    val todaySteps by stepViewModel.stepCount.collectAsState()
+    Log.d("step card", "$todaySteps")
+
+//    val diff = todaySteps - yesterdaySteps
+    val diff = todaySteps
     val color = if (diff >= 0) Color(0xFFFF3434) else Color(0xFF1673FF)
     val arrow = if (diff >= 0) "▲" else "▼"
 
@@ -56,7 +67,7 @@ fun StepCountCard(
                     modifier = Modifier
                         .size(20.dp)
                         .clickable {
-                            viewModel.refreshStepCount()
+                            stepViewModel.refreshStepCount()
                         }
                 )
             }
