@@ -99,6 +99,7 @@ fun FinalGuideScreen(navController: NavController, goalViewModel: GoalViewModel,
 
         }
     }
+    val particle = if (goalDisplayText == "체중 유지") "를" else "을"
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -122,7 +123,7 @@ fun FinalGuideScreen(navController: NavController, goalViewModel: GoalViewModel,
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Text(
-                    text = "${goalDisplayText}을 목표로 선택해주셨네요.",
+                    text = "${goalDisplayText}${particle} 목표로 선택해주셨네요.",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color.Black
