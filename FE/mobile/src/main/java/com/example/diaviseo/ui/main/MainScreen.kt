@@ -38,7 +38,7 @@ fun MainScreen() {
         }
     }
 
-// ⬇️ 요기!! 조건부 UI는 Scaffold 바깥에!
+// 조건부 UI는 Scaffold 바깥에!
     if (isFabMenuOpen.value) {
         Box(
             modifier = Modifier
@@ -66,7 +66,7 @@ fun MainScreen() {
                                 shadowElevation = 4.dp,
                                 modifier = Modifier.size(100.dp)
                             ) {
-                                // 이모지 or 아이콘이 들어갈 자리
+                                // 이미지 들어갈 자리
                                 Box(modifier = Modifier.fillMaxSize())
                             }
                             Spacer(modifier = Modifier.height(8.dp))
