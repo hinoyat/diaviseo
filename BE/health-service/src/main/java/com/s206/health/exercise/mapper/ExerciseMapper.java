@@ -42,28 +42,14 @@ public class ExerciseMapper {
     }
 
     // 2. 운동 기록 전체 및 상세 조회 Mapper
-    // Exercise 엔티티와 관련 정보를 ExerciseListResponse DTO 로 변환
     public ExerciseListResponse toListResponse(
             Exercise exercise,
             ExerciseType exerciseType,
             ExerciseCategory exerciseCategory) {
 
-        // 저장된 칼로리 값 가져오기
+        // 저장된 칼로리 값을 그대로 사용
         Integer storedCalorie = exercise.getExerciseCalorie();
 
-        // 예상 칼로리 계산 (운동 종류의 분당 칼로리 × 운동 시간)
-        Integer expectedCalorie = null;
-        if (exerciseType != null) {
-            expectedCalorie = exerciseType.getExerciseCalorie() * exercise.getExerciseTime();
-        }
-
-        // 저장된 값이 없거나 예상 값과 다르면 예상 값 사용
-        Integer finalCalorie = storedCalorie;
-        if (storedCalorie == null || storedCalorie == 0 ||
-                (expectedCalorie != null && !expectedCalorie.equals(storedCalorie))) {
-            finalCalorie = expectedCalorie;
-        }
-
-        return toListResponse(exercise, exerciseType, exerciseCategory, finalCalorie);
+        return toListResponse(exercise, exerciseType, exerciseCategory, storedCalorie);
     }
 }

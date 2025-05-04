@@ -1,6 +1,9 @@
 package com.s206.health.exercise.service;
 
+import com.s206.common.exception.types.BadRequestException;
+import com.s206.common.exception.types.NotFoundException;
 import com.s206.health.exercise.dto.request.ExerciseCreateRequest;
+import com.s206.health.exercise.dto.request.ExerciseUpdateRequest;
 import com.s206.health.exercise.dto.response.ExerciseListResponse;
 import com.s206.health.exercise.entity.Exercise;
 import com.s206.health.exercise.entity.ExerciseCategory;
@@ -27,10 +30,10 @@ public class ExerciseService {
     private final ExerciseCategoryRepository exerciseCategoryRepository;
     private final ExerciseMapper exerciseMapper;
 
-    // 운동 기록 전체 조회
+    // 특정 사용자의 운동 기록 전체 조회
     @Transactional(readOnly = true)
-    public List<ExerciseListResponse> getAllExercises() {
-        List<Exercise> exercises = exerciseRepository.findByIsDeletedFalse();
+    public List<ExerciseListResponse> getAllExercisesByUser(Integer userId) {
+        List<Exercise> exercises = exerciseRepository.findByUserIdAndIsDeletedFalse(userId);
 
         // 모든 운동 유형 정보를 가져와서 Map 으로 변환 (ID -> ExerciseType)
         Map<Integer, ExerciseType> exerciseTypeMap = exerciseTypeRepository.findAll().stream()
@@ -52,47 +55,54 @@ public class ExerciseService {
                     }
 
                     // 매퍼를 사용하여 DTO 변환
-                    return exerciseMapper.toListResponse(exercise, exerciseType, exerciseCategory);
+                    return exerciseMapper.toListResponse(exercise, exerciseType, exerciseCategory, exercise.getExerciseCalorie());
                 })
                 .collect(Collectors.toList());
     }
 
-    // 운동 기록 상세 조회
+    // 특정 사용자의 운동 기록 상세 조회
     @Transactional(readOnly = true)
-    public ExerciseListResponse getExerciseById(Integer exerciseId) {
-        // 1. 운동 기록 조회
-        Exercise exercise = exerciseRepository.findById(exerciseId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 운동 기록입니다."));
+    public ExerciseListResponse getExerciseById(Integer userId, Integer exerciseId) {
+        // 1. 운동 기록 조회 (해당 사용자 확인)
+        Exercise exercise = exerciseRepository.findByExerciseIdAndUserId(exerciseId, userId)
+                .orElseThrow(() -> new NotFoundException("해당 사용자의 운동 기록을 찾을 수 없습니다."));
 
         // 삭제된 운동 기록인 경우 예외 발생
         if (exercise.getIsDeleted()) {
-            throw new IllegalArgumentException("삭제된 운동 기록입니다.");
+            throw new BadRequestException("삭제된 운동 기록입니다.");
         }
 
         // 2. 운동 종류 정보 조회
         ExerciseType exerciseType = exerciseTypeRepository.findById(exercise.getExerciseTypeId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 운동 종류입니다."));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 운동 종류입니다."));
 
         // 3. 운동 카테고리 정보 조회
         ExerciseCategory exerciseCategory = exerciseCategoryRepository.findById(exerciseType.getExerciseCategoryId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 운동 카테고리입니다."));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 운동 카테고리입니다."));
 
         // 4. 매퍼를 사용하여 응답 DTO 생성 및 반환
-        return exerciseMapper.toListResponse(exercise, exerciseType, exerciseCategory);
+        return exerciseMapper.toListResponse(exercise, exerciseType, exerciseCategory, exercise.getExerciseCalorie());
     }
 
     // 운동 기록 생성
     @Transactional
-    public ExerciseListResponse createExercise(ExerciseCreateRequest request) {
+    public ExerciseListResponse createExercise(Integer userId, ExerciseCreateRequest request) {
+        // Request에 있는 userId 무시하고 경로 변수의 userId 사용
+
         // 1. 운동 종류 존재 여부 확인
         ExerciseType exerciseType = exerciseTypeRepository.findById(request.getExerciseTypeId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 운동 종류입니다."));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 운동 종류입니다."));
 
-        // 2. 운동 기록 생성 (운동 시간에 비례한 칼로리 계산)
-        Integer totalCalorie = exerciseType.getExerciseCalorie() * request.getExerciseTime();
+        // 2. 칼로리 계산
+        Integer totalCalorie;
+        if (request.getExerciseCalorie() != null) {
+            totalCalorie = request.getExerciseCalorie();
+        } else {
+            totalCalorie = exerciseType.getExerciseCalorie() * request.getExerciseTime();
+        }
 
         Exercise exercise = Exercise.builder()
-                .userId(request.getUserId())
+                .userId(userId)  // 경로 변수의 userId 사용
                 .exerciseTypeId(request.getExerciseTypeId())
                 .exerciseDate(request.getExerciseDate())
                 .exerciseTime(request.getExerciseTime())
@@ -111,5 +121,83 @@ public class ExerciseService {
 
         // 5. 매퍼를 사용하여 응답 DTO 생성 및 반환
         return exerciseMapper.toListResponse(savedExercise, exerciseType, exerciseCategory, totalCalorie);
+    }
+
+    // 운동 기록 수정
+    @Transactional
+    public ExerciseListResponse updateExercise(Integer userId, Integer exerciseId, ExerciseUpdateRequest request) {
+        // 1. 운동 기록 조회 (해당 사용자 확인)
+        Exercise exercise = exerciseRepository.findByExerciseIdAndUserId(exerciseId, userId)
+                .orElseThrow(() -> new NotFoundException("해당 사용자의 운동 기록을 찾을 수 없습니다."));
+
+        // 삭제된 운동 기록인 경우 예외
+        if (exercise.getIsDeleted()) {
+            throw new BadRequestException("삭제된 운동 기록입니다.");
+        }
+
+        // 2. 운동 종류 존재 여부 확인
+        ExerciseType exerciseType = exerciseTypeRepository.findById(request.getExerciseTypeId())
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 운동 종류 입니다."));
+
+        // 3. 칼로리
+        Integer totalCalorie;
+        if (request.getExerciseCalorie() != null) {
+            totalCalorie = request.getExerciseCalorie();
+        } else {
+            totalCalorie = exerciseType.getExerciseCalorie() * request.getExerciseTime();
+        }
+
+        Exercise updatedExercise = Exercise.builder()
+                .exerciseId(exercise.getExerciseId())
+                .userId(exercise.getUserId())  // 기존 userId 유지
+                .exerciseTypeId(request.getExerciseTypeId())
+                .exerciseDate(request.getExerciseDate())
+                .exerciseTime(request.getExerciseTime())
+                .exerciseCalorie(totalCalorie)
+                .createdAt(exercise.getCreatedAt())
+                .updatedAt(LocalDateTime.now())
+                .deletedAt(exercise.getDeletedAt())
+                .isDeleted(exercise.getIsDeleted())
+                .build();
+
+        // 4. 변경 사항 저장
+        Exercise savedExercise = exerciseRepository.save(updatedExercise);
+
+        // 5. 카테고리 정보 조회
+        ExerciseCategory exerciseCategory = exerciseCategoryRepository.findById(exerciseType.getExerciseCategoryId())
+                .orElse(null);
+
+        // 6. 매퍼를 사용하여 응답 DTO 생성 및 반환
+        return exerciseMapper.toListResponse(savedExercise, exerciseType, exerciseCategory, totalCalorie);
+    }
+
+    // 운동 기록 삭제
+    @Transactional
+    public void deleteExercise(Integer userId, Integer exerciseId) {
+        // 1. 운동 기록 조회 (해당 사용자 확인)
+        Exercise exercise = exerciseRepository.findByExerciseIdAndUserId(exerciseId, userId)
+                .orElseThrow(() -> new NotFoundException("해당 사용자의 운동 기록을 찾을 수 없습니다."));
+
+        // 이미 삭제된 운동 기록인 경우 예외 발생
+        if (exercise.getIsDeleted()) {
+            throw new BadRequestException("이미 삭제된 운동 기록입니다.");
+        }
+
+        // 2. 소프트 삭제 처리
+        Exercise deletedExercise = Exercise.builder()
+                .exerciseId(exercise.getExerciseId())
+                .userId(exercise.getUserId())
+                .exerciseTypeId(exercise.getExerciseTypeId())
+                .exerciseDate(exercise.getExerciseDate())
+                .exerciseTime(exercise.getExerciseTime())
+                .exerciseCalorie(exercise.getExerciseCalorie())
+                .createdAt(exercise.getCreatedAt())
+                .updatedAt(LocalDateTime.now())
+                .deletedAt(LocalDateTime.now())
+                .isDeleted(true)
+                .build();
+
+        // 3. 운동 기록 저장
+        exerciseRepository.save(deletedExercise);
     }
 }

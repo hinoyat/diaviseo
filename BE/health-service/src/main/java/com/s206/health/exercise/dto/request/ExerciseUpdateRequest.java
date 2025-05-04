@@ -1,6 +1,9 @@
 package com.s206.health.exercise.dto.request;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -8,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ExerciseCreateRequest {
+public class ExerciseUpdateRequest {
     private Integer exerciseTypeId;
     private LocalDateTime exerciseDate;
     private Integer exerciseTime;
