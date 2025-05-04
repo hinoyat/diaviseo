@@ -2,7 +2,9 @@ package com.s206.health.exercise.controller;
 
 import com.s206.health.exercise.dto.request.ExerciseCreateRequest;
 import com.s206.health.exercise.dto.request.ExerciseUpdateRequest;
+import com.s206.health.exercise.dto.response.ExerciseCategoryResponse;
 import com.s206.health.exercise.dto.response.ExerciseListResponse;
+import com.s206.health.exercise.dto.response.ExerciseTypeResponse;
 import com.s206.health.exercise.service.ExerciseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -59,5 +61,20 @@ public class ExerciseController {
             @PathVariable Integer exerciseId) {
         exerciseService.deleteExercise(userId, exerciseId);
         return ResponseEntity.ok().build();
+    }
+
+    // 운동 카테고리 조회
+    @GetMapping("/category")
+    public ResponseEntity<List<ExerciseCategoryResponse>> getAllCategories() {
+        List<ExerciseCategoryResponse> categories = exerciseService.getAllCategories();
+        return ResponseEntity.ok(categories);
+    }
+
+    // 카테고리별 운동 조회
+    @GetMapping("/category/{exerciseCategoryId}")
+    public ResponseEntity<List<ExerciseTypeResponse>> getExercisesByCategory(
+            @PathVariable Integer exerciseCategoryId) {
+        List<ExerciseTypeResponse> exercises = exerciseService.getExercisesByCategory(exerciseCategoryId);
+        return ResponseEntity.ok(exercises);
     }
 }

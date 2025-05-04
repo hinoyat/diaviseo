@@ -4,7 +4,9 @@ import com.s206.common.exception.types.BadRequestException;
 import com.s206.common.exception.types.NotFoundException;
 import com.s206.health.exercise.dto.request.ExerciseCreateRequest;
 import com.s206.health.exercise.dto.request.ExerciseUpdateRequest;
+import com.s206.health.exercise.dto.response.ExerciseCategoryResponse;
 import com.s206.health.exercise.dto.response.ExerciseListResponse;
+import com.s206.health.exercise.dto.response.ExerciseTypeResponse;
 import com.s206.health.exercise.entity.Exercise;
 import com.s206.health.exercise.entity.ExerciseCategory;
 import com.s206.health.exercise.entity.ExerciseType;
@@ -199,5 +201,41 @@ public class ExerciseService {
 
         // 3. 운동 기록 저장
         exerciseRepository.save(deletedExercise);
+    }
+
+    // 운동 카테고리 전체 조회
+    @Transactional(readOnly = true)
+    public List<ExerciseCategoryResponse> getAllCategories() {
+        List<ExerciseCategory> categories = exerciseCategoryRepository.findByIsDeletedFalse();
+
+        return categories.stream()
+                .map(category -> ExerciseCategoryResponse.builder()
+                        .exerciseCategoryId(category.getExerciseCategoryId())
+                        .exerciseCategoryName(category.getExerciseCategoryName())
+                        .createdAt(category.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    // 카테고리별 운동 조회
+    @Transactional(readOnly = true)
+    public List<ExerciseTypeResponse> getExercisesByCategory(Integer exerciseCategoryId) {
+        // 카테고리 존재 여부 확인
+        ExerciseCategory category = exerciseCategoryRepository.findById(exerciseCategoryId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 운동 카테고리입니다."));
+
+        // 해당 카테고리의 운동 타입 조회
+        List<ExerciseType> exerciseTypes = exerciseTypeRepository
+                .findByExerciseCategoryIdAndIsDeletedFalse(exerciseCategoryId);
+
+        return exerciseTypes.stream()
+                .map(exerciseType -> ExerciseTypeResponse.builder()
+                        .exerciseTypeId(exerciseType.getExerciseTypeId())
+                        .exerciseCategoryId(exerciseType.getExerciseCategoryId())
+                        .exerciseName(exerciseType.getExerciseName())
+                        .exerciseCalorie(exerciseType.getExerciseCalorie())
+                        .createdAt(exerciseType.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
     }
 }
