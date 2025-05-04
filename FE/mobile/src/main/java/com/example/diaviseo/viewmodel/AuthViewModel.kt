@@ -114,8 +114,10 @@ class AuthViewModel : ViewModel() {
                 val context = activity.applicationContext
                 onResult(true, isNewUser)
 
-                TokenDataStore.saveAccessToken(context, body?.data?.accessToken?:"")
-                TokenDataStore.saveRefreshToken(context, body?.data?.refreshToken?:"") // 선택적 저장
+//                TokenDataStore.saveAccessToken(context, body?.data?.accessToken?:"")
+//                TokenDataStore.saveRefreshToken(context, body?.data?.refreshToken?:"") // 선택적 저장
+                TokenDataStore.saveAccessToken(context, "1234")
+                TokenDataStore.saveRefreshToken(context, "1234")
 
                 // 메인스레드에서 Toast 띄우 기
 //                  withContext(Dispatchers.Main) {

@@ -64,6 +64,7 @@ android {
 dependencies {
     implementation(platform("androidx.compose:compose-bom:2025.03.01"))
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.activity:activity-compose")
     implementation("androidx.compose.foundation:foundation")
@@ -79,6 +80,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")   // 코루틴
 
     implementation("androidx.datastore:datastore-preferences:1.1.0")    // datastore
+    implementation("androidx.work:work-runtime-ktx:2.8.1")    // WorkManager
 
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.35.0-alpha") // System UI 제어
 
