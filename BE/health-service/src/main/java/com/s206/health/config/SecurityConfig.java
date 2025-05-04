@@ -21,6 +21,8 @@ public class SecurityConfig {
                                 "api/exercises/**",
                                 "api/bodies/**",
                                 "api/foods/**",
+                                "api/food-sets/**",
+                                "api/meals/**",
                                 "api/favorites/**",
                                 "/actuator/**"
                         ).permitAll()
