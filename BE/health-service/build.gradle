@@ -53,6 +53,9 @@ dependencies {
 	// Prometheus 메트릭 수집을 위한 의존성
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'io.micrometer:micrometer-registry-prometheus'
+
+	// ElasticSearch 의존성 추가
+	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 }
 
 dependencyManagement {
