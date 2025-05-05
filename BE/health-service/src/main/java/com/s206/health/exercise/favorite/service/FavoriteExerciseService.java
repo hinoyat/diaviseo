@@ -71,13 +71,7 @@ public class FavoriteExerciseService {
                 .map(favorite -> {
                     String categoryName = categoryMap.get(favorite.getExerciseType().getExerciseCategoryId());
 
-                    return FavoriteExerciseResponse.builder()
-                            .exerciseTypeId(favorite.getExerciseType().getExerciseTypeId())
-                            .exerciseName(favorite.getExerciseType().getExerciseName())
-                            .calorie(favorite.getExerciseType().getExerciseCalorie())
-                            .categoryName(categoryName)
-                            .createdAt(favorite.getCreatedAt())
-                            .build();
+                    return FavoriteExerciseResponse.toDto(favorite, categoryName);
                 })
                 .collect(Collectors.toList());
     }

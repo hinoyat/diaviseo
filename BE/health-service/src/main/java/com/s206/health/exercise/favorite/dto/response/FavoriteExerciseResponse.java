@@ -19,11 +19,12 @@ public class FavoriteExerciseResponse {
     private String categoryName;
     private LocalDateTime createdAt;
 
-    public static FavoriteExerciseResponse toDto(FavoriteExercise favorite) {
+    public static FavoriteExerciseResponse toDto(FavoriteExercise favorite, String categoryName) {
         return FavoriteExerciseResponse.builder()
                 .exerciseTypeId(favorite.getExerciseType().getExerciseTypeId())
                 .exerciseName(favorite.getExerciseType().getExerciseName())
                 .calorie(favorite.getExerciseType().getExerciseCalorie())
+                .categoryName(categoryName)
                 .createdAt(favorite.getCreatedAt())
                 .build();
     }
