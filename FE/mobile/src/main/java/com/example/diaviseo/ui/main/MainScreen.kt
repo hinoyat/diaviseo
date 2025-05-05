@@ -48,7 +48,7 @@ fun MainScreen() {
                       ChatScreen()
                 }
                 composable("goal") {
-                      GoalScreen()
+                      GoalScreen(navController)
                 }
                 composable("my") {
 //                      MyScreen()
