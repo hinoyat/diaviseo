@@ -3,6 +3,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.background
 import androidx.navigation.NavHostController
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -19,57 +21,63 @@ fun HomeScreen(
     userNickname: String,
     navController: NavHostController
 ) {
-    Column(
+    Box(
         modifier = Modifier
-//                .padding(innerPadding)
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(
-                PaddingValues(
-                    start = 16.dp,
-                    top = 36.dp,
-                    end = 16.dp,
-                    bottom = 16.dp
-                )
-            )
+            .background(Color(0xFFDFE9FF))  // ← 화면 전체 배경색
     ) {
-        MainHeader(userNickname, navController)
+        Column(
+            modifier = Modifier
+    //                .padding(innerPadding)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(
+                    PaddingValues(
+                        start = 16.dp,
+                        top = 36.dp,
+                        end = 16.dp,
+                        bottom = 16.dp
+                    )
+                )
+        ) {
+            MainHeader(userNickname, navController)
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        WeightPredictionSection(
-            calorieDifference = -50 // 예시 데이터
-        )
+            WeightPredictionSection(
+                calorieDifference = -50 // 예시 데이터
+            )
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-        CaloriesGaugeSection(
-            consumedCalorie = 1080,
-            remainingCalorie = 150,
-            burnedCalorie = 180,
-            extraBurned = 100,
-            navController = navController
-        )
+            CaloriesGaugeSection(
+                consumedCalorie = 1080,
+                remainingCalorie = 150,
+                burnedCalorie = 180,
+                extraBurned = 100,
+                navController = navController
+            )
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-        SummaryCardSection(navController = navController)
+            SummaryCardSection(navController = navController)
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-        AiAssistantCard(navController = navController)
+            AiAssistantCard(navController = navController)
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-        StepCountCard(
-//                stepsToday = 6118,
-            yesterdaySteps = 5115
-        )
+            StepCountCard(
+    //                stepsToday = 6118,
+                yesterdaySteps = 5115
+            )
 
-//            BloodSugarCard(
-//                latestSugar = 89,
-//                navController = navController
-//            )
+    //            BloodSugarCard(
+    //                latestSugar = 89,
+    //                navController = navController
+    //            )
+        }
     }
 }
 
