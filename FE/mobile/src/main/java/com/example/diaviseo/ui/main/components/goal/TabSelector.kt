@@ -50,7 +50,7 @@ fun TabSelector(
                         shape = RoundedCornerShape(20.dp)
                     )
                     .clickable { onTabChange(label) }
-                    .padding(start = 16.dp, end = 20.dp, top = 6.dp, bottom = 6.dp)
+                    .padding(start = 16.dp, end = 20.dp, top = 3.dp, bottom = 3.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically

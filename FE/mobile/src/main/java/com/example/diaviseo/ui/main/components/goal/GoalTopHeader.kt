@@ -49,7 +49,7 @@ fun GoalTopHeader(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color(0xFF5C9DFF))
-            .padding(top = 36.dp, bottom = 40.dp)
+            .padding(top = 16.dp, bottom = 16.dp)
     ) {
         Row(
             modifier = Modifier
