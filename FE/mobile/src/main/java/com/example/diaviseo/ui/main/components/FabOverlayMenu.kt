@@ -76,7 +76,7 @@ fun FabOverlayMenu(
                                 Image(
                                     painter = painterResource(id = iconRes),
                                     contentDescription = label,
-                                    modifier = Modifier.size(100.dp)
+                                    modifier = Modifier.size(60.dp)
                                 )
                             }
                         }
