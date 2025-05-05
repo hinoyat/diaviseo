@@ -9,12 +9,12 @@ plugins {
 
 android {
     namespace = "com.example.diaviseo"
-    compileSdk = 35
+    compileSdk = 36 // 35 -> 36
 
     defaultConfig {
         applicationId = "com.example.diaviseo"
         minSdk = 28
-        targetSdk = 35   // 개발 시 이용하고 있는 라이브러리 버전
+        targetSdk = 36   // 개발 시 이용하고 있는 라이브러리 버전
         versionCode = 1
         versionName = "1.0"
 
@@ -98,5 +98,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    //헬스 커넥트
+    implementation("androidx.health.connect:connect-client:1.1.0-rc01")
 
 }
