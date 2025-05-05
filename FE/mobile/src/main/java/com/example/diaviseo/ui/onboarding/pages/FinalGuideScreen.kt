@@ -55,7 +55,7 @@ fun FinalGuideScreen(navController: NavController, goalViewModel: GoalViewModel,
 
             // ✅ 모든 권한 허용 시 Health Connect의 실제 데이터 로깅 시도
             coroutineScope.launch {
-                healthConnectManager.logAllHealthData()  // ✅ 여기!
+                healthConnectManager.logAllHealthData()
                 healthConnectManager.logRawSteps()
 
             }
