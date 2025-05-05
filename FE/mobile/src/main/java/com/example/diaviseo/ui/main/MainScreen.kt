@@ -20,16 +20,18 @@ import com.example.diaviseo.ui.main.components.*
 import com.example.diaviseo.R
 
 @Composable
-fun MainScreen() {
+fun MainScreen(navController: NavHostController) {
+    // ✅ 외부에서 전달받는 navController 사용 (하단바 & 각 섹션에 라우팅 전달 목적)
+
     // 화면 이동을 관리해주는 내비게이션 컨트롤러
-    val navController = rememberNavController()
+//    val navController = rememberNavController()
     val userNickname = "김디아" // TODO: ViewModel 등에서 유저 정보 주입
     val isFabMenuOpen = remember { mutableStateOf(false) }
 
     Scaffold(
         bottomBar = {
             BottomNavigationBar(
-                navController = navController,
+                navController = navController, // ✅ 바텀바에서 화면 이동 처리
                 isFabMenuOpen = isFabMenuOpen
             )
         },
@@ -90,51 +92,12 @@ fun MainScreen() {
     }
 
     // 조건부 UI는 Scaffold 바깥에!
+    // 하단바 + 버튼 토글 (컴포넌트로 분리)
     if (isFabMenuOpen.value) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.3f))
-                .clickable { isFabMenuOpen.value = false }  // 클릭 시 닫기
-        ) {
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 150.dp),  // + 버튼 위쪽 위치
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(24.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    repeat(3) { index ->
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Surface(
-                                shape = CircleShape,
-                                color = Color.White,
-                                shadowElevation = 4.dp,
-                                modifier = Modifier.size(100.dp)
-                            ) {
-                                // 이미지 들어갈 자리
-                                Box(modifier = Modifier.fillMaxSize())
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = when (index) {
-                                    0 -> "체중/체성분"
-                                    1 -> "식단"
-                                    else -> "운동"
-                                },
-                                color = Color.White,
-                                fontSize = 15.sp
-                            )
-                        }
-                    }
-                }
-            }
-        }
+        FabOverlayMenu(
+            onDismiss = { isFabMenuOpen.value = false },
+            navController = navController
+        )
     }
 }
 
