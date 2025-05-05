@@ -4,12 +4,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.rememberNavController
 import com.example.diaviseo.ui.components.BottomNavigationBar
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.diaviseo.ui.main.components.FabOverlayMenu
+import com.example.diaviseo.ui.register.bodyregister.BodyDataRegisterScreen
 
 @Composable
 fun MainScreen() {
@@ -25,7 +25,7 @@ fun MainScreen() {
                 isFabMenuOpen = isFabMenuOpen
             )
         },
-        containerColor = Color(0xFFDFE9FF)
+//        containerColor = Color(0xFFDFE9FF)
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -48,10 +48,14 @@ fun MainScreen() {
                       ChatScreen()
                 }
                 composable("goal") {
-//                      GoalScreen()
+                      GoalScreen()
                 }
                 composable("my") {
 //                      MyScreen()
+                }
+
+                composable("body_register") {
+                    BodyDataRegisterScreen(navController)
                 }
             }
         }
