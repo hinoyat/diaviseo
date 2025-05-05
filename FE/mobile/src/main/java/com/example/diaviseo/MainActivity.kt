@@ -45,6 +45,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.concurrent.TimeUnit
 
+import com.example.diaviseo.ui.register.bodyregister.BodyDataRegisterScreen
 
 class MainActivity : ComponentActivity() {
     val testViewModel = TestViewModel()
@@ -96,7 +97,8 @@ class MainActivity : ComponentActivity() {
                 NavHost(navController, startDestination = "splash") {
                     composable("splash") { SplashScreen(navController) }
                     signupNavGraph(navController)
-                    composable("main") { MainScreen() }
+                    composable("main") { MainScreen(navController) }
+                    composable("body_register") { BodyDataRegisterScreen(navController) }
                 }
             }
         }
