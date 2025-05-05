@@ -1,7 +1,6 @@
-package com.example.diaviseo.ui.main.components
+package com.example.diaviseo.ui.main.components.home
 
 import android.annotation.SuppressLint
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,11 +12,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.diaviseo.viewmodel.StepViewModel
+import kotlin.math.abs
 
 @SuppressLint("ContextCastToActivity")
 @Composable
@@ -68,7 +67,7 @@ fun StepCountCard(
             Spacer(Modifier.height(4.dp))
             // 어제 대비 증감
             Text(
-                "어제보다 ${kotlin.math.abs(diff)} $arrow",
+                "어제보다 ${abs(diff)} $arrow",
                 fontSize = 13.sp,
                 color = color
             )

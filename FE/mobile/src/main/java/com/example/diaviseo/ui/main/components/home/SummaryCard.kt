@@ -1,4 +1,4 @@
-package com.example.diaviseo.ui.main.components
+package com.example.diaviseo.ui.main.components.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -14,10 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavHostController
-import com.example.diaviseo.R
 import com.example.diaviseo.ui.theme.*
 
 @Composable
