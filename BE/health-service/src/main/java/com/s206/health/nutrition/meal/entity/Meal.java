@@ -51,4 +51,17 @@ public class Meal {
     @Builder.Default
     @Column(nullable = false)
     private Boolean isDeleted = false;
+
+    public void updateMealDate(LocalDate mealDate) {
+        this.mealDate = mealDate;
+    }
+
+    public void updateIsMeal(Boolean isMeal) {
+        this.isMeal = isMeal;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
+    }
 }
