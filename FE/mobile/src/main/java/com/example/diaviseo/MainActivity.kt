@@ -98,7 +98,6 @@ class MainActivity : ComponentActivity() {
                     composable("splash") { SplashScreen(navController) }
                     signupNavGraph(navController)
                     composable("main") { MainScreen() }
-                    composable("body_register") { BodyDataRegisterScreen(navController) }
                 }
             }
         }
