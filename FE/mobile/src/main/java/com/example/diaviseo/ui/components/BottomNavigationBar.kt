@@ -12,16 +12,23 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.diaviseo.R
 import androidx.compose.ui.text.font.FontWeight
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.diaviseo.ui.theme.*
+import com.example.diaviseo.ui.theme.DiaViseoColors
 
 @Composable
 fun BottomNavigationBar(
     navController: NavHostController,
     isFabMenuOpen: MutableState<Boolean>
 ) {
-    var selectedTab by remember { mutableStateOf("dashboard") }
+    // NavController의 백스택을 관찰해서 현재 route를 가져옵니다.
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = backStackEntry?.destination?.route
+
     Box(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
+            .height(110.dp)
             .navigationBarsPadding()
     ) {
         Surface(
@@ -29,32 +36,45 @@ fun BottomNavigationBar(
             shadowElevation = 4.dp,
             color = Color.White,
             modifier = Modifier
-                .fillMaxWidth()
-                .height(64.dp)
-                .align(Alignment.BottomCenter)
+                .fillMaxSize()
         ) {
             NavigationBar(
                 containerColor = Color.White,
                 tonalElevation = 0.dp
             ) {
+                fun navTo(route: String) {
+                    if (currentRoute == route) return
+
+                    // 1) Home 으로 돌아갈 땐 popBackStack
+                    val popped = navController.popBackStack(route, inclusive = false)
+                    if (!popped) {
+                        // 2) 백스택에 route 가 없으면 navigate
+                        navController.navigate(route) {
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                }
+
                 NavigationBarItem(
                     icon = {
                         Icon(
                             painter = painterResource(
-                                id = if (selectedTab == "dashboard") R.drawable.bottom_active_dashboard else R.drawable.bottom_dashboard
+                                id = if (currentRoute == "home")
+                                    R.drawable.bottom_active_dashboard
+                                else
+                                    R.drawable.bottom_dashboard
                             ),
-                            contentDescription = "대시보드",
+                            contentDescription = "홈",
                             modifier = Modifier.size(24.dp),
                             tint = Color.Unspecified
                         )
                     },
-                    label = { Text("대시보드", fontWeight = FontWeight.Normal) },
-                    selected = selectedTab == "dashboard",
-                    onClick = { selectedTab = "dashboard" },
+                    label = { Text("홈", style = medium12) },
+                    selected = currentRoute == "home",
+                    onClick = { navTo("home") },
                     colors = NavigationBarItemDefaults.colors(
                         indicatorColor = Color.Transparent,
-                        selectedIconColor = Color.Unspecified,
-                        unselectedIconColor = Color.Unspecified,
                         selectedTextColor = Color(0xFF1673FF),
                         unselectedTextColor = Color(0xFFBDBDBD)
                     )
@@ -64,20 +84,21 @@ fun BottomNavigationBar(
                     icon = {
                         Icon(
                             painter = painterResource(
-                                id = if (selectedTab == "chat") R.drawable.bottom_active_chat else R.drawable.bottom_chat
+                                id = if (currentRoute == "chat")
+                                    R.drawable.bottom_active_chat
+                                else
+                                    R.drawable.bottom_chat
                             ),
                             contentDescription = "챗봇",
                             modifier = Modifier.size(24.dp),
                             tint = Color.Unspecified
                         )
                     },
-                    label = { Text("챗봇", fontWeight = FontWeight.Normal) },
-                    selected = selectedTab == "chat",
-                    onClick = { selectedTab = "chat" },
+                    label = { Text("챗봇", style = medium12) },
+                    selected = currentRoute == "chat",
+                    onClick = { navTo("chat") },
                     colors = NavigationBarItemDefaults.colors(
                         indicatorColor = Color.Transparent,
-                        selectedIconColor = Color.Unspecified,
-                        unselectedIconColor = Color.Unspecified,
                         selectedTextColor = Color(0xFF1673FF),
                         unselectedTextColor = Color(0xFFBDBDBD)
                     )
@@ -89,20 +110,21 @@ fun BottomNavigationBar(
                     icon = {
                         Icon(
                             painter = painterResource(
-                                id = if (selectedTab == "goal") R.drawable.bottom_active_goal else R.drawable.bottom_goal
+                                id = if (currentRoute == "goal")
+                                    R.drawable.bottom_active_goal
+                                else
+                                    R.drawable.bottom_goal
                             ),
-                            contentDescription = "목표",
+                            contentDescription = "평가",
                             modifier = Modifier.size(24.dp),
                             tint = Color.Unspecified
                         )
                     },
-                    label = { Text("목표", fontWeight = FontWeight.Normal) },
-                    selected = selectedTab == "goal",
-                    onClick = { selectedTab = "goal" },
+                    label = { Text("평가", style = medium12) },
+                    selected = currentRoute == "goal",
+                    onClick = { navTo("goal") },
                     colors = NavigationBarItemDefaults.colors(
                         indicatorColor = Color.Transparent,
-                        selectedIconColor = Color.Unspecified,
-                        unselectedIconColor = Color.Unspecified,
                         selectedTextColor = Color(0xFF1673FF),
                         unselectedTextColor = Color(0xFFBDBDBD)
                     )
@@ -112,20 +134,21 @@ fun BottomNavigationBar(
                     icon = {
                         Icon(
                             painter = painterResource(
-                                id = if (selectedTab == "my") R.drawable.bottom_active_my else R.drawable.bottom_my
+                                id = if (currentRoute == "my")
+                                    R.drawable.bottom_active_my
+                                else
+                                    R.drawable.bottom_my
                             ),
                             contentDescription = "마이",
                             modifier = Modifier.size(24.dp),
                             tint = Color.Unspecified
                         )
                     },
-                    label = { Text("마이", fontWeight = FontWeight.Normal) },
-                    selected = selectedTab == "my",
-                    onClick = { selectedTab = "my" },
+                    label = { Text("마이", style = medium12) },
+                    selected = currentRoute == "my",
+                    onClick = { navTo("my") },
                     colors = NavigationBarItemDefaults.colors(
                         indicatorColor = Color.Transparent,
-                        selectedIconColor = Color.Unspecified,
-                        unselectedIconColor = Color.Unspecified,
                         selectedTextColor = Color(0xFF1673FF),
                         unselectedTextColor = Color(0xFFBDBDBD)
                     )
