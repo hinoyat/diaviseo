@@ -26,10 +26,10 @@ fun GoalScreen(navController: NavHostController) {
                 selectedTab = selectedTab.value,
                 onTabChange = { selectedTab.value = it }
             )
-//            GoalContent(
-//                selectedTab = selectedTab.value,
-//                today = today
-//            )
+            GoalContent(
+                selectedTab = selectedTab.value,
+                today = today
+            )
         }
     }
 }
