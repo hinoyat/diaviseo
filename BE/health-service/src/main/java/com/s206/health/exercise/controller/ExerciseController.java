@@ -19,35 +19,36 @@ public class ExerciseController {
 
     private final ExerciseService exerciseService;
 
-    // 특정 사용자의 운동 기록 전체 조회
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<ExerciseListResponse>> getAllExercisesByUser(@PathVariable Integer userId) {
+    // 운동 기록 전체 조회
+    @GetMapping
+    public ResponseEntity<List<ExerciseListResponse>> getAllExercisesByUser(
+            @RequestHeader("X-USER-ID") Integer userId) {
         List<ExerciseListResponse> exercises = exerciseService.getAllExercisesByUser(userId);
         return ResponseEntity.ok(exercises);
     }
 
-    // 특정 사용자의 운동 기록 상세 조회
-    @GetMapping("/{userId}/{exerciseId}")
+    // 운동 기록 상세 조회
+    @GetMapping("/{exerciseId}")
     public ResponseEntity<ExerciseListResponse> getExerciseById(
-            @PathVariable Integer userId,
+            @RequestHeader("X-USER-ID") Integer userId,
             @PathVariable Integer exerciseId) {
         ExerciseListResponse exercise = exerciseService.getExerciseById(userId, exerciseId);
         return ResponseEntity.ok(exercise);
     }
 
     // 운동 기록 생성
-    @PostMapping("/{userId}")
+    @PostMapping
     public ResponseEntity<ExerciseListResponse> createExercise(
-            @PathVariable Integer userId,
+            @RequestHeader("X-USER-ID") Integer userId,
             @RequestBody ExerciseCreateRequest request) {
         ExerciseListResponse response = exerciseService.createExercise(userId, request);
         return ResponseEntity.ok(response);
     }
 
     // 운동 기록 수정
-    @PutMapping("/{userId}/{exerciseId}")
+    @PutMapping("/{exerciseId}")
     public ResponseEntity<ExerciseListResponse> updateExercise(
-            @PathVariable Integer userId,
+            @RequestHeader("X-USER-ID") Integer userId,
             @PathVariable Integer exerciseId,
             @RequestBody ExerciseUpdateRequest request) {
         ExerciseListResponse response = exerciseService.updateExercise(userId, exerciseId, request);
@@ -55,9 +56,9 @@ public class ExerciseController {
     }
 
     // 운동 기록 삭제
-    @DeleteMapping("/{userId}/{exerciseId}")
+    @DeleteMapping("/{exerciseId}")
     public ResponseEntity<Void> deleteExercise(
-            @PathVariable Integer userId,
+            @RequestHeader("X-USER-ID") Integer userId,
             @PathVariable Integer exerciseId) {
         exerciseService.deleteExercise(userId, exerciseId);
         return ResponseEntity.ok().build();
@@ -70,7 +71,7 @@ public class ExerciseController {
         return ResponseEntity.ok(categories);
     }
 
-    // 카테고리별 운동 조회
+    // 운동 카테고리별 운동 조회
     @GetMapping("/category/{exerciseCategoryId}")
     public ResponseEntity<List<ExerciseTypeResponse>> getExercisesByCategory(
             @PathVariable Integer exerciseCategoryId) {
