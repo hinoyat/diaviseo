@@ -1,6 +1,7 @@
 package com.s206.health.exercise.controller;
 
 import com.s206.health.exercise.dto.response.DailyExerciseStatsResponse;
+import com.s206.health.exercise.dto.response.MonthlyExerciseStatsResponse;
 import com.s206.health.exercise.dto.response.TodayExerciseStatsResponse;
 import com.s206.health.exercise.dto.response.WeeklyExerciseStatsResponse;
 import com.s206.health.exercise.service.ExerciseStatsService;
@@ -39,6 +40,14 @@ public class ExerciseStatsController {
     public ResponseEntity<WeeklyExerciseStatsResponse> getWeeklyStats(
             @RequestHeader("X-USER-ID") Integer userId) {
         WeeklyExerciseStatsResponse response = exerciseStatsService.getWeeklyStats(userId);
+        return ResponseEntity.ok(response);
+    }
+
+    // 월별 운동 조회 (최근 7개월)
+    @GetMapping("/monthly")
+    public ResponseEntity<MonthlyExerciseStatsResponse> getMonthlyStats(
+            @RequestHeader("X-USER-ID") Integer userId) {
+        MonthlyExerciseStatsResponse response = exerciseStatsService.getMonthlyStats(userId);
         return ResponseEntity.ok(response);
     }
 }

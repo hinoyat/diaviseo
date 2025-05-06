@@ -1,6 +1,7 @@
 package com.s206.health.exercise.service;
 
 import com.s206.health.exercise.dto.response.DailyExerciseStatsResponse;
+import com.s206.health.exercise.dto.response.MonthlyExerciseStatsResponse;
 import com.s206.health.exercise.dto.response.TodayExerciseStatsResponse;
 import com.s206.health.exercise.dto.response.WeeklyExerciseStatsResponse;
 import com.s206.health.exercise.entity.Exercise;
@@ -11,6 +12,7 @@ import com.s206.health.exercise.repository.ExerciseRepository;
 import com.s206.health.exercise.repository.ExerciseTypeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -242,6 +244,70 @@ public class ExerciseStatsService {
 
         return WeeklyExerciseStatsResponse.builder()
                 .weeklyExercises(weeklyExercises)
+                .build();
+    }
+
+    // 월별 운동 통계 조회
+    @Transactional(readOnly = true)
+    public MonthlyExerciseStatsResponse getMonthlyStats(Integer userId) {
+        // 1. 날짜 범위 계산 (이번 달 ~ 7개월 전)
+        LocalDate today = LocalDate.now();
+        LocalDate startDate = today.minusMonths(6).withDayOfMonth(1);
+
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = today.atTime(LocalTime.MAX);
+
+        // 2. 해당 날짜 범위 내 운동 기록 조회
+        List<Exercise> exercises = exerciseRepository.findByUserIdAndExerciseDateBetweenAndIsDeletedFalseOrderByExerciseDateDesc(
+                userId, startDateTime, endDateTime
+        );
+
+        // 3. 월별로 그룹화
+        Map<YearMonth, List<Exercise>> exerciseByMonth = exercises.stream()
+                .collect(Collectors.groupingBy(exercise ->
+                    YearMonth.of(
+                            exercise.getExerciseDate().getYear(),
+                            exercise.getExerciseDate().getMonth()
+                    )
+                ));
+
+        // 4. 월별 통계 계산
+        List<MonthlyExerciseStatsResponse.MonthlyExercise> monthlyExercises = new ArrayList<>();
+
+        // 모든 월에 대해 (빈 월도 포함)
+        YearMonth currentMonth = YearMonth.from(today);
+        for (int i = 0; i < 7; i++) {
+            // 해당 월의 운동 기록
+            List<Exercise> monthlyExerciseList = exerciseByMonth.getOrDefault(currentMonth, Collections.emptyList());
+
+            // 해당 월의 총 칼로리 계산
+            Integer totalCalories = monthlyExerciseList.stream()
+                    .mapToInt(Exercise::getExerciseCalorie)
+                    .sum();
+
+            // 해당 월의 일수
+            int daysInMonth = currentMonth.lengthOfMonth();
+
+            // 일평균 칼로리 계산
+            double avgDailyCalories = daysInMonth > 0 ? (double) totalCalories / daysInMonth : 0;
+
+            // 월별 운동 통계 추가
+            monthlyExercises.add(MonthlyExerciseStatsResponse.MonthlyExercise.builder()
+                    .yearMonth(currentMonth)
+                    .totalCalories(totalCalories)
+                    .totalExerciseCount(monthlyExerciseList.size())
+                    .avgDailyCalories(Math.round(avgDailyCalories * 10) / 10.0) // 소수점 한 자리까지
+                    .build());
+
+            // 이전 월로 이동
+            currentMonth = currentMonth.minusMonths(1);
+        }
+
+        // 5. 연월 기준 내림차순 정렬 (최신 월이 먼저)
+        monthlyExercises.sort(Comparator.comparing(MonthlyExerciseStatsResponse.MonthlyExercise::getYearMonth).reversed());
+
+        return MonthlyExerciseStatsResponse.builder()
+                .monthlyExercises(monthlyExercises)
                 .build();
     }
 }
