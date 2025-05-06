@@ -5,29 +5,31 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TodayExerciseStatsResponse {
-    private LocalDateTime date;
-    private Integer totalCalories;
-    private Integer totalExerciseTime;
-    private Integer exerciseCount;
-    private List<ExerciseDetail> exercises;
+public class DailyExerciseStatsResponse {
+    private List<DailyExercise> dailyExercises;
 
     @Getter
     @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
+    public static class DailyExercise {
+        private LocalDate date;
+        private Integer totalCalories;
+        private Integer exerciseCount;
+        private List<ExerciseDetail> exercises;
+    }
+
+    @Getter
+    @Builder
     public static class ExerciseDetail {
         private Integer exerciseId;
         private String exerciseName;
         private String categoryName;
-        private LocalDateTime exerciseDate;
         private Integer exerciseTime;
         private Integer exerciseCalorie;
     }
