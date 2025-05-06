@@ -58,8 +58,10 @@ fun AiTipBox(
             contentScale = ContentScale.Fit,
             modifier = Modifier
                 .size(80.dp)
-                .align(Alignment.TopEnd)       // BoxScope 안에서 우상단 붙이기
-                .offset(x = 16.dp) // 약간 겹치도록 위로 올려줌)
+                // BoxScope에서 우상단 기준
+                .align(Alignment.TopEnd)
+                // X축은 0dp(우측 끝), Y축은 -40dp(위로 반만큼)
+                .offset(x = 0.dp, y = (-64).dp)
         )
     }
 }
