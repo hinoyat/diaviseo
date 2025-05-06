@@ -1,11 +1,10 @@
-package com.example.diaviseo.ui.main.components
+package com.example.diaviseo.ui.main.components.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
 //import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -15,7 +14,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavHostController
 import com.example.diaviseo.R
@@ -33,7 +31,7 @@ fun AiAssistantCard(navController: NavHostController) {
             )
             .background(Color.White, shape = RoundedCornerShape(12.dp))
             .clickable {
-//                navController.navigate("ai_chat")
+                navController.navigate("chat")
             }
             .padding(16.dp)
     ) {

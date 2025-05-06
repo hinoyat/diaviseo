@@ -1,9 +1,7 @@
-package com.example.diaviseo.ui.main.components
+package com.example.diaviseo.ui.main.components.home
 
-import android.content.Context
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
@@ -17,17 +15,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
-import kotlinx.coroutines.launch
 import com.example.diaviseo.ui.theme.*
+import java.util.Locale
 
 @Composable
 fun MainHeader(userNickname: String, navController: NavHostController) {
     val today = remember { Calendar.getInstance().time }
-    val formatter = remember { SimpleDateFormat("M월 d일 E요일", java.util.Locale.KOREA) }
+    val formatter = remember { SimpleDateFormat("M월 d일 E요일", Locale.KOREA) }
     val formattedDate = formatter.format(today)
 
     Row(

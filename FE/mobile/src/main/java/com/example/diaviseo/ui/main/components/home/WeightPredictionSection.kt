@@ -1,4 +1,4 @@
-package com.example.diaviseo.ui.main.components
+package com.example.diaviseo.ui.main.components.home
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
