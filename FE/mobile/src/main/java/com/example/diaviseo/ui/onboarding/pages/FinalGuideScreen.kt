@@ -23,10 +23,47 @@ import com.example.diaviseo.ui.theme.DiaViseoColors
 import androidx.compose.ui.text.style.TextAlign
 import com.example.diaviseo.ui.components.onboarding.PermissionRequestButton
 
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.health.connect.client.PermissionController
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import androidx.compose.ui.platform.LocalContext
+import android.util.Log
+import com.example.diaviseo.healthconnect.HealthConnectManager
+
 
 @Composable
 fun FinalGuideScreen(navController: NavController, goalViewModel: GoalViewModel, authViewModel: AuthViewModel) {
     var showDialog by remember { mutableStateOf(false) }
+
+    // ✅ Health Connect 관련 객체 초기화
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val healthConnectManager = remember { HealthConnectManager(context) }
+
+    // ✅ 권한 요청 런처 등록
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = PermissionController.createRequestPermissionResultContract()
+    ) { granted ->
+        // ✅ 사용자가 권한을 모두 허용했는지 확인
+        // granted: Set<String>
+        if (granted.containsAll(healthConnectManager.getPermissions())) {
+            // ✅ 권한 모두 허용됨
+            Log.d("HealthConnect", "모든 권한 허용됨")
+
+            // ✅ 모든 권한 허용 시 Health Connect의 실제 데이터 로깅 시도
+            coroutineScope.launch {
+                healthConnectManager.logAllHealthData()
+                healthConnectManager.logRawSteps()
+
+            }
+        } else {
+            // ⚠️ 일부 권한 거부됨
+            Log.w("HealthConnect", "일부 권한 거부됨")
+        }
+    }
 
     val name = authViewModel.name.collectAsState().value
     val birthday = authViewModel.birthday.collectAsState().value
@@ -198,8 +235,26 @@ fun FinalGuideScreen(navController: NavController, goalViewModel: GoalViewModel,
                 )
                 Spacer(modifier = Modifier.height(12.dp))
 
+                // ✅ Health Connect 연동 버튼 클릭 시 동작
                 Button(
-                    onClick = { /* TODO: 헬스 커넥트 연동 */ },
+                    onClick = {
+                        coroutineScope.launch {
+                            // ✅ Health Connect 앱 설치 여부 확인
+                            val isAvailable = healthConnectManager.isAvailable()
+                            if (isAvailable) {
+                                // ➕ 설치되어 있으면 권한 요청
+                                permissionLauncher.launch(healthConnectManager.getPermissions())
+
+                                // 🔍 걸음 데이터 로그 출력 (테스트용)
+                                healthConnectManager.logRawSteps()
+                            } else {
+                                // 설치 안 됨 → Play Store 링크로 이동
+                                val uri = Uri.parse("https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata")
+                                val intent = Intent(Intent.ACTION_VIEW, uri)
+                                context.startActivity(intent)
+                            }
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = DiaViseoColors.Main1)
                 ) {
