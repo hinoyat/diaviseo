@@ -51,7 +51,7 @@ fun BodyDataRegisterScreen(navController: NavController) {
             onRightActionClick = { navController.popBackStack() }
         )
 
-        Spacer(modifier = Modifier.height(22.dp))
+//        Spacer(modifier = Modifier.height(22.dp))
         // 타이틀 및 설명 텍스트
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
