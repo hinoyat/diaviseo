@@ -1,18 +1,14 @@
 import os
 from dotenv import load_dotenv
 
-
-
-load_dotenv()
-api_key = os.getenv("OPENAI_API_KEY")
-os.environ["OPENAI_API_KEY"] = api_key
+from app.body.config.settings import get_settings
 
 
 def build_qa():
   from langchain_openai import ChatOpenAI
   from langchain.prompts import PromptTemplate
   from langchain.schema.runnable import RunnablePassthrough
-
+  settings = get_settings()
   # 1단계: 사용자 상태 요약 프롬프트
   profile_prompt = PromptTemplate(
       input_variables=["age", "gender", "weight", "skeletal_muscle_mass",
@@ -52,7 +48,11 @@ def build_qa():
   )
 
   # LLM 설정
-  llm = ChatOpenAI(model="gpt-4o", temperature=0.7)
+  llm = ChatOpenAI(
+      model="gpt-4o-mini",
+      temperature=0.3,
+      api_key=settings.openai_api_key
+  )
 
   # 각각의 LLMChain 생성
   profile_chain = profile_prompt | llm
