@@ -121,8 +121,8 @@ fun SignupScreen(navController: NavController) {
                 val activity = context as? Activity
                 if (activity != null) {
 //                    performLogin이 진짜
-//                    GoogleLoginManager.performLogin(
-                    GoogleLoginManager.performTest(
+                    GoogleLoginManager.performLogin(
+//                    GoogleLoginManager.performTest(
                         activity = activity,
                         onSuccess = { email, name, idToken, activity ->
                             authViewModel.setEmail(email ?: "") // Null 처리 추가
