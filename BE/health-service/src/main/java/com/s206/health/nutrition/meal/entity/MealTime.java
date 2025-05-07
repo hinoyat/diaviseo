@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +36,9 @@ public class MealTime {
     @OneToMany(mappedBy = "mealTime", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<MealFood> mealFoods = new ArrayList<>();
 
+    @Column(nullable = false)
+    private LocalTime eatingTime;
+
     @CreationTimestamp
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -49,4 +53,12 @@ public class MealTime {
     @Builder.Default
     @Column(nullable = false)
     private Boolean isDeleted = false;
+
+    public void updateEatingTime(LocalTime eatingTime) {
+        this.eatingTime = eatingTime;
+    }
+    public void delete() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
+    }
 }
