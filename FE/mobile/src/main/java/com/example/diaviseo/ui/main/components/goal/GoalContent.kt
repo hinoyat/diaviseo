@@ -23,6 +23,7 @@ fun GoalContent(
     val isToday = remember(today) {
         today == LocalDate.now()
     }
+    val isMale = false
 
     Column(
         modifier = Modifier
@@ -91,7 +92,27 @@ fun GoalContent(
             }
 
             "체중" -> {
-                // TODO: 체중 리포트 컴포넌트 연결 예정
+                WeightOverviewSection(
+                    isToday = isToday,
+                    isMale = isMale,
+                    weight = 59.1f,
+                    muscleMass = 19.3f,
+                    fatMass = 17.1f,
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                BMRMBISection(
+                    weight = 59.1f,
+                    heightCm = 166f,
+                    age = 26,
+                    isMale = isMale
+                )
+                Spacer(modifier = Modifier.height(48.dp))
+
+                AiTipBox("현재 체중 대비 골격근량은 꽤 좋은 편이라 근육량은 잘 유지되고 있어요. 다만 체지방률이 약간 높은 편일 수 있으니, 유산소 운동과 함께 단백질 섭취를 늘려 체지방을 천천히 줄이는 방향이 이상적이에요. 균형 잡힌 식단과 꾸준한 활동이 핵심이에요!")
+                Spacer(modifier = Modifier.height(24.dp))
+
+                WeightChartSection()
             }
         }
 
