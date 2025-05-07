@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.WeekFields;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -32,11 +33,22 @@ public class ExerciseStatsService {
 
     // 오늘의 운동 통계 조회
     @Transactional(readOnly = true)
-    public TodayExerciseStatsResponse getTodayStats(Integer userId) {
-        // 1. 오늘 날짜 범위 계산 (00:00:00 ~ 23:59:59)
-        LocalDate today = LocalDate.now();
-        LocalDateTime startDateTime = today.atStartOfDay();
-        LocalDateTime endDateTime = today.atTime(LocalTime.MAX);
+    public TodayExerciseStatsResponse getTodayStats(Integer userId, String date) {
+        // 1. 날짜 파라미터 처리 (없으면 오늘 날짜 사용)
+        LocalDate targetDate;
+        if (date != null && !date.isEmpty()) {
+            try {
+                targetDate = LocalDate.parse(date);
+            } catch (DateTimeParseException e) {
+                log.error("유효하지 않은 형식입니다. : {}", date);
+                targetDate = LocalDate.now();
+            }
+        } else  {
+            targetDate = LocalDate.now();
+        }
+        // 해당 날짜 범위 계산 (00:00:00 ~ 23:59:59)
+        LocalDateTime startDateTime = targetDate.atStartOfDay();
+        LocalDateTime endDateTime = targetDate.atTime(LocalTime.MAX);
 
         // 오늘의 운동 기록 조회
         List<Exercise> todayExercises = exerciseRepository
@@ -48,7 +60,7 @@ public class ExerciseStatsService {
             todayExercises = new ArrayList<>();
         }
 
-        // 운동 통계 직접 계산 (쿼리 결과에 의존하지 않음)
+        // 운동 통계 직접 계산
         int exerciseCount = todayExercises.size();
         int totalCalories = todayExercises.stream()
                 .mapToInt(Exercise::getExerciseCalorie)

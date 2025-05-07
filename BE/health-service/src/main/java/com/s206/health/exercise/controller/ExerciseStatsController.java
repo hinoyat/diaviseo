@@ -7,10 +7,7 @@ import com.s206.health.exercise.dto.response.WeeklyExerciseStatsResponse;
 import com.s206.health.exercise.service.ExerciseStatsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/exercises")
@@ -22,8 +19,9 @@ public class ExerciseStatsController {
     // 오늘의 운동 조회
     @GetMapping("/today")
     public ResponseEntity<TodayExerciseStatsResponse> getTodayStats(
-            @RequestHeader("X-USER-ID") Integer userId) {
-        TodayExerciseStatsResponse response = exerciseStatsService.getTodayStats(userId);
+            @RequestHeader("X-USER-ID") Integer userId,
+            @RequestParam(required = false) String date) {
+        TodayExerciseStatsResponse response = exerciseStatsService.getTodayStats(userId, date);
         return ResponseEntity.ok(response);
     }
 
