@@ -21,6 +21,7 @@ public class FoodDetailResponse {
     private BigDecimal saturatedFat;
     private BigDecimal transFat;
     private BigDecimal cholesterol;
+    private BigDecimal baseAmount;
     private boolean isFavorite;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -41,6 +42,7 @@ public class FoodDetailResponse {
                 .isFavorite(isFavorite)
                 .createdAt(food.getCreatedAt())
                 .updatedAt(food.getUpdatedAt())
+                .baseAmount(food.getBaseAmount())
                 .build();
     }
 }
