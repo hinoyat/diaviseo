@@ -40,9 +40,9 @@ public class MealController {
     }
 
     // 2. 식단 상세 조회 API - mealId
-    @GetMapping("/{id}")
+    @GetMapping("/{mealId}")
     public ResponseEntity<ResponseDto<MealDetailResponse>> getMealDetail(
-            @PathVariable("id") Integer mealId,
+            @PathVariable("mealId") Integer mealId,
             @RequestHeader("X-USER-ID") Integer userId
     ) {
         log.info("Getting meal detail: mealId={}, userId={}", mealId, userId);
@@ -86,9 +86,9 @@ public class MealController {
     }
 
     // 6. 식단 삭제 API  - mealId 기반
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{mealId}")
     public ResponseEntity<ResponseDto<Void>> deleteMeal(
-            @PathVariable("id") Integer mealId,
+            @PathVariable("mealId") Integer mealId,
             @RequestHeader("X-USER-ID") Integer userId
     ) {
         log.info("Deleting meal: mealId={}, userId={}", mealId, userId);
