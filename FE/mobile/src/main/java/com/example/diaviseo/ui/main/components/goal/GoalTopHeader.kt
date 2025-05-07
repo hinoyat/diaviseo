@@ -32,8 +32,8 @@ fun GoalTopHeader(
 ) {
     val selectedDate by viewModel.selectedDate.collectAsState()
     val day = selectedDate.dayOfMonth.toString()
-    val dayOfWeek = currentDate.dayOfWeek
-    val isToday = currentDate == LocalDate.now()
+    val dayOfWeek = selectedDate.dayOfWeek
+    val isToday = selectedDate == LocalDate.now()
 
     val dayColor = when (dayOfWeek) {
         DayOfWeek.SATURDAY -> DiaViseoColors.Main2

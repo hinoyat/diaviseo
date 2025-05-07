@@ -13,15 +13,20 @@ import androidx.compose.ui.unit.sp
 import com.example.diaviseo.ui.theme.DiaViseoColors
 import java.time.LocalDate
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.diaviseo.ui.theme.semibold16
+import com.example.diaviseo.viewmodel.GoalViewModel
 
 @Composable
 fun GoalContent(
     selectedTab: String,
     today: LocalDate
 ) {
-    val isToday = remember(today) {
-        today == LocalDate.now()
+    val goalViewModel: GoalViewModel = viewModel()
+    val selectedDate by goalViewModel.selectedDate.collectAsState()
+
+    val isToday = remember(selectedDate) {
+        selectedDate == LocalDate.now()
     }
     val isMale = false
 
