@@ -66,6 +66,10 @@ class AuthViewModel : ViewModel() {
         _name.value = name
     }
 
+    fun setPhone(phone: String) {
+        _phone.value = phone
+    }
+
     fun setProvider(provider: String) {
         _provider.value = provider
     }
