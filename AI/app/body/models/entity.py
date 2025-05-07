@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from datetime import datetime
+
 from typing import List, Optional
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from app.body.config.body_database import Base
@@ -16,6 +18,7 @@ class Body(Base):
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
     deleted_at = Column(DateTime)
+
 
 
 
@@ -54,3 +57,20 @@ class BodyComposition(BaseModel):
         calories_burned=nutrition_data["calories_burned"],
         goal=goal_data["goal_type"]
     )
+
+
+class WeightRecord(BaseModel):
+  date: datetime
+  weight:float
+
+class ExerciseRecord(BaseModel):
+  date: datetime
+  exerciseName: str
+  exerciseTime: int
+  calories_burned: Optional[float] = None
+
+class UserHealthData(BaseModel):
+  user_id: int
+  goal_weight: Optional[float] = None
+  weight_history: List[WeightRecord] = []
+  exercise_history: List[ExerciseRecord] = []

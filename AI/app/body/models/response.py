@@ -8,3 +8,9 @@ class ChatMessage(BaseModel):
 
 class ChatHistoryResponse(BaseModel):
     history: list[ChatMessage]
+
+
+class CalorieResponse(BaseModel):
+    success: bool
+    message: str
+    to_burn_calories: float
