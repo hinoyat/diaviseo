@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     db_host: str
     db_port: str
     mongo_db_name: str
+    mongo_db_collection_name: str
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
