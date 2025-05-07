@@ -1,6 +1,6 @@
 package com.s206.health.elastic.service;
 
-import com.s206.health.elastic.entity.Food;
+import com.s206.health.elastic.document.ElasticFood;
 import com.s206.health.elastic.repository.ElasticRepository;
 import com.s206.health.nutrition.food.repository.FoodRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,18 +20,18 @@ public class ElasticsearchService {
     private final FoodRepository foodRepository; // MySQL 음식 레포지토리
 
     // 음식 저장
-    public Food save(Food food) {
+    public ElasticFood save(ElasticFood food) {
         return elasticRepository.save(food);
     }
 
     // 이름으로 음식 검색
-    public List<Food> searchByName(String name) {
+    public List<ElasticFood> searchByName(String name) {
         return elasticRepository.findByNameContaining(name);
     }
 
     // 모든 음식 조회
-    public List<Food> findAll() {
-        Iterable<Food> foods = elasticRepository.findAll();
+    public List<ElasticFood> findAll() {
+        Iterable<ElasticFood> foods = elasticRepository.findAll();
         return StreamSupport.stream(foods.spliterator(), false)
                 .collect(Collectors.toList());
     }
@@ -44,12 +44,13 @@ public class ElasticsearchService {
 
         int syncCount = 0;
         for (com.s206.health.nutrition.food.entity.Food mysqlFood : mysqlFoods) {
-            if (mysqlFood.getIsDeleted()) {
+            Boolean isDeleted = mysqlFood.getIsDeleted();
+            if (Boolean.TRUE.equals(isDeleted)) {
                 continue; // 삭제된 데이터는 건너뜀
             }
 
             // Elasticsearch Food 엔티티로 변환
-            Food esFood = Food.builder()
+            ElasticFood esFood = ElasticFood.builder()
                     .id(mysqlFood.getFoodId().toString()) // ID를 MySQL의 foodId로 설정
                     .foodId(mysqlFood.getFoodId())        // foodId 필드 설정
                     .name(mysqlFood.getFoodName())        // 음식 이름 설정

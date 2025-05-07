@@ -1,4 +1,4 @@
-package com.s206.health.elastic.entity;
+package com.s206.health.elastic.document;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
@@ -13,7 +13,7 @@ import org.springframework.data.elasticsearch.annotations.Setting;
 @Builder
 @Document(indexName = "food") // Elasticsearch 인덱스 이름 지정
 @Setting(settingPath = "elastic-settings.json")
-public class Food {
+public class ElasticFood {
 
     @Id // Elasticsearch 문서 ID
     private String id;
