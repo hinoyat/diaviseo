@@ -20,7 +20,9 @@ public interface MealRepository extends JpaRepository<Meal, Integer> {
             "COALESCE(SUM(f.calorie * mf.quantity), 0), " +
             "COALESCE(SUM(f.carbohydrate * mf.quantity), 0), " +
             "COALESCE(SUM(f.protein * mf.quantity), 0), " +
-            "COALESCE(SUM(f.fat * mf.quantity), 0) " +
+            "COALESCE(SUM(f.fat * mf.quantity), 0), " +
+            "COALESCE(SUM(f.sweet * mf.quantity), 0), " +
+            "COALESCE(SUM(f.sodium * mf.quantity), 0) " +
             "FROM Meal m JOIN m.mealTimes mt JOIN mt.mealFoods mf JOIN mf.food f " +
             "WHERE m.userId = :userId AND m.mealDate = :date " +
             "AND m.isDeleted = false AND mt.isDeleted = false")
@@ -30,7 +32,9 @@ public interface MealRepository extends JpaRepository<Meal, Integer> {
             "SUM(f.calorie * mf.quantity) as totalCalorie, " +
             "SUM(f.carbohydrate * mf.quantity) as totalCarbohydrate, " +
             "SUM(f.protein * mf.quantity) as totalProtein, " +
-            "SUM(f.fat * mf.quantity) as totalFat " +
+            "SUM(f.fat * mf.quantity) as totalFat, " +
+            "SUM(f.sweet * mf.quantity) as totalSugar, " +
+            "SUM(f.sodium * mf.quantity) as totalSodium " +
             "FROM Meal m JOIN m.mealTimes mt JOIN mt.mealFoods mf JOIN mf.food f " +
             "WHERE m.userId = :userId AND m.mealDate BETWEEN :startDate AND :endDate " +
             "AND m.isDeleted = false AND mt.isDeleted = false " +
