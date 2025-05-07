@@ -15,9 +15,11 @@ import com.s206.health.exercise.repository.ExerciseCategoryRepository;
 import com.s206.health.exercise.repository.ExerciseRepository;
 import com.s206.health.exercise.repository.ExerciseTypeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +91,11 @@ public class ExerciseService {
     // 운동 기록 생성
     @Transactional
     public ExerciseListResponse createExercise(Integer userId, ExerciseCreateRequest request) {
-        // Request에 있는 userId 무시하고 경로 변수의 userId 사용
+        // 날짜가 null 인 경우 현재 시간으로 설정
+        LocalDateTime exerciseDate = request.getExerciseDate();
+        if (exerciseDate == null) {
+            exerciseDate = LocalDateTime.now();
+        }
 
         // 1. 운동 종류 존재 여부 확인
         ExerciseType exerciseType = exerciseTypeRepository.findById(request.getExerciseTypeId())
@@ -106,7 +112,7 @@ public class ExerciseService {
         Exercise exercise = Exercise.builder()
                 .userId(userId)  // 경로 변수의 userId 사용
                 .exerciseTypeId(request.getExerciseTypeId())
-                .exerciseDate(request.getExerciseDate())
+                .exerciseDate(exerciseDate)
                 .exerciseTime(request.getExerciseTime())
                 .exerciseCalorie(totalCalorie)
                 .createdAt(LocalDateTime.now())
