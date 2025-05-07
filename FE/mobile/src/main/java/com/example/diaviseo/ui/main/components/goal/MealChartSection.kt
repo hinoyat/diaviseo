@@ -1,10 +1,8 @@
 package com.example.diaviseo.ui.main.components.goal
 
-import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -12,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.diaviseo.ui.theme.DiaViseoColors
 import com.example.diaviseo.ui.theme.medium12
 import com.example.diaviseo.ui.theme.medium14
@@ -39,7 +36,7 @@ fun MealChartSection() {
                     style = semibold16,
                     color = DiaViseoColors.Basic
                 )
-                }
+            }
             Box(
                 modifier = Modifier
                     .fillMaxWidth(),

@@ -40,12 +40,13 @@ import androidx.activity.compose.setContent
 import androidx.work.*
 import com.example.diaviseo.ui.theme.DiaViseoTheme
 import com.example.diaviseo.worker.StepResetWorker
+import kotlinx.coroutines.CoroutineScope   // 테스트용 지우지 말기
+import kotlinx.coroutines.Dispatchers   // 테스트용 지우지 말기
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.concurrent.TimeUnit
 
-import com.example.diaviseo.ui.register.bodyregister.BodyDataRegisterScreen
 
 class MainActivity : ComponentActivity() {
     val testViewModel = TestViewModel()

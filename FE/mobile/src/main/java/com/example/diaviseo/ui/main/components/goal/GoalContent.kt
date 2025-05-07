@@ -58,14 +58,36 @@ fun GoalContent(
                 MealChartSection()
                 Spacer(modifier = Modifier.height(24.dp))
 
-                MealBanner(
+                Banner(
                     isToday = isToday,
+                    type = GoalBannerType.MEAL,
                     onClick = { /* 상세화면 이동 예정 */ }
                 )
             }
 
             "운동" -> {
-                // TODO: 운동 리포트 컴포넌트 연결 예정
+                GoalExerciseSection(isToday = isToday)
+
+                LineChartSection()
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = "난 얼마나 걸었을까?",
+                    style = semibold16,
+                    color = DiaViseoColors.Basic
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+
+                StepBarChart()
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Banner(
+                    isToday = isToday,
+                    type = GoalBannerType.EXERCISE,
+                    onClick = {
+                        // TODO: 해당 날짜의 운동 상세 화면으로 이동
+                    }
+                )
             }
 
             "체중" -> {
