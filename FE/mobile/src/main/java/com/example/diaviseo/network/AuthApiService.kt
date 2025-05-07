@@ -15,15 +15,25 @@ data class TestLoginRequest(
     val provider: String
 )
 
+data class PhoneAuthTryRequest(
+    val phone: String,
+)
+
+data class PhoneAuthConfirmRequest(
+    val phone: String,
+    val code: String
+)
+
 // 서버 응답받을 데이터
-data class GoogleLoginResponse(
+// 그 중에서도 공통 데이터
+data class ApiResponse<T>(
     val timestamp: String,
     val status: String,
     val message: String,
-    val data: GoogleLoginResponseData?
+    val data: T?
 )
 
-data class GoogleLoginResponseData(
+data class GoogleLoginResponse(
     val accessToken: String?,
     val refreshToken: String?,
     val newUser: Boolean
@@ -34,10 +44,20 @@ interface AuthApiService {
     @POST("auth/oauth/login")
     suspend fun loginWithGoogle(
         @Body request: GoogleLoginRequest
-    ): Response<GoogleLoginResponse>
+    ): ApiResponse<GoogleLoginResponse>
 
     @POST("auth/test/login")
     suspend fun loginWithTest(
         @Body request: TestLoginRequest
-    ): Response<GoogleLoginResponse>
+    ): ApiResponse<GoogleLoginResponse>
+
+    @POST("users/verify/phone")
+    suspend fun phoneAuthTry(
+        @Body request: PhoneAuthTryRequest
+    ): ApiResponse<Unit>   // data에 null 올 거 알고 있음
+
+    @POST("users/verify/phone/confirm")
+    suspend fun phoneAuthConfirm(
+        @Body request: PhoneAuthConfirmRequest
+    ): ApiResponse<Unit>   // data에 null 올 거 알고 있음
 }
