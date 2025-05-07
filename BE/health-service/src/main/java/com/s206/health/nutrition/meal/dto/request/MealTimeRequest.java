@@ -5,14 +5,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.time.LocalTime;
 import java.util.List;
 
 @Getter
 @ToString
 @Builder
 public class MealTimeRequest {
-
     private MealType mealType;
-
+    private LocalTime eatingTime;
     private List<MealFoodRequest> foods;
 }
