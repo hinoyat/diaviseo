@@ -17,7 +17,14 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
+import com.example.diaviseo.network.PhoneAuthConfirmRequest
+import com.example.diaviseo.network.PhoneAuthTryRequest
 import com.example.diaviseo.network.TestLoginRequest
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import org.json.JSONObject
+import retrofit2.HttpException
+import java.io.IOException
 
 
 class AuthViewModel : ViewModel() {
@@ -39,6 +46,12 @@ class AuthViewModel : ViewModel() {
     private val _phone = MutableStateFlow("01012345678")
     val phone: StateFlow<String> = _phone
 
+    private val _authCode = MutableStateFlow("")
+    val authCode: StateFlow<String> = _authCode
+
+    private val _isPhoneAuth = MutableStateFlow(false)
+    val isPhoneAuth: StateFlow<Boolean> = _isPhoneAuth
+
     private val _height = MutableStateFlow("")
     val height: StateFlow<String> = _height
 
@@ -57,7 +70,10 @@ class AuthViewModel : ViewModel() {
     private val _isAuthenticated = MutableStateFlow(true)
     val isAuthenticated: StateFlow<Boolean> = _isAuthenticated
 
-    
+    private val _toastMessage = MutableSharedFlow<String>()
+    val toastMessage: SharedFlow<String> = _toastMessage
+
+
     fun setEmail(email: String) {
         _email.value = email
     }
@@ -70,9 +86,14 @@ class AuthViewModel : ViewModel() {
         _phone.value = phone
     }
 
+    fun setauthCode(authCode: String) {
+        _authCode.value = authCode
+    }
+
     fun setProvider(provider: String) {
         _provider.value = provider
     }
+
     fun setGender(gender: String) {
         _gender.value = gender
     }
@@ -104,38 +125,110 @@ class AuthViewModel : ViewModel() {
         viewModelScope.launch {
             isLoading = true  // 💡 스피너 ON
 
-            // 진짜 구글 로그인일 경우
-//            val request = GoogleLoginRequest("google", idToken)
-//            val response = RetrofitInstance.authApiService.loginWithGoogle(request)
+            try {
+                // 진짜 구글 로그인일 경우
+                val request = GoogleLoginRequest("google", idToken)
+                val response = RetrofitInstance.authApiService.loginWithGoogle(request)
 
-            // 테스트 경우
-            val request = TestLoginRequest("s12c1s206@gmail.com", "google")
-            val response = RetrofitInstance.authApiService.loginWithTest(request)
+                // 테스트 경우
+    //            val request = TestLoginRequest("s12c1s206@gmail.com", "google")
+    //            val response = RetrofitInstance.authApiService.loginWithTest(request)
 
-            if (response.isSuccessful) {
-                val body = response.body()
-                val isNewUser = body?.data?.newUser ?: true
+                val isNewUser = response.data?.newUser ?: true
                 val context = activity.applicationContext
                 onResult(true, isNewUser)
 
-//                TokenDataStore.saveAccessToken(context, body?.data?.accessToken?:"")
-//                TokenDataStore.saveRefreshToken(context, body?.data?.refreshToken?:"") // 선택적 저장
-                TokenDataStore.saveAccessToken(context, "1234")
-                TokenDataStore.saveRefreshToken(context, "1234")
+                // 기존 회원이면 토큰 넣을테고 아니면 안 넣을테고
+                TokenDataStore.saveAccessToken(context, response.data?.accessToken ?: "")
+                TokenDataStore.saveRefreshToken(context, response.data?.refreshToken ?: "") // 선택적 저장
+//                TokenDataStore.saveAccessToken(context, "1234")
+//                TokenDataStore.saveRefreshToken(context, "1234")
 
                 // 메인스레드에서 Toast 띄우 기
 //                  withContext(Dispatchers.Main) {
 //                      Toast.makeText(activity, "환영합니다, ${body.userId}님!", Toast.LENGTH_SHORT).show()
 //                  }
-
-            } else {
+            } catch (e: HttpException) {
+                // HTTP 오류 코드(4xx,5xx) 처리
                 onResult(false, false)
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(activity, "로그인 실패: ${response.code()}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(activity, "로그인 실패: ${e}", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            } catch (e: IOException) {
+                // 네트워크 오류 처리
+                onResult(false, false)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(activity, "로그인 실패: ${e}", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
 
-            isLoading = false // 💡 스피너 OFF
+            isLoading = false // 스피너 OFF
+        }
+    }
+
+    fun phoneAuthTry(onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                val request = PhoneAuthTryRequest(phone.value)
+                val response = RetrofitInstance.authApiService.phoneAuthTry(request)
+
+                val msg = response.message
+                // 메시지를 흘려보냄
+                _toastMessage.emit(msg)
+
+                // HTTP 응답 자체가 “성공”이라면
+                onSuccess()
+            } catch (e: HttpException) {
+                // HTTP 에러 코드 + 바디 파싱
+                val errorJson = e.response()?.errorBody()?.string()
+                val errorMsg = errorJson?.let {
+                    runCatching {
+                        JSONObject(it).optString("message")
+                            .takeIf { msg -> msg.isNotBlank() }
+                            ?: "인증 요청에 실패했습니다 (HTTP ${e.code()})"
+                    }.getOrDefault("인증 요청에 실패했습니다 (HTTP ${e.code()})")
+                } ?: "인증 요청에 실패했습니다 (HTTP ${e.code()})"
+                _toastMessage.emit(errorMsg)
+            } catch (e: IOException) {
+                // 네트워크 오류 등
+                _toastMessage.emit("네트워크 오류가 발생했습니다: ${e.message}")
+            } catch (e: Exception) {
+                // 그 외 예외
+                _toastMessage.emit("알 수 없는 오류가 발생했습니다: ${e.message}")
+            }
+        }
+    }
+
+    fun phoneAuthConfirm() {
+        viewModelScope.launch {
+            try {
+                val request = PhoneAuthConfirmRequest(phone.value, authCode.value)
+                val response = RetrofitInstance.authApiService.phoneAuthConfirm(request)
+
+                val msg = response.message
+                // 메시지를 흘려보냄
+                _toastMessage.emit(msg)
+                _isPhoneAuth.value = true
+            } catch (e: HttpException) {
+                // HTTP 에러 코드 + 바디 파싱
+                val errorJson = e.response()?.errorBody()?.string()
+                val errorMsg = errorJson?.let {
+                    runCatching {
+                        JSONObject(it).optString("message")
+                            .takeIf { msg -> msg.isNotBlank() }
+                            ?: "인증 요청에 실패했습니다 (HTTP ${e.code()})"
+                    }.getOrDefault("인증 요청에 실패했습니다 (HTTP ${e.code()})")
+                } ?: "인증 요청에 실패했습니다 (HTTP ${e.code()})"
+                _toastMessage.emit(errorMsg)
+            } catch (e: IOException) {
+                // 네트워크 오류 등
+                _toastMessage.emit("네트워크 오류가 발생했습니다: ${e.message}")
+            } catch (e: Exception) {
+                // 그 외 예외
+                _toastMessage.emit("알 수 없는 오류가 발생했습니다: ${e.message}")
+            }
         }
     }
 }

@@ -1,6 +1,8 @@
 package com.example.diaviseo.ui.signup
 
+import android.app.Activity
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,6 +31,7 @@ import com.example.diaviseo.ui.components.BottomButtonSection
 import com.example.diaviseo.ui.theme.DiaViseoColors
 import kotlinx.coroutines.delay
 import com.example.diaviseo.viewmodel.AuthViewModel
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun PhoneAuthScreen(navController: NavController, viewModel: AuthViewModel) {
@@ -43,6 +46,9 @@ fun PhoneAuthScreen(navController: NavController, viewModel: AuthViewModel) {
     var allChecked by remember { mutableStateOf(false) } // 전체 약관 동의 여부
     var showTermsDetail by remember { mutableStateOf(true) } // 하위 약관 보기 여부
     var requestClicked by remember { mutableStateOf(false) } // 요청 버튼 눌렀는지 여부
+
+    val context = LocalContext.current
+    val isPhoneAuth by viewModel.isPhoneAuth.collectAsState()
 
     // --- 약관 리스트 ---
     val termList = listOf(
@@ -69,6 +75,14 @@ fun PhoneAuthScreen(navController: NavController, viewModel: AuthViewModel) {
     LaunchedEffect(timer){
         if (timer == 0) {
             timerStarted = false
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.toastMessage.collect { message ->
+            Toast
+                .makeText(context, message, Toast.LENGTH_LONG)
+                .show()
         }
     }
 
@@ -242,10 +256,13 @@ fun PhoneAuthScreen(navController: NavController, viewModel: AuthViewModel) {
 
                             TextButton(
                                 onClick = {
-                                    // 요청 로직
-                                    timerStarted = true
-                                    timer = 180
-                                    requestClicked = true
+                                    viewModel.setPhone(carrier + phoneNumber)
+                                    viewModel.phoneAuthTry{
+                                        // onSuccess로 넘어와야 여기 요청 로직 시작
+                                        timerStarted = true
+                                        timer = 180
+                                        requestClicked = true
+                                    }
                                 },
                                 enabled = buttonEnabled,    // 8자리 아니면 비활성
                                 contentPadding = PaddingValues(0.dp),
@@ -309,7 +326,10 @@ fun PhoneAuthScreen(navController: NavController, viewModel: AuthViewModel) {
                     val isConfirmEnabled = authCode.isNotBlank() && requestClicked
 
                     Button(
-                        onClick = {/*예정*/},
+                        onClick = {
+                            viewModel.setauthCode(authCode)
+                            viewModel.phoneAuthConfirm()
+                        },
                         enabled = isConfirmEnabled,
                         modifier = Modifier
                             .height(56.dp), // TextField와 동일 높이
@@ -329,7 +349,7 @@ fun PhoneAuthScreen(navController: NavController, viewModel: AuthViewModel) {
 
             BottomButtonSection(
                 text = "다음",
-                enabled = false,
+                enabled = isPhoneAuth,
                 onClick = { navController.navigate("onboarding/name")
                 }
             )
