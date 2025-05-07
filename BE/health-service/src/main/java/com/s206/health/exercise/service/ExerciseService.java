@@ -91,7 +91,11 @@ public class ExerciseService {
     // 운동 기록 생성
     @Transactional
     public ExerciseListResponse createExercise(Integer userId, ExerciseCreateRequest request) {
-        LocalDateTime exerciseDate = LocalDateTime.now();
+        // 날짜가 null 인 경우 현재 시간으로 설정
+        LocalDateTime exerciseDate = request.getExerciseDate();
+        if (exerciseDate == null) {
+            exerciseDate = LocalDateTime.now();
+        }
 
         // 1. 운동 종류 존재 여부 확인
         ExerciseType exerciseType = exerciseTypeRepository.findById(request.getExerciseTypeId())
