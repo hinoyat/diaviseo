@@ -93,6 +93,12 @@ public class GlobalExceptionHandler {
     // =========================================================================
     // 500, 502 서버 오류
     // =========================================================================
+    // 500 Internal Server Error - 일반 서버 오류
+    @ExceptionHandler(InternalServerErrorException.class)
+    public ResponseEntity<ResponseDto<Void>> handleInternalServerError(InternalServerErrorException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ResponseDto.error(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage()));
+    }
 
     // 500 Internal Server Error - AI 호출 실패
     @ExceptionHandler(AiCallFailedException.class)

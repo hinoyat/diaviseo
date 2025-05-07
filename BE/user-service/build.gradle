@@ -54,6 +54,12 @@ dependencies {
 	// Prometheus 메트릭 수집을 위한 의존성
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'io.micrometer:micrometer-registry-prometheus'
+
+	// redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	// coolsms
+	implementation 'net.nurigo:sdk:4.3.0'
 }
 
 dependencyManagement {
