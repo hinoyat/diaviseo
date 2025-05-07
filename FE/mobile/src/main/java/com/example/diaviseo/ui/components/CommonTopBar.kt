@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 @Composable
 fun CommonTopBar(
     title: String? = null,
+    onLeftActionClick: (() -> Unit)? = null,
     onRightActionClick: (() -> Unit)? = null
 ) {
     val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
@@ -37,11 +38,29 @@ fun CommonTopBar(
             .padding(top = statusBarPadding)
             .height(56.dp)
     ) {
+        // ← 버튼: 왼쪽 끝에 정렬
+        onLeftActionClick?.let {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .offset(x = (-8).dp)
+                    .size(48.dp)
+                    .clickable { it() },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.back), // ← 이 아이콘 필요!
+                    contentDescription = "뒤로가기",
+                    tint = Color.Black,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
         // 중앙 타이틀
         title?.let {
             Text(
                 text = it,
-                fontSize = 22.sp,
+                fontSize = 20.sp,
                 modifier = Modifier.align(Alignment.Center),
                 color = Color.Black
             )
