@@ -78,6 +78,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.3.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")   // 코루틴
+    implementation("io.coil-kt:coil-compose:2.4.0")
 
     implementation("androidx.datastore:datastore-preferences:1.1.0")    // datastore
     implementation("androidx.work:work-runtime-ktx:2.8.1")    // WorkManager
@@ -92,6 +93,7 @@ dependencies {
 
     implementation("com.patrykandpatrick.vico:compose:1.13.1")
     implementation("com.patrykandpatrick.vico:core:1.13.1")
+    implementation("com.patrykandpatrick.vico:compose-m3:1.13.1")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

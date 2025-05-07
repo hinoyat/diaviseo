@@ -14,17 +14,26 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.diaviseo.R
 import com.example.diaviseo.ui.theme.DiaViseoColors
 import com.example.diaviseo.ui.theme.bold18
 import com.example.diaviseo.ui.theme.medium12
 
 @Composable
-fun MealBanner(
+fun Banner(
     isToday: Boolean,
+    type: GoalBannerType,
     onClick: () -> Unit
 ) {
+    val text = when (type) {
+        GoalBannerType.MEAL -> if (isToday) "오늘 식단\n상세 보러가기" else "이 날의 식단\n상세 보러가기"
+        GoalBannerType.EXERCISE -> if (isToday) "오늘 운동\n상세 보러가기" else "이 날의 운동\n상세 보러가기"
+    }
+
+    val imageRes = when (type) {
+        GoalBannerType.MEAL -> com.example.diaviseo.R.drawable.dash_meal
+        GoalBannerType.EXERCISE -> com.example.diaviseo.R.drawable.dash_exercise
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -34,7 +43,7 @@ fun MealBanner(
     ) {
         // 배경 이미지
         Image(
-            painter = painterResource(id = R.drawable.dash_meal),
+            painter = painterResource(id = imageRes),
             contentDescription = "dash background",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
@@ -42,7 +51,7 @@ fun MealBanner(
 
         // 1) 텍스트: 좌측 세로 중앙
         Text(
-            text = if (isToday) "오늘 식단\n상세 보러가기" else "이 날의 식단\n상세 보러가기",
+            text = text,
             style = bold18,
             color = Color.White,
             modifier = Modifier
@@ -66,4 +75,9 @@ fun MealBanner(
             )
         }
     }
+}
+
+enum class GoalBannerType {
+    MEAL,
+    EXERCISE
 }
