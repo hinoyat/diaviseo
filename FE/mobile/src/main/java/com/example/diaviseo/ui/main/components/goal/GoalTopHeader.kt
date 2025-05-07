@@ -1,35 +1,37 @@
 package com.example.diaviseo.ui.main.components.goal
 
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.*
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.diaviseo.R
 import com.example.diaviseo.ui.theme.DiaViseoColors
 import com.example.diaviseo.ui.theme.*
+import com.example.diaviseo.viewmodel.GoalViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.*
+import androidx.compose.runtime.getValue
 
 @Composable
 fun GoalTopHeader(
     currentDate: LocalDate,
     selectedTab: String,
-    onTabChange: (String) -> Unit
+    onTabChange: (String) -> Unit,
+    viewModel: GoalViewModel = viewModel()
 ) {
-    val day = currentDate.dayOfMonth.toString()
+    val selectedDate by viewModel.selectedDate.collectAsState()
+    val day = selectedDate.dayOfMonth.toString()
     val dayOfWeek = currentDate.dayOfWeek
     val isToday = currentDate == LocalDate.now()
 
@@ -88,7 +90,7 @@ fun GoalTopHeader(
                 contentDescription = "달력",
                 modifier = Modifier
                     .size(32.dp)
-                    .clickable { /* TODO: 달력 모달 */ }
+                    .clickable { viewModel.setShowDatePicker() }
             )
         }
 
