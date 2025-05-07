@@ -24,12 +24,16 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.ui.text.font.FontWeight
 import com.example.diaviseo.viewmodel.AuthViewModel
 import com.example.diaviseo.ui.components.BottomButtonSection
- import com.example.diaviseo.ui.components.onboarding.StepProgressBar
+import com.example.diaviseo.ui.components.onboarding.StepProgressBar
+import androidx.activity.compose.BackHandler
 
 @Composable
 fun NameInputScreen(
     navController: NavController, viewModel: AuthViewModel
 ) {
+    // 백버튼 눌러도 아무 동작 안 하게
+    BackHandler(enabled = true){}
+
     var name by remember { mutableStateOf(viewModel.name.value) }
 
     Box(modifier = Modifier.fillMaxSize()) {
