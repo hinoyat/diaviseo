@@ -61,9 +61,16 @@ fun FabOverlayMenu(
                                     when (index) {
                                         0 -> {
                                             onDismiss()
-                                            navController.navigate("body_register") // ✅ 이동
+                                            navController.navigate("body_register") // 체성분 등록
                                         }
-                                        // TODO: 1, 2는 이후 구현
+                                        1 -> {
+                                            onDismiss()
+                                            navController.navigate("diet_register") // 식단 등록
+                                        }
+                                        2 -> {
+                                            onDismiss()
+                                            navController.navigate("exercise_register") // 운동 등록
+                                        }
                                     }
                                 }
                         )
