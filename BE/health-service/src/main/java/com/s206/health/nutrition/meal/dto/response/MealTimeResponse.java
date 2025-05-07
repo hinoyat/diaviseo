@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,8 @@ public class MealTimeResponse {
 
     private MealType mealType;
 
+    private LocalTime eatingTime;
+
     private List<MealFoodResponse> foods;
 
     private LocalDateTime createdAt;
@@ -27,6 +30,7 @@ public class MealTimeResponse {
         return MealTimeResponse.builder()
                 .mealTimeId(mealTime.getMealTimeId())
                 .mealType(mealTime.getMealType())
+                .eatingTime(mealTime.getEatingTime())
                 .foods(mealTime.getMealFoods().stream()
                         .map(MealFoodResponse::toDto)
                         .collect(Collectors.toList()))
