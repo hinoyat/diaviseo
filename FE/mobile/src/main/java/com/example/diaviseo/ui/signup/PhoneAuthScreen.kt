@@ -242,7 +242,6 @@ fun PhoneAuthScreen(navController: NavController, viewModel: AuthViewModel) {
                     OutlinedTextField(
                         value = phoneNumber,
                         onValueChange = {
-                            Log.d("PhoneNumberInput", "phoneNumber changed to: $carrier $it")
                             phoneNumber = it },
                         modifier = Modifier.weight(2f),
                         singleLine = true,
