@@ -24,6 +24,21 @@ data class PhoneAuthConfirmRequest(
     val code: String
 )
 
+data class SignUpWithDiaRequest(
+    private val name: String,
+    private val nickname: String,
+    private val gender: String,
+    private val goal: String,
+    private val birthday: String,
+    private val height: Float,
+    private val weight: Float,
+    private val phone: String,
+    private val email: String,
+    private val provider: String,
+    private val consentPersonal: Boolean,
+    private val locationPersonal: Boolean,
+)
+
 // 서버 응답받을 데이터
 // 그 중에서도 공통 데이터
 data class ApiResponse<T>(
@@ -37,6 +52,26 @@ data class GoogleLoginResponse(
     val accessToken: String?,
     val refreshToken: String?,
     val newUser: Boolean
+)
+
+data class SignUpWithDiaResponse(
+    private val name: String,
+    private val nickname: String,
+    private val gender: String,
+    private val goal: String,
+    private val birthday: String,
+    private val height: Float,
+    private val weight: Float,
+    private val phone: String,
+    private val email: String,
+    private val provider: String,
+    private val consentPersonal: Boolean,
+    private val locationPersonal: Boolean,
+    private val createdAt: String,
+    private val updatedAt: String,
+    private val deletedAt: String?,
+    private val isDeleted: Boolean,
+    private val notificationEnabled: Boolean
 )
 
 interface AuthApiService {
@@ -60,4 +95,9 @@ interface AuthApiService {
     suspend fun phoneAuthConfirm(
         @Body request: PhoneAuthConfirmRequest
     ): ApiResponse<Unit>   // data에 null 올 거 알고 있음
+
+    @POST("users/signup")
+    suspend fun signUpWithDia(
+        @Body request: SignUpWithDiaRequest
+    ): ApiResponse<SignUpWithDiaResponse>
 }

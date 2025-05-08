@@ -1,16 +1,16 @@
 package com.example.diaviseo.viewmodel
 
 import android.app.Activity
+import android.app.Application
 import android.util.Log
 import android.widget.Toast
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import com.example.diaviseo.datastore.TokenDataStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 
-//채현 추가
 import com.example.diaviseo.network.GoogleLoginRequest
 import com.example.diaviseo.network.RetrofitInstance
 import androidx.compose.runtime.mutableStateOf
@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import com.example.diaviseo.network.PhoneAuthConfirmRequest
 import com.example.diaviseo.network.PhoneAuthTryRequest
+import com.example.diaviseo.network.SignUpWithDiaRequest
 import com.example.diaviseo.network.TestLoginRequest
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -27,13 +28,15 @@ import org.json.JSONObject
 import retrofit2.HttpException
 import java.io.IOException
 
-
-class AuthViewModel : ViewModel() {
+class AuthViewModel (application: Application) : AndroidViewModel(application) {
     private val _email = MutableStateFlow("")
     val email: StateFlow<String> = _email
 
     private val _name = MutableStateFlow("")
     val name: StateFlow<String> = _name
+
+    private val _idToken = MutableStateFlow("")
+    val idToken: StateFlow<String> = _idToken
 
     private val _nickname = MutableStateFlow("")
     val nickname: StateFlow<String> = _nickname
@@ -84,6 +87,10 @@ class AuthViewModel : ViewModel() {
 
     fun setName(name: String) {
         _name.value = name
+    }
+
+    fun setIdToken(idToken: String) {
+        _idToken.value = idToken
     }
 
     fun setNickname(nickname: String) {
@@ -263,6 +270,57 @@ class AuthViewModel : ViewModel() {
             Log.d("authviewmodel all state", "height : ${_height.value}")
             Log.d("authviewmodel all state", "weight : ${_weight.value}")
             Log.d("authviewmodel all state", "goal : ${_goal.value}")
+        }
+    }
+
+    fun signUpWithDia (tempGoal: String) {
+        viewModelScope.launch {
+            val context = getApplication<Application>().applicationContext
+
+            try {
+                val request = SignUpWithDiaRequest(
+                    name.value,
+                    nickname.value,
+                    gender.value,
+                    tempGoal,
+                    birthday.value,
+                    height.value.toFloat(),
+                    weight.value.toFloat(),
+                    phone.value,
+                    email.value,
+                    provider.value,
+                    true,
+                    true
+                )
+                val response = RetrofitInstance.authApiService.signUpWithDia(request)
+
+                if (response.status == "CREATED"){
+                    val requestGoogle = GoogleLoginRequest("google", idToken.value)
+                    val responseGoogle = RetrofitInstance.authApiService.loginWithGoogle(requestGoogle)
+
+                    TokenDataStore.saveAccessToken(context, responseGoogle.data?.accessToken ?: "")
+                    TokenDataStore.saveRefreshToken(context, responseGoogle.data?.refreshToken ?: "")
+                    _idToken.value = ""   // 성공하면 구글 idtoken 삭제
+                }
+
+            } catch (e: HttpException) {
+                // HTTP 에러 코드 + 바디 파싱
+                val errorJson = e.response()?.errorBody()?.string()
+                val errorMsg = errorJson?.let {
+                    runCatching {
+                        JSONObject(it).optString("message")
+                            .takeIf { msg -> msg.isNotBlank() }
+                            ?: "인증 요청에 실패했습니다 (HTTP ${e.code()})"
+                    }.getOrDefault("인증 요청에 실패했습니다 (HTTP ${e.code()})")
+                } ?: "인증 요청에 실패했습니다 (HTTP ${e.code()})"
+                _toastMessage.emit(errorMsg)
+            } catch (e: IOException) {
+                // 네트워크 오류 등
+                _toastMessage.emit("네트워크 오류가 발생했습니다: ${e.message}")
+            } catch (e: Exception) {
+                // 그 외 예외
+                _toastMessage.emit("알 수 없는 오류가 발생했습니다: ${e.message}")
+            }
         }
     }
 }

@@ -124,6 +124,7 @@ fun GoalSelectScreen(
 //                    goalViewModel.setGoal(tempGoal)
                     authViewModel.setGoal(tempGoal)
                     navController.navigate("onboarding/finalguide")
+                    authViewModel.signUpWithDia(tempGoal)
                 }
             )
         }
