@@ -18,6 +18,7 @@ fun GoalScreen(navController: NavHostController) {
     val goalViewModel: GoalViewModel = viewModel()
 
     val showDatePicker by goalViewModel.showDatePicker.collectAsState()
+    val selectedDate by goalViewModel.selectedDate.collectAsState()
     LoadingOverlay(isVisible = goalViewModel.isLoading.collectAsState().value)
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -30,13 +31,13 @@ fun GoalScreen(navController: NavHostController) {
             )
             GoalContent(
                 selectedTab = selectedTab.value,
-                today = today
+                navController = navController
             )
         }
         // 날짜 선택 모달
         DiaDatePickerDialog(
             isVisible = showDatePicker,
-            initialDate = today,
+            initialDate = selectedDate,
             onDismiss = { goalViewModel.setShowDatePicker() },
             onConfirm = {
                 goalViewModel.loadDataForDate(it)
