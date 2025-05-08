@@ -15,20 +15,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.diaviseo.R
+import com.example.diaviseo.ui.components.CommonTopBar
 import com.example.diaviseo.ui.mypageedit.bottomsheet.EditBirthDateBottomSheet
 import com.example.diaviseo.ui.mypageedit.bottomsheet.EditNicknameBottomSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserProfileEditScreen() {
+fun UserProfileEditScreen(navController: NavHostController) {
     val nicknameSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val birthDateSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     var showNicknameSheet by remember { mutableStateOf(false) }
     var showBirthDateSheet by remember { mutableStateOf(false) }
 
-    // 닉네임 수정 BottomSheet
+    // 닉네임 BottomSheet
     if (showNicknameSheet) {
         ModalBottomSheet(
             onDismissRequest = { showNicknameSheet = false },
@@ -37,7 +40,6 @@ fun UserProfileEditScreen() {
             EditNicknameBottomSheet(
                 initialNickname = "디아25",
                 onSave = {
-                    // TODO: 저장 처리
                     showNicknameSheet = false
                 },
                 onDismiss = { showNicknameSheet = false }
@@ -45,7 +47,7 @@ fun UserProfileEditScreen() {
         }
     }
 
-    // 생일 수정 BottomSheet
+    // 생년월일 BottomSheet
     if (showBirthDateSheet) {
         ModalBottomSheet(
             onDismissRequest = { showBirthDateSheet = false },
@@ -54,7 +56,6 @@ fun UserProfileEditScreen() {
             EditBirthDateBottomSheet(
                 initialBirthDate = "2000.02.14",
                 onSave = {
-                    // TODO: 저장 처리
                     showBirthDateSheet = false
                 },
                 onDismiss = { showBirthDateSheet = false }
@@ -62,66 +63,75 @@ fun UserProfileEditScreen() {
         }
     }
 
-    // 본문
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Image(
-            painter = painterResource(id = R.drawable.charac_main_nontext),
-            contentDescription = "다이아비서",
-            modifier = Modifier.size(96.dp)
-        )
-
-        Text(
-            text = "다이비서",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(top = 8.dp, bottom = 24.dp)
-        )
-
-        Text(
-            text = "내 정보",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
+    Scaffold(
+        topBar = {
+            CommonTopBar(
+                onLeftActionClick = { navController.popBackStack() }
+            )
+        }
+    ) { innerPadding ->
+        Column(
             modifier = Modifier
-                .align(Alignment.Start)
-                .padding(bottom = 16.dp)
-        )
-
-        ProfileInfoRow(title = "이름", value = "김디아")
-        ProfileInfoRow(title = "성별", value = "여성")
-        ProfileInfoRow(title = "핸드폰 번호", value = "010-1234-5678")
-        ProfileInfoRow(title = "닉네임", value = "디아25", onClick = { showNicknameSheet = true })
-        ProfileInfoRow(title = "생년월일", value = "2000년 2월 14일", onClick = { showBirthDateSheet = true })
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 32.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "회원탈퇴",
-                fontSize = 14.sp,
-                color = Color.Gray,
-                modifier = Modifier.clickable { /* TODO */ }
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Image(
+                painter = painterResource(id = R.drawable.charac_main_nontext),
+                contentDescription = "다이아비서",
+                modifier = Modifier.size(96.dp)
             )
+
             Text(
-                text = "로그아웃",
-                fontSize = 14.sp,
-                color = Color.Gray,
-                modifier = Modifier.clickable { /* TODO */ }
+                text = "다이비서",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(top = 8.dp, bottom = 24.dp)
             )
+
+            Text(
+                text = "내 정보",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(bottom = 16.dp)
+            )
+
+            ProfileInfoRow(title = "이름", value = "김디아")
+            ProfileInfoRow(title = "성별", value = "여성")
+            ProfileInfoRow(title = "핸드폰 번호", value = "010-1234-5678")
+            ProfileInfoRow(title = "닉네임", value = "디아25", onClick = { showNicknameSheet = true })
+            ProfileInfoRow(title = "생년월일", value = "2000년 2월 14일", onClick = { showBirthDateSheet = true })
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 32.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Text(
+                    text = "회원탈퇴",
+                    fontSize = 14.sp,
+                    color = Color.Gray,
+                    modifier = Modifier.clickable { /* TODO */ }
+                )
+                Text(
+                    text = "로그아웃",
+                    fontSize = 14.sp,
+                    color = Color.Gray,
+                    modifier = Modifier.clickable { /* TODO */ }
+                )
+            }
         }
     }
 }
+
 
 @Composable
 fun ProfileInfoRow(title: String, value: String, onClick: (() -> Unit)? = null) {
@@ -146,9 +156,10 @@ fun ProfileInfoRow(title: String, value: String, onClick: (() -> Unit)? = null) 
         }
     }
 }
-
 @Preview(showBackground = true)
 @Composable
 fun UserProfileEditScreenPreview() {
-    UserProfileEditScreen()
+    val navController = rememberNavController()
+    UserProfileEditScreen(navController = navController)
 }
+
