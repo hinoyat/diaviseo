@@ -70,7 +70,8 @@ fun FinalGuideScreen(navController: NavController, goalViewModel: GoalViewModel,
     val genderCode = authViewModel.gender.collectAsState().value
     val heightStr = authViewModel.height.collectAsState().value
     val weightStr = authViewModel.weight.collectAsState().value
-    val goalString = goalViewModel.goal.collectAsState().value
+//    val goalString = goalViewModel.goal.collectAsState().value
+    val goalString = authViewModel.goal.collectAsState().value
 
     val height = heightStr.toFloatOrNull() ?: 160f
     val weight = weightStr.toFloatOrNull() ?: 55f
