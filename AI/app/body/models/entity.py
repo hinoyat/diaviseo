@@ -2,7 +2,9 @@ from pydantic import BaseModel
 from datetime import datetime
 
 from typing import List, Optional
-from sqlalchemy import Column, Integer, String, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Float, Date
+from sqlalchemy.orm import relationship
+
 from app.body.config.body_database import Base
 
 class Body(Base):
@@ -18,8 +20,6 @@ class Body(Base):
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
     deleted_at = Column(DateTime)
-
-
 
 
 class BodyComposition(BaseModel):
@@ -74,3 +74,40 @@ class UserHealthData(BaseModel):
   goal_weight: Optional[float] = None
   weight_history: List[WeightRecord] = []
   exercise_history: List[ExerciseRecord] = []
+
+class Meal(Base):
+    __tablename__ = "meal_tb"
+    meal_id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=False)
+    meal_date = Column(Date, nullable=False)
+    is_meal = Column(Boolean, nullable=False)
+    is_deleted = Column(Boolean, default=False, nullable=False)
+    meal_times = relationship("MealTime", back_populates="meal")
+
+class MealTime(Base):
+    __tablename__ = "meal_time_tb"
+    meal_time_id = Column(Integer, primary_key=True, index=True)
+    meal_id = Column(Integer, ForeignKey("meal_tb.meal_id"), nullable=False)
+    meal_type = Column(String(20), nullable=False)
+    is_deleted = Column(Boolean, default=False, nullable=False)
+    meal = relationship("Meal", back_populates="meal_times")
+    meal_foods = relationship("MealFood", back_populates="meal_time")
+
+class MealFood(Base):
+    __tablename__ = "meal_food_tb"
+    meal_food_id = Column(Integer, primary_key=True, index=True)
+    meal_time_id = Column(Integer, ForeignKey("meal_time_tb.meal_time_id"), nullable=False)
+    food_id = Column(Integer, ForeignKey("food_tb.food_id"), nullable=False)
+    quantity = Column(Integer, nullable=False)
+    food = relationship("Food", back_populates="meal_foods")
+    meal_time = relationship("MealTime", back_populates="meal_foods")
+
+class Food(Base):
+    __tablename__ = "food_tb"
+    food_id = Column(Integer, primary_key=True, index=True)
+    food_name = Column(String(50), nullable=False)
+    calorie = Column(Float)
+    carbohydrate = Column(Float)
+    protein = Column(Float)
+    fat = Column(Float)
+    meal_foods = relationship("MealFood", back_populates="food")
