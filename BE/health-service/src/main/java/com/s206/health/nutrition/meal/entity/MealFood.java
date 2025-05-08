@@ -32,4 +32,14 @@ public class MealFood {
 
     @Column(length = 250)
     private String foodImageUrl;
+
+    // 음식 이미지 URL 업데이트
+    public void updateFoodImageUrl(String foodImageUrl) {
+        this.foodImageUrl = foodImageUrl;
+    }
+
+    // 음식 수량 업데이트
+    public void updateQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
 }
