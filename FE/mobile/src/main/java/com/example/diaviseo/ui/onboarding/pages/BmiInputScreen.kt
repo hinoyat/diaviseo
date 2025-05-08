@@ -1,5 +1,6 @@
 package com.example.diaviseo.ui.onboarding.pages
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -23,12 +24,29 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.TextFieldValue
+import java.time.LocalDate
 
 @Composable
 fun BmiInputScreen(
     navController: NavController, viewModel: AuthViewModel
 ) {
-    val name by viewModel.name.collectAsState()
+    // 뷰 모델 state 테스트
+    LaunchedEffect(Unit) {
+        viewModel.printAllState()
+    }
+
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        viewModel.toastMessage.collect { message ->
+            Toast
+                .makeText(context, message, Toast.LENGTH_SHORT)
+                .show()
+        }
+    }
+
+    val nickname by viewModel.nickname.collectAsState()
 
     val gender by viewModel.gender.collectAsState()
     val birthday by viewModel.birthday.collectAsState()
@@ -82,7 +100,7 @@ fun BmiInputScreen(
                 // 성별
                 Text(
                     text = "아래의 정보를 입력해주시면\n" +
-                            "${name.ifBlank { "회원" }}님의 현재의 BMI를 계산해드릴게요.",
+                            "${nickname.ifBlank { "회원" }}님의 현재의 BMI를 계산해드릴게요.",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color.Black
@@ -98,8 +116,37 @@ fun BmiInputScreen(
                 // 생년월일
                 OutlinedTextField(
                     value = birthday,
-                    onValueChange = { viewModel.setBirthday(it) },
-                    placeholder = { Text("예: 2000-01-01") },
+                    onValueChange = {input ->
+                        // 숫자만 필터링
+                        val numericInput = input.filter { it.isDigit() }.take(8)
+
+                        if (numericInput.length == 8) {
+                            val year = numericInput.substring(0, 4).toInt()
+                            val month = numericInput.substring(4, 6).toInt()
+                            val day = numericInput.substring(6, 8).toInt()
+
+                            val isValidDate = try {
+                                val date = LocalDate.of(year, month, day)
+                                val today = LocalDate.now()
+                                val minDate = today.minusYears(120)
+                                date in minDate..today
+                            } catch (e: Exception) {
+                                false
+                            }
+
+                            if (isValidDate) {
+                                val formatted = "${numericInput.substring(0, 4)}-" +
+                                        "${numericInput.substring(4, 6)}-" +
+                                        "${numericInput.substring(6, 8)}"
+                                viewModel.setBirthday(formatted)
+                            } else {
+                                viewModel.setToastMessage("올바른 날짜 형식이 아닙니다")
+                            }
+                        } else {
+                            viewModel.setBirthday(numericInput)
+                        }
+                    },
+                    placeholder = { Text("예: 20000101") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(),
