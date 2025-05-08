@@ -56,8 +56,7 @@ async def handle_chat(user_id: str, message: str):
     chain = build_chat_chain(user_id)
     response = chain.invoke(prompt)
 
-    return {"response": response["response"]}
-
+    return response["response"]
 
 async def get_langchain_chat_history(user_id: str):
     settings = get_settings()
@@ -81,4 +80,4 @@ async def get_langchain_chat_history(user_id: str):
                                                                            "additional_kwargs") else None
         })
 
-    return {"history": response_history}
+    return response_history
