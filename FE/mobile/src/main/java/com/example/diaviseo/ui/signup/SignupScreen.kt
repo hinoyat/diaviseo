@@ -33,8 +33,9 @@ import kotlinx.coroutines.delay
 // import androidx.compose.foundation.ExperimentalFoundationApi // 필요시 추가
 
 @Composable
-fun SignupScreen(navController: NavController) {
-    val authViewModel: AuthViewModel = viewModel()
+//fun SignupScreen(navController: NavController) {
+//    val authViewModel: AuthViewModel = viewModel()
+fun SignupScreen(navController: NavController, authViewModel: AuthViewModel,) {
     val context = LocalContext.current // Activity Context 필요 시
     val isLoading = authViewModel.isLoading
 

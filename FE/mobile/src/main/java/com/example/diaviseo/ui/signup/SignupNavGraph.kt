@@ -18,8 +18,14 @@ fun NavGraphBuilder.signupNavGraph(navController: NavHostController) {
         startDestination = "signup",
         route = "signupGraph"
     ) {
-        composable("signup") { SignupScreen(navController) }
-        
+//        composable("signup") { SignupScreen(navController) }
+        composable("signup") { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry("signupGraph")
+            }
+            val authViewModel: AuthViewModel = viewModel(parentEntry)
+            SignupScreen(navController, authViewModel)
+        }
         // 휴대폰 인증
         composable("phoneAuth") { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
