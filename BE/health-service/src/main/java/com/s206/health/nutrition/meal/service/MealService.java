@@ -9,7 +9,6 @@ import com.s206.health.nutrition.food.repository.FoodRepository;
 import com.s206.health.nutrition.meal.dto.request.MealCreateRequest;
 import com.s206.health.nutrition.meal.dto.request.MealFoodRequest;
 import com.s206.health.nutrition.meal.dto.request.MealTimeRequest;
-import com.s206.health.nutrition.meal.dto.request.MealUpdateRequest;
 import com.s206.health.nutrition.meal.dto.response.*;
 import com.s206.health.nutrition.meal.entity.Meal;
 import com.s206.health.nutrition.meal.entity.MealFood;

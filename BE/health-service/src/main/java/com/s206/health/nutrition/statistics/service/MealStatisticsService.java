@@ -79,7 +79,7 @@ public class MealStatisticsService {
         } catch (Exception e) {
             log.error("[STATS_WEEK] 주별 통계 계산 오류: userId={}, 오류={}", userId, e.getMessage(), e);
 
-            // 오류 발생 시 대체 로직: 일별 데이터를 사용하여 주별 통계 계산
+            // 오류 발생 시 일별 데이터를 사용하여 주별 통계 계산
             return getWeeklyStatsUsingDailyData(userId, endDate);
         }
     }
