@@ -30,10 +30,11 @@ fun GoalSelectScreen(
     authViewModel: AuthViewModel,
     goalViewModel: GoalViewModel
 ) {
-    val name by authViewModel.name.collectAsState()
+    val nickname by authViewModel.nickname.collectAsState()
     val height by authViewModel.height.collectAsState()
     val weight by authViewModel.weight.collectAsState()
-    val selectedGoal by goalViewModel.goal.collectAsState()
+    val selectedGoal by authViewModel.goal.collectAsState()
+//    val selectedGoal by goalViewModel.goal.collectAsState()
 
     val bmi = remember(height, weight) {
         val h = height.toFloatOrNull()?.div(100f)
@@ -89,7 +90,7 @@ fun GoalSelectScreen(
 
                 Text(
                     text = buildAnnotatedString {
-                        append("$name 님의 BMI는 ${"%.1f".format(bmi)}로\n현재 ")
+                        append("$nickname 님의 BMI는 ${"%.1f".format(bmi)}로\n현재 ")
                         withStyle(
                             style = SpanStyle(
                                 color = bmiColor,
@@ -111,16 +112,17 @@ fun GoalSelectScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                GoalOptionButton("체중 감량", tempGoal == "감량", isRecommended = recommendedGoal == "체중 감량") { tempGoal = "감량" }
-                GoalOptionButton("체중 유지", tempGoal == "유지", isRecommended = recommendedGoal == "체중 유지") { tempGoal = "유지" }
-                GoalOptionButton("체중 증량", tempGoal == "증량", isRecommended = recommendedGoal == "체중 증량") { tempGoal = "증량" }
+                GoalOptionButton("체중 감량", tempGoal == "WEIGHT_LOSS", isRecommended = recommendedGoal == "체중 감량") { tempGoal = "WEIGHT_LOSS" }
+                GoalOptionButton("체중 유지", tempGoal == "WEIGHT_MAINTENANCE", isRecommended = recommendedGoal == "체중 유지") { tempGoal = "WEIGHT_MAINTENANCE" }
+                GoalOptionButton("체중 증량", tempGoal == "WEIGHT_GAIN", isRecommended = recommendedGoal == "체중 증량") { tempGoal = "WEIGHT_GAIN" }
             }
 
             BottomButtonSection(
                 text = "목표 설정하기",
                 enabled = tempGoal.isNotBlank(),
                 onClick = {
-                    goalViewModel.setGoal(tempGoal)
+//                    goalViewModel.setGoal(tempGoal)
+                    authViewModel.setGoal(tempGoal)
                     navController.navigate("onboarding/finalguide")
                 }
             )
