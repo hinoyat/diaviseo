@@ -18,8 +18,7 @@ object ExerciseSessionRecordProcessor {
         return ExerciseRecordRequest(
             exerciseTypeId = record.exerciseType,
             exerciseDate = formattedDate,
-            exerciseTime = durationMinutes,
-            exerciseStartTime = formattedDate
+            exerciseTime = durationMinutes
         )
     }
 }
