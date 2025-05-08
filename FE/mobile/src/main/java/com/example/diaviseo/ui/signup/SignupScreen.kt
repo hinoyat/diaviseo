@@ -33,8 +33,9 @@ import kotlinx.coroutines.delay
 // import androidx.compose.foundation.ExperimentalFoundationApi // 필요시 추가
 
 @Composable
-fun SignupScreen(navController: NavController) {
-    val authViewModel: AuthViewModel = viewModel()
+//fun SignupScreen(navController: NavController) {
+//    val authViewModel: AuthViewModel = viewModel()
+fun SignupScreen(navController: NavController, authViewModel: AuthViewModel,) {
     val context = LocalContext.current // Activity Context 필요 시
     val isLoading = authViewModel.isLoading
 
@@ -128,6 +129,7 @@ fun SignupScreen(navController: NavController) {
                             authViewModel.setEmail(email ?: "") // Null 처리 추가
                             authViewModel.setName(name ?: "") // Null 처리 추가
                             authViewModel.setProvider("google")
+                            authViewModel.setIdToken(idToken)
 
                             authViewModel.loginWithGoogle(idToken, activity) { success, isNewUser ->
                                 if (success) {
