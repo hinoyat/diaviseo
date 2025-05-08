@@ -1,6 +1,7 @@
 package com.example.diaviseo.viewmodel
 
 import android.app.Activity
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import com.example.diaviseo.datastore.TokenDataStore
@@ -34,13 +35,13 @@ class AuthViewModel : ViewModel() {
     private val _name = MutableStateFlow("")
     val name: StateFlow<String> = _name
 
-    private val _nickname = MutableStateFlow("s206")
+    private val _nickname = MutableStateFlow("")
     val nickname: StateFlow<String> = _nickname
 
-    private val _gender = MutableStateFlow("F")
+    private val _gender = MutableStateFlow("")
     val gender: StateFlow<String> = _gender
 
-    private val _birthday = MutableStateFlow("1999-09-22")
+    private val _birthday = MutableStateFlow("")
     val birthday: StateFlow<String> = _birthday
 
     private val _phone = MutableStateFlow("")
@@ -60,6 +61,9 @@ class AuthViewModel : ViewModel() {
 
     private val _provider = MutableStateFlow("")
     val provider: StateFlow<String> = _provider
+
+    private val _goal = MutableStateFlow("") // "감량", "유지", "증량"
+    val goal: StateFlow<String> = _goal
 
     private val _consentPersonal = MutableStateFlow(true)
     val consentPersonal: StateFlow<Boolean> = _consentPersonal
@@ -82,6 +86,10 @@ class AuthViewModel : ViewModel() {
         _name.value = name
     }
 
+    fun setNickname(nickname: String) {
+        _nickname.value = nickname
+    }
+
     fun setPhone(phone: String) {
         _phone.value = phone
     }
@@ -92,6 +100,10 @@ class AuthViewModel : ViewModel() {
 
     fun setProvider(provider: String) {
         _provider.value = provider
+    }
+
+    fun setGoal(goal: String) {
+        _goal.value = goal
     }
 
     fun setGender(gender: String) {
@@ -116,6 +128,12 @@ class AuthViewModel : ViewModel() {
 
     fun setLocationPersonal(consent: Boolean) {
         _locationPersonal.value = consent
+    }
+
+    fun setToastMessage(msg : String) {
+        viewModelScope.launch {
+            _toastMessage.emit(msg)
+        }
     }
 
     var isLoading by mutableStateOf(false)
@@ -229,6 +247,22 @@ class AuthViewModel : ViewModel() {
                 // 그 외 예외
                 _toastMessage.emit("알 수 없는 오류가 발생했습니다: ${e.message}")
             }
+        }
+    }
+
+//    뷰모델 새로 켜질때마다 확인할 수 있을까?
+    fun printAllState () {
+        viewModelScope.launch {
+            Log.d("authviewmodel all state", "email : ${_email.value}")
+            Log.d("authviewmodel all state", "name : ${_name.value}")
+            Log.d("authviewmodel all state", "phone : ${_phone.value}")
+            Log.d("authviewmodel all state", "nickname : ${_nickname.value}")
+            Log.d("authviewmodel all state", "gender : ${_gender.value}")
+            Log.d("authviewmodel all state", "birthday : ${_birthday.value}")
+            Log.d("authviewmodel all state", "provider : ${_provider.value}")
+            Log.d("authviewmodel all state", "height : ${_height.value}")
+            Log.d("authviewmodel all state", "weight : ${_weight.value}")
+            Log.d("authviewmodel all state", "goal : ${_goal.value}")
         }
     }
 }
