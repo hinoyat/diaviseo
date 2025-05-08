@@ -15,6 +15,8 @@ public class ExerciseTypeResponse {
     private Integer exerciseTypeId;
     private Integer exerciseCategoryId;
     private String exerciseName;
+    private String exerciseEnglishName;
     private Integer exerciseCalorie;
+    private Integer exerciseNumber;
     private LocalDateTime createdAt;
 }
