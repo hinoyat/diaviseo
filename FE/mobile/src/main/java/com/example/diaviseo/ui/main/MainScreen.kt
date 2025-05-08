@@ -4,13 +4,17 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.*
+import androidx.navigation.navArgument
 import com.example.diaviseo.ui.components.BottomNavigationBar
+import com.example.diaviseo.ui.detail.ExerciseDetailScreen
 import com.example.diaviseo.ui.main.components.FabOverlayMenu
 import com.example.diaviseo.ui.register.bodyregister.BodyDataRegisterScreen
 import com.example.diaviseo.ui.register.diet.DietRegisterMainScreen
 import com.example.diaviseo.ui.register.exercise.ExerciseRegisterMainScreen
 import com.example.diaviseo.ui.register.diet.DietAiRegisterScreen
+import java.time.LocalDate
 
 @Composable
 fun MainScreen() {
@@ -21,7 +25,7 @@ fun MainScreen() {
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val hideBottomBarRoutes = listOf("body_register", "diet_register", "exercise_register","diet_ai_register")
+    val hideBottomBarRoutes = listOf("body_register", "diet_register", "exercise_register", "diet_ai_register", "exercise_detail/{date}")
     val isBottomBarVisible = currentRoute !in hideBottomBarRoutes
 
     Scaffold(
@@ -74,6 +78,12 @@ fun MainScreen() {
                 DietAiRegisterScreen(navController)
             }
 
+            // 운동 상세화면
+            composable("exercise_detail") { backStackEntry ->
+                ExerciseDetailScreen(
+                    navController = navController
+                )
+            }
         }
     }
     // 조건부 UI는 Scaffold 바깥에!
