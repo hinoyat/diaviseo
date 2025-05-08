@@ -1,5 +1,6 @@
 package com.example.diaviseo.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -28,7 +29,8 @@ import androidx.compose.foundation.layout.asPaddingValues
 fun CommonTopBar(
     title: String? = null,
     onLeftActionClick: (() -> Unit)? = null,
-    onRightActionClick: (() -> Unit)? = null
+    onRightActionClick: (() -> Unit)? = null,
+    calendar: Boolean? = false
 ) {
     val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
 
@@ -68,20 +70,39 @@ fun CommonTopBar(
 
         // X 버튼: Box + clickable로 끝까지 정렬
         onRightActionClick?.let {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .offset(x = 8.dp)
-                    .size(48.dp) // 터치 영역 확보
-                    .clickable { it() }, // 클릭 액션
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.close),
-                    contentDescription = "닫기",
-                    tint = Color.Black,
-                    modifier = Modifier.size(20.dp)
-                )
+            if (calendar == true) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .offset(x = (-8).dp)
+                        .size(48.dp) // 터치 영역 확보
+                        .clickable { it() }, // 클릭 액션
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.diary),
+                        contentDescription = "달력",
+                        modifier = Modifier
+                            .size(32.dp)
+//                            .clickable { it() }
+                    )
+                }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .offset(x = 8.dp)
+                        .size(48.dp) // 터치 영역 확보
+                        .clickable { it() }, // 클릭 액션
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.close),
+                        contentDescription = "닫기",
+                        tint = Color.Black,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
     }
