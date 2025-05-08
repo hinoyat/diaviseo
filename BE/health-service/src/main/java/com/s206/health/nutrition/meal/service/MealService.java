@@ -18,8 +18,10 @@ import com.s206.health.nutrition.meal.repository.MealFoodRepository;
 import com.s206.health.nutrition.meal.repository.MealRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -232,6 +234,17 @@ public class MealService {
         Meal meal = mealTime.getMeal();
         if (!meal.getUserId().equals(userId)) {
             throw new UnauthorizedException("이 음식에 접근할 권한이 없습니다.");
+        }
+
+        // 이미지가 있다면 이미지도 삭제
+        String imageUrl = mealFood.getFoodImageUrl();
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            try {
+                mealImageService.deleteMealImage(imageUrl);
+                log.info("[DELETE_FOOD] 이미지 삭제 완료 : {}", imageUrl);
+            } catch (Exception e) {
+                log.warn("이미지 삭제 실패: {}", e.getMessage());
+            }
         }
 
         // MealFood 삭제
@@ -543,5 +556,95 @@ public class MealService {
                 .endDate(endDate)
                 .dailyNutritions(dailyNutritions)
                 .build();
+    }
+
+    @Autowired
+    private MealImageService mealImageService;
+
+    // 음식 이미지를 업로드하고 식단에 추가
+    @Transactional
+    public Map<String, String> uploadMealFoodImage(Integer mealFoodId, MultipartFile file, Integer userId) {
+        log.info("[UPLOAD_IMAGE] userId={} → 식단 이미지 업로드 요청: mealFoodId={}", userId, mealFoodId);
+
+        // MealFood 찾기
+        MealFood mealFood = mealFoodRepository.findById(mealFoodId)
+                .orElseThrow(() -> new NotFoundException("해당 음식을 찾을 수 없습니다."));
+
+        // 소유권 확인
+        MealTime mealTime = mealFood.getMealTime();
+        Meal meal = mealTime.getMeal();
+        if (!meal.getUserId().equals(userId)) {
+            throw new UnauthorizedException("이 음식에 접근할 권한이 없습니다.");
+        }
+
+        // 기존 이미지가 있다면 삭제
+        String existingImageUrl = mealFood.getFoodImageUrl();
+        if (existingImageUrl != null && !existingImageUrl.isEmpty()) {
+            try {
+                mealImageService.deleteMealImage(existingImageUrl);
+            } catch (Exception e) {
+                log.warn("기존 이미지 삭제 실패: {}", e.getMessage());
+            }
+        }
+
+        // 새 이미지 업로드
+        String objectName = mealImageService.uploadMealImage(file);
+
+        // 이미지 URL을 MealFood에 저장
+        mealFood.updateFoodImageUrl(objectName);
+        mealFoodRepository.save(mealFood);
+
+        // 접근 URL 생성
+        String imageUrl = mealImageService.getMealImageUrl(objectName);
+
+        // 결과 반환
+        Map<String, String> result = new HashMap<>();
+        result.put("objectName", objectName);
+        result.put("imageUrl", imageUrl);
+
+        log.info("[UPLOAD_IMAGE] 이미지 업로드 완료: mealFoodId={}, objectName={}", mealFoodId, objectName);
+        return result;
+    }
+
+    // 이미 업로드된 이미지를 특정 식단 음식에 연결
+    @Transactional
+    public Map<String, String> attachImageToMealFood(Integer mealFoodId, String objectName, Integer userId) {
+        log.info("[ATTACH_IMAGE] userId={} → 이미지 연결 요청: mealFoodId={}, objectName={}", userId, mealFoodId, objectName);
+
+        // MealFood 찾기
+        MealFood mealFood = mealFoodRepository.findById(mealFoodId)
+                .orElseThrow(() -> new NotFoundException("해당 음식을 찾을 수 없습니다."));
+
+        // 소유권 확인
+        MealTime mealTime = mealFood.getMealTime();
+        Meal meal = mealTime.getMeal();
+        if (!meal.getUserId().equals(userId)) {
+            throw new UnauthorizedException("이 음식에 접근할 권한이 없습니다.");
+        }
+
+        // 기존 이미지가 있다면 삭제
+        String existingImageUrl = mealFood.getFoodImageUrl();
+        if (existingImageUrl != null && !existingImageUrl.isEmpty()) {
+            try {
+                mealImageService.deleteMealImage(existingImageUrl);
+            } catch (Exception e) {
+                log.warn("기존 이미지 삭제 실패: {}", e.getMessage());
+            }
+        }
+
+        // 새 이미지 연결
+        mealFood.updateFoodImageUrl(objectName);
+        mealFoodRepository.save(mealFood);
+
+        // 접근 URL 생성
+        String imageUrl = mealImageService.getMealImageUrl(objectName);
+
+        // 결과 반환
+        Map<String, String> result = new HashMap<>();
+        result.put("objectName", objectName);
+        result.put("imageUrl", imageUrl);
+
+        log.info("[ATTACH_IMAGE] 이미지 연결 완료: mealFoodId={}, objectName={}", mealFoodId, objectName);
+        return result;
     }
 }

@@ -24,8 +24,14 @@ public class ExerciseType {
     @Column(name = "exercise_name", nullable = false, length = 50)
     private String exerciseName;
 
+    @Column(name = "exercise_english_name", nullable = false, length = 50)
+    private String exerciseEnglishName;
+
     @Column(name = "exercise_calorie", nullable = false)
     private Integer exerciseCalorie;
+
+    @Column(name = "exercise_number", nullable = false)
+    private Integer exerciseNumber;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

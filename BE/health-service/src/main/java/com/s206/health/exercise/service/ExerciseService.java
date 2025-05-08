@@ -239,7 +239,9 @@ public class ExerciseService {
                         .exerciseTypeId(exerciseType.getExerciseTypeId())
                         .exerciseCategoryId(exerciseType.getExerciseCategoryId())
                         .exerciseName(exerciseType.getExerciseName())
+                        .exerciseEnglishName(exerciseType.getExerciseEnglishName())
                         .exerciseCalorie(exerciseType.getExerciseCalorie())
+                        .exerciseNumber(exerciseType.getExerciseNumber())
                         .createdAt(exerciseType.getCreatedAt())
                         .build())
                 .collect(Collectors.toList());
