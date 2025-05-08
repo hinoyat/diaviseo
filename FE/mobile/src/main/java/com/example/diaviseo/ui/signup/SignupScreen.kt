@@ -129,6 +129,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel,) {
                             authViewModel.setEmail(email ?: "") // Null 처리 추가
                             authViewModel.setName(name ?: "") // Null 처리 추가
                             authViewModel.setProvider("google")
+                            authViewModel.setIdToken(idToken)
 
                             authViewModel.loginWithGoogle(idToken, activity) { success, isNewUser ->
                                 if (success) {
