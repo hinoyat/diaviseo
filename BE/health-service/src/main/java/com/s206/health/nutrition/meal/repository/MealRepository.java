@@ -83,4 +83,6 @@ public interface MealRepository extends JpaRepository<Meal, Integer> {
     List<Object[]> calculateMonthlyAverageNutrition(@Param("userId") Integer userId,
                                                     @Param("startDate") LocalDate startDate,
                                                     @Param("endDate") LocalDate endDate);
+    
+    // TODO: List<Object[]> 반환을 DTO 사용해서 반환해주기
 }

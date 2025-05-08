@@ -118,6 +118,7 @@ public class MealStatisticsService {
             BigDecimal totalFat = BigDecimal.ZERO;
             BigDecimal totalSugar = BigDecimal.ZERO;
 
+            // TODO: 코드 가독성 개선하기 -> DTO
             for (Object[] row : weekData) {
                 totalCalorie += ((Number) row[1]).intValue();
                 totalCarbs = totalCarbs.add((BigDecimal) row[2]);
