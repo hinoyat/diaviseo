@@ -251,7 +251,7 @@ fun PhoneAuthScreen(navController: NavController, viewModel: AuthViewModel) {
                         trailingIcon = {
                             // 유효성 검사: 8자리여야만 true
                             val isPhoneValid = phoneNumber.length == 8
-                            val buttonEnabled = !timerStarted || (isPhoneValid && !requestClicked)
+                            val buttonEnabled = !timerStarted && (isPhoneValid && !requestClicked)
 
                             TextButton(
                                 onClick = {

@@ -43,7 +43,7 @@ class AuthViewModel : ViewModel() {
     private val _birthday = MutableStateFlow("1999-09-22")
     val birthday: StateFlow<String> = _birthday
 
-    private val _phone = MutableStateFlow("01012345678")
+    private val _phone = MutableStateFlow("")
     val phone: StateFlow<String> = _phone
 
     private val _authCode = MutableStateFlow("")
