@@ -37,6 +37,7 @@ public class UserService {
                 .name(request.getName())
                 .nickname(request.getNickname())
                 .gender(request.getGender())
+                .goal(request.getGoal())
                 .height(request.getHeight())
                 .weight(request.getWeight())
                 .birthday(request.getBirthday())
@@ -99,6 +100,10 @@ public class UserService {
 
         if (request.getNotificationEnabled() != null) {
             user.updateNotificationEnabled(request.getNotificationEnabled());
+        }
+
+        if (request.getGoal() != null) {
+            user.updateGoal(request.getGoal());
         }
 
         return UserDetailResponse.toDto(user);

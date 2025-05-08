@@ -50,6 +50,9 @@ public class Food {
     @Column(nullable = false, precision = 6, scale = 2)
     private BigDecimal cholesterol;
 
+    @Column(nullable = false, precision = 6, scale = 2)
+    private BigDecimal baseAmount;
+
     @CreationTimestamp
     @Column(nullable = false)
     private LocalDateTime createdAt;

@@ -1,6 +1,5 @@
 package com.s206.health.nutrition.meal.dto.request;
 
-import com.s206.health.nutrition.meal.entity.MealType;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;

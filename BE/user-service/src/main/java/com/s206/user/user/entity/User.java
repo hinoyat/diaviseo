@@ -1,6 +1,7 @@
 package com.s206.user.user.entity;
 
 import com.s206.user.user.enums.Gender;
+import com.s206.user.user.enums.Goal;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,6 +31,10 @@ public class User {
 
     @Column(nullable = false, length = 50)
     private String nickname;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Goal goal;
 
     @Column(nullable = false, precision = 6, scale = 2)
     private BigDecimal height;
@@ -97,6 +102,10 @@ public class User {
 
     public void updateBirthday(LocalDate birthday) {
         this.birthday = birthday;
+    }
+
+    public void updateGoal(Goal goal) {
+        this.goal = goal;
     }
 
     public void updateNotificationEnabled(Boolean notificationEnabled) {
