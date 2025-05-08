@@ -255,7 +255,8 @@ fun PhoneAuthScreen(navController: NavController, viewModel: AuthViewModel) {
 
                             TextButton(
                                 onClick = {
-                                    viewModel.setPhone(carrier + phoneNumber)
+                                    val formatted = phoneNumber.chunked(4).joinToString("-")
+                                    viewModel.setPhone("$carrier-$formatted")
                                     viewModel.phoneAuthTry{
                                         // onSuccess로 넘어와야 여기 요청 로직 시작
                                         timerStarted = true
