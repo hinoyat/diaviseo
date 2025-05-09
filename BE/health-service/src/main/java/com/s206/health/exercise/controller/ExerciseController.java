@@ -47,6 +47,15 @@ public class ExerciseController {
         return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK,"운동 기록 생성 성공",response));
     }
 
+    // 운동 기록 리스트 저장
+    @PostMapping("/list")
+    public ResponseEntity<ResponseDto<List<ExerciseListResponse>>> createExercises(
+            @RequestHeader("X-USER-ID") Integer userId,
+            @RequestBody List<ExerciseCreateRequest> requests) {
+        List<ExerciseListResponse> responses = exerciseService.createExercises(userId, requests);
+        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "운동 기록 리스트 저장 성공", responses));
+    }
+
     // 운동 기록 수정
     @PutMapping("/{exerciseId}")
     public ResponseEntity<ResponseDto<ExerciseListResponse>> updateExercise(

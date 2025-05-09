@@ -131,6 +131,14 @@ public class ExerciseService {
         return exerciseMapper.toListResponse(savedExercise, exerciseType, exerciseCategory, totalCalorie);
     }
 
+    // 운동 기록 리스트 저장
+    @Transactional
+    public List<ExerciseListResponse> createExercises(Integer userId, List<ExerciseCreateRequest> requests) {
+        return requests.stream()
+                .map(request -> createExercise(userId, request))
+                .collect(Collectors.toList());
+    }
+
     // 운동 기록 수정
     @Transactional
     public ExerciseListResponse updateExercise(Integer userId, Integer exerciseId, ExerciseUpdateRequest request) {
