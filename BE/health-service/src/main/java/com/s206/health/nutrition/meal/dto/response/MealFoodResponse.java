@@ -4,10 +4,12 @@ import com.s206.health.nutrition.food.entity.Food;
 import com.s206.health.nutrition.meal.entity.MealFood;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
 @Getter
+@Setter
 @Builder
 public class MealFoodResponse {
     private Integer mealFoodId;

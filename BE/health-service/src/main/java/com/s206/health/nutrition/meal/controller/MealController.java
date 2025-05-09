@@ -3,21 +3,22 @@ package com.s206.health.nutrition.meal.controller;
 import com.s206.common.dto.ResponseDto;
 import com.s206.health.nutrition.meal.dto.request.MealCreateRequest;
 import com.s206.health.nutrition.meal.dto.request.MealTimeRequest;
-import com.s206.health.nutrition.meal.dto.response.DailyNutritionResponse;
-import com.s206.health.nutrition.meal.dto.response.MealDailyResponse;
-import com.s206.health.nutrition.meal.dto.response.MealDetailResponse;
-import com.s206.health.nutrition.meal.dto.response.MealTimeResponse;
-import com.s206.health.nutrition.meal.dto.response.WeeklyNutritionResponse;
+import com.s206.health.nutrition.meal.dto.response.*;
 import com.s206.health.nutrition.meal.entity.MealType;
+import com.s206.health.nutrition.meal.service.MealImageService;
 import com.s206.health.nutrition.meal.service.MealService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/meals")
@@ -26,6 +27,7 @@ import java.time.LocalDate;
 public class MealController {
 
     private final MealService mealService;
+    private final MealImageService mealImageService;
 
     // 1. 식단 등록/수정 API - 날짜 기반 처리
     @PostMapping
@@ -46,6 +48,18 @@ public class MealController {
     ) {
         log.info("Getting meal detail: mealId={}, userId={}", mealId, userId);
         MealDetailResponse response = mealService.getMealDetail(mealId, userId);
+
+        // foodImageUrl을 완전한 URL로 변환
+        for (MealTimeResponse mealTimeResponse : response.getMealTimes()) {
+            for (MealFoodResponse foodResponse : mealTimeResponse.getFoods()) {
+                String imageUrl = foodResponse.getFoodImageUrl();
+                if (imageUrl != null && !imageUrl.isEmpty()) {
+                    // setter 메서드를 사용하여 값 변경
+                    foodResponse.setFoodImageUrl(mealImageService.getMealImageUrl(imageUrl));
+                }
+            }
+        }
+
         return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "식단 상세 조회 성공", response));
     }
 
@@ -151,5 +165,17 @@ public class MealController {
         log.info("Updating meal time: date={}, type={}, userId={}", date, mealType, userId);
         MealTimeResponse response = mealService.updateMealTimeByDateAndType(date, mealType, request, userId);
         return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "시간대별 식단 수정 성공", response));
+    }
+
+    // 12. 음식 이미지 업로드 API
+    @PostMapping(value = "/food/{mealFoodId}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseDto<Map<String, String>>> uploadFoodImage(
+            @PathVariable("mealFoodId") Integer mealFoodId,
+            @RequestParam("image") MultipartFile file,
+            @RequestHeader("X-USER-ID") Integer userId
+    ) {
+        log.info("Uploading food image: mealFoodId={}, userId={}", mealFoodId, userId);
+        Map<String, String> response = mealService.uploadMealFoodImage(mealFoodId, file, userId);
+        return ResponseEntity.ok(ResponseDto.success(HttpStatus.CREATED, "음식 이미지 업로드 성공", response));
     }
 }

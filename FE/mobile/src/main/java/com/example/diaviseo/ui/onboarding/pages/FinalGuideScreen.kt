@@ -32,45 +32,22 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
 import android.util.Log
 import com.example.diaviseo.healthconnect.HealthConnectManager
-
+import com.example.diaviseo.healthconnect.HealthConnectPermissionHandler
+import com.example.diaviseo.healthconnect.HealthConnectLogger
+import com.example.diaviseo.healthconnect.processor.StepDataProcessor
+import com.example.diaviseo.healthconnect.processor.ExerciseSessionRecordProcessor
 
 @Composable
 fun FinalGuideScreen(navController: NavController, goalViewModel: GoalViewModel, authViewModel: AuthViewModel) {
     var showDialog by remember { mutableStateOf(false) }
-
-    // ✅ Health Connect 관련 객체 초기화
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-    val healthConnectManager = remember { HealthConnectManager(context) }
-
-    // ✅ 권한 요청 런처 등록
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = PermissionController.createRequestPermissionResultContract()
-    ) { granted ->
-        // ✅ 사용자가 권한을 모두 허용했는지 확인
-        // granted: Set<String>
-        if (granted.containsAll(healthConnectManager.getPermissions())) {
-            // ✅ 권한 모두 허용됨
-            Log.d("HealthConnect", "모든 권한 허용됨")
-
-            // ✅ 모든 권한 허용 시 Health Connect의 실제 데이터 로깅 시도
-            coroutineScope.launch {
-                healthConnectManager.logAllHealthData()
-                healthConnectManager.logRawSteps()
-
-            }
-        } else {
-            // ⚠️ 일부 권한 거부됨
-            Log.w("HealthConnect", "일부 권한 거부됨")
-        }
-    }
 
     val name = authViewModel.name.collectAsState().value
     val birthday = authViewModel.birthday.collectAsState().value
     val genderCode = authViewModel.gender.collectAsState().value
     val heightStr = authViewModel.height.collectAsState().value
     val weightStr = authViewModel.weight.collectAsState().value
-    val goalString = goalViewModel.goal.collectAsState().value
+//    val goalString = goalViewModel.goal.collectAsState().value
+    val goalString = authViewModel.goal.collectAsState().value
 
     val height = heightStr.toFloatOrNull() ?: 160f
     val weight = weightStr.toFloatOrNull() ?: 55f
@@ -137,6 +114,60 @@ fun FinalGuideScreen(navController: NavController, goalViewModel: GoalViewModel,
         }
     }
     val particle = if (goalDisplayText == "체중 유지") "를" else "을"
+
+
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = PermissionController.createRequestPermissionResultContract()
+    ) { granted ->
+        val manager = HealthConnectManager.createIfAvailable(context)
+        if (manager != null) {
+            HealthConnectPermissionHandler.handlePermissionResult(
+                granted = granted,
+                manager = manager,
+                scope = coroutineScope
+            )
+        } else {
+            Log.e("HealthConnect", "권한 결과 처리 중 HCManager null")
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            HealthConnectLogger.logRawSteps(context)
+            HealthConnectLogger.logRawExerciseSessions(context)
+        }
+    }
+    // 서버 전송을 위한 가공된 걸음 수 데이터도 출력
+
+        LaunchedEffect(Unit) {
+            coroutineScope.launch {
+                val manager = HealthConnectManager.createIfAvailable(context)
+                if (manager != null) {
+                    val stepRecords = manager.readSteps()
+                    val processed = StepDataProcessor.process(stepRecords)
+                    processed.forEach {
+                        Log.d("StepProcessed", it.toString())
+                    }
+                }
+            }
+        }
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            val manager = HealthConnectManager.createIfAvailable(context)
+            if (manager != null) {
+                val sessionRecords = manager.readExerciseSessions()
+                val processed = sessionRecords.map {
+                    ExerciseSessionRecordProcessor.toRequest(it)
+                }
+                processed.forEach {
+                    Log.d("ExerciseProcessed", it.toString())
+                }
+            }
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -236,22 +267,26 @@ fun FinalGuideScreen(navController: NavController, goalViewModel: GoalViewModel,
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // ✅ Health Connect 연동 버튼 클릭 시 동작
+                // 연동 버튼 클릭 시 로직
                 Button(
                     onClick = {
-                        coroutineScope.launch {
-                            // ✅ Health Connect 앱 설치 여부 확인
-                            val isAvailable = healthConnectManager.isAvailable()
-                            if (isAvailable) {
-                                // ➕ 설치되어 있으면 권한 요청
-                                permissionLauncher.launch(healthConnectManager.getPermissions())
-
-                                // 🔍 걸음 데이터 로그 출력 (테스트용)
-                                healthConnectManager.logRawSteps()
-                            } else {
-                                // 설치 안 됨 → Play Store 링크로 이동
-                                val uri = Uri.parse("https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata")
-                                val intent = Intent(Intent.ACTION_VIEW, uri)
+                        val manager = HealthConnectManager.createIfAvailable(context)
+                        if (manager != null) {
+                            HealthConnectPermissionHandler.requestPermissionsIfAvailable(
+                                context = context,
+                                scope = coroutineScope,
+                                manager = manager,
+                                launcher = permissionLauncher
+                            )
+                        } else {
+                            val intent = Intent(Intent.ACTION_VIEW).apply {
+                                data = Uri.parse("https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata")
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            if (intent.resolveActivity(context.packageManager) != null) {
                                 context.startActivity(intent)
+                            } else {
+                                Log.e("HealthConnect", "Play Store 실행 실패")
                             }
                         }
                     },
@@ -260,6 +295,7 @@ fun FinalGuideScreen(navController: NavController, goalViewModel: GoalViewModel,
                 ) {
                     Text("헬스 커넥트 연동하기", color = Color.White)
                 }
+
 
                 Spacer(modifier = Modifier.height(60.dp))
 
@@ -272,7 +308,6 @@ fun FinalGuideScreen(navController: NavController, goalViewModel: GoalViewModel,
                 Spacer(modifier = Modifier.height(12.dp))
 
                 PermissionRequestButton(modifier = Modifier.padding(top = 12.dp))
-
             }
 
             BottomButtonSection(

@@ -34,7 +34,7 @@ fun NameInputScreen(
     // 백버튼 눌러도 아무 동작 안 하게
     BackHandler(enabled = true){}
 
-    var name by remember { mutableStateOf(viewModel.name.value) }
+    var nickname by remember { mutableStateOf(viewModel.nickname.value) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         // 배경 이미지
@@ -83,9 +83,9 @@ fun NameInputScreen(
 
                 // 입력 필드
                 OutlinedTextField(
-                    value = name,
+                    value = nickname,
                     onValueChange = {
-                        if (it.length <= 8) name = it // 8자 제한 적용
+                        if (it.length <= 8) nickname = it // 8자 제한 적용
                     },
                     placeholder = { Text("이름(닉네임)을 적어주세요.") },
                     singleLine = true,
@@ -110,9 +110,9 @@ fun NameInputScreen(
             // 하단 다음 버튼
             BottomButtonSection(
                 text="다음",
-                enabled = name.isNotBlank(),
+                enabled = nickname.isNotBlank(),
                 onClick = {
-                    viewModel.setName(name)
+                    viewModel.setNickname(nickname)
                     navController.navigate("onboarding/Bmiinput")
                 }
             )

@@ -10,8 +10,8 @@ import android.util.Log
 
 
 class GoalViewModel : ViewModel() {
-    private val _goal = MutableStateFlow("") // "감량", "유지", "증량"
-    val goal: StateFlow<String> = _goal
+//    private val _goal = MutableStateFlow("") // "감량", "유지", "증량"
+//    val goal: StateFlow<String> = _goal
 
     private val _selectedDate = MutableStateFlow(LocalDate.now())
     val selectedDate: StateFlow<LocalDate> = _selectedDate
@@ -32,9 +32,9 @@ class GoalViewModel : ViewModel() {
         }
     }
 
-    fun setGoal(goal: String) {
-        _goal.value = goal
-    }
+//    fun setGoal(goal: String) {
+//        _goal.value = goal
+//    }
 
     fun setShowDatePicker() {
         _showDatePicker.value = !_showDatePicker.value
