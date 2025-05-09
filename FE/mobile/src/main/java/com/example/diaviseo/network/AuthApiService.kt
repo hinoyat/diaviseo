@@ -54,6 +54,11 @@ data class GoogleLoginResponse(
     val newUser: Boolean
 )
 
+data class RefreshAuthTokenResponse(
+    val accessToken: String,
+    val refreshToken: String
+)
+
 data class SignUpWithDiaResponse(
     private val name: String,
     private val nickname: String,
@@ -85,6 +90,10 @@ interface AuthApiService {
     suspend fun loginWithTest(
         @Body request: TestLoginRequest
     ): ApiResponse<GoogleLoginResponse>
+
+    @POST("auth/reissue")
+    suspend fun refreshAuthToken(
+    ): ApiResponse<RefreshAuthTokenResponse>
 
     @POST("users/verify/phone")
     suspend fun phoneAuthTry(
