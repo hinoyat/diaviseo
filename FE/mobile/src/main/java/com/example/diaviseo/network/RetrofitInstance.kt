@@ -1,10 +1,13 @@
 package com.example.diaviseo.network
 
 import android.util.Log
+import com.example.diaviseo.AppContextHolder
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import com.example.diaviseo.BuildConfig
-
+import kotlinx.coroutines.runBlocking
+import com.example.diaviseo.datastore.TokenDataStore
+import kotlinx.coroutines.flow.first
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import okhttp3.Interceptor
@@ -19,8 +22,16 @@ object RetrofitInstance {
 
     // 2. 헤더/응답코드 확인용 Interceptor
     val authInterceptor = Interceptor { chain ->
+        val context = AppContextHolder.appContext
+
+        // DataStore의 Flow에서 값 1개만 꺼내기
+        val accessToken = runBlocking {
+            TokenDataStore.getAccessToken(context).first() ?: ""
+        }
+
+        Log.d("Network", "accesstoken 불러오기 : $accessToken")
         val newRequest = chain.request().newBuilder()
-            .addHeader("Authorization", "Bearer token")
+            .addHeader("Authorization", "Bearer $accessToken")
             .build()
         val response = chain.proceed(newRequest)
         // 401 오류가 나면 자동으로 토큰 갱신 요청 => 우왕 나중에 써야지
@@ -35,6 +46,7 @@ object RetrofitInstance {
         Log.d("Network", "Response Code: ${response.code}")
         response
     }
+
 
     // 3. OkHttpClient 구성
     val client = OkHttpClient.Builder()
