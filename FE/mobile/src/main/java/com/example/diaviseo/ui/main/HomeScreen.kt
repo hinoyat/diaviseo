@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.navigation.NavHostController
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.diaviseo.R
 import com.example.diaviseo.ui.main.components.home.AiAssistantCard
 import com.example.diaviseo.ui.main.components.home.CaloriesGaugeSection
@@ -15,11 +16,12 @@ import com.example.diaviseo.ui.main.components.home.MainHeader
 import com.example.diaviseo.ui.main.components.home.StepCountCard
 import com.example.diaviseo.ui.main.components.home.SummaryCard
 import com.example.diaviseo.ui.main.components.home.WeightPredictionSection
+import com.example.diaviseo.viewmodel.ProfileViewModel
 
 @Composable
 fun HomeScreen(
-    userNickname: String?,
-    navController: NavHostController
+    navController: NavHostController,
+    viewModel: ProfileViewModel = viewModel()
 ) {
     Box(
         modifier = Modifier
@@ -40,7 +42,7 @@ fun HomeScreen(
                     )
                 )
         ) {
-            MainHeader(userNickname, navController)
+            MainHeader(viewModel= viewModel, navController= navController)
 
             Spacer(modifier = Modifier.height(24.dp))
 
