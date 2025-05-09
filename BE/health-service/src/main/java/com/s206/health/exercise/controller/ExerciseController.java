@@ -89,4 +89,12 @@ public class ExerciseController {
         List<ExerciseTypeResponse> exercises = exerciseService.getExercisesByCategory(exerciseCategoryId);
         return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK,"카테고리별 운동 조회 성공",exercises));
     }
+
+    // 최근에 한 운동 조회
+    @GetMapping("/latest")
+    public ResponseEntity<ResponseDto<List<ExerciseTypeResponse>>> getLatestExercises(
+            @RequestHeader("X-USER-ID") Integer userId) {
+        List<ExerciseTypeResponse> exercises = exerciseService.getLatestExercises(userId, 10);
+        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "최근에 한 운동 조회 성공", exercises));
+    }
 }

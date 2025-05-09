@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,7 +39,7 @@ public class ExerciseService {
     // 특정 사용자의 운동 기록 전체 조회
     @Transactional(readOnly = true)
     public List<ExerciseListResponse> getAllExercisesByUser(Integer userId) {
-        List<Exercise> exercises = exerciseRepository.findByUserIdAndIsDeletedFalse(userId);
+        List<Exercise> exercises = exerciseRepository.findByUserIdAndIsDeletedFalseOrderByExerciseDateDesc(userId);
 
         // 모든 운동 유형 정보를 가져와서 Map 으로 변환 (ID -> ExerciseType)
         Map<Integer, ExerciseType> exerciseTypeMap = exerciseTypeRepository.findAll().stream()
@@ -253,5 +255,49 @@ public class ExerciseService {
                         .createdAt(exerciseType.getCreatedAt())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    // 최근에 한 운동 조회
+    @Transactional(readOnly = true)
+    public List<ExerciseTypeResponse> getLatestExercises(Integer userId, int limit) {
+        // 1. 사용자의 모든 운동 기록을 내림차순 조회
+        List<Exercise> allExercises = exerciseRepository.findByUserIdAndIsDeletedFalseOrderByExerciseDateDesc(userId);
+
+        // 2. exerciseTypeId를 기준으로 중복 제거하여 최신 운동 타입 ID 목록 추출
+        List<Integer> uniqueExerciseTypeIds = allExercises.stream()
+                .map(Exercise::getExerciseTypeId)
+                .distinct()
+                .limit(limit)
+                .collect(Collectors.toList());
+
+        // 3. 해당 운동 타입 정보 가져오기
+        List<ExerciseType> exerciseTypes = exerciseTypeRepository.findAllById(uniqueExerciseTypeIds);
+
+        // 4. 응답 DTO 생성
+        Map<Integer, ExerciseTypeResponse> responseMap = new LinkedHashMap<>();
+
+        // 운동 타입 ID 목록을 순회하며 응답 객체 생성
+        for (Integer typeId : uniqueExerciseTypeIds) {
+            // 운동 타입 찾기
+            exerciseTypes.stream()
+                    .filter(type -> type.getExerciseTypeId().equals(typeId))
+                    .findFirst() // 일치하는 첫 번째 항목 선택
+                    .ifPresent(exerciseType -> { // 해당 운동 타입이 존재하는 경우에만 처리
+                        ExerciseTypeResponse response = ExerciseTypeResponse.builder()
+                                .exerciseTypeId(exerciseType.getExerciseTypeId())
+                                .exerciseCategoryId(exerciseType.getExerciseCategoryId())
+                                .exerciseName(exerciseType.getExerciseName())
+                                .exerciseEnglishName(exerciseType.getExerciseEnglishName())
+                                .exerciseCalorie(exerciseType.getExerciseCalorie())
+                                .exerciseNumber(exerciseType.getExerciseNumber())
+                                .createdAt(exerciseType.getCreatedAt())
+                                .build();
+
+                        // 생성된 응답 객체를 맵에 저장 (키: 운동 타입 ID)
+                        responseMap.put(typeId, response);
+                    });
+        }
+
+        return new ArrayList<>(responseMap.values());
     }
 }
