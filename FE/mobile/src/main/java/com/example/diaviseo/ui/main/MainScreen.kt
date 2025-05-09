@@ -8,7 +8,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.*
 import com.example.diaviseo.ui.components.BottomNavigationBar
 import com.example.diaviseo.ui.main.components.FabOverlayMenu
+import com.example.diaviseo.ui.mypageedit.screen.AllergyEditScreen
+import com.example.diaviseo.ui.mypageedit.screen.DiseaseEditScreen
+import com.example.diaviseo.ui.mypageedit.screen.FaqScreen
 import com.example.diaviseo.ui.mypageedit.screen.PhysicalInfoEditScreen
+import com.example.diaviseo.ui.mypageedit.screen.PreferredExerciseScreen
 import com.example.diaviseo.ui.mypageedit.screen.UserProfileEditScreen
 import com.example.diaviseo.ui.register.bodyregister.BodyDataRegisterScreen
 import com.example.diaviseo.ui.register.diet.DietRegisterMainScreen
@@ -91,6 +95,20 @@ fun MainScreen() {
                 )
             }
 
+            // 알러지 질환 스크린
+            composable("edit_allergy") {
+                AllergyEditScreen(navController)
+            }
+            composable("edit_disease") {
+                DiseaseEditScreen(navController)
+            }
+
+            composable("edit_exercise") {
+                PreferredExerciseScreen(navController)
+            }
+            composable("faq") {
+                FaqScreen(navController)
+            }
 
             composable("body_register") {
                 BodyDataRegisterScreen(navController)

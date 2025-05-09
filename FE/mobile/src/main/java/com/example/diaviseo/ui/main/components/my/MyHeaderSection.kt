@@ -37,7 +37,7 @@ fun MyHeaderSection(userName: String = "김디아") {
         }
 
         Image(
-            painter = painterResource(id = R.drawable.charac_main_nontext), // 너희 다이아비서 캐릭터 이미지 res에 넣은 이름
+            painter = painterResource(id = R.drawable.charac_main_nontext),
             contentDescription = "다이아비서 캐릭터",
             modifier = Modifier
                 .size(64.dp)
