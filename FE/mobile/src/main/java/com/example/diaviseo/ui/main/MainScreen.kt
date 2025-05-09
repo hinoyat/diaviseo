@@ -1,5 +1,6 @@
 package com.example.diaviseo.ui.main
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -11,12 +12,22 @@ import com.example.diaviseo.ui.register.bodyregister.BodyDataRegisterScreen
 import com.example.diaviseo.ui.register.diet.DietRegisterMainScreen
 import com.example.diaviseo.ui.register.exercise.ExerciseRegisterMainScreen
 import com.example.diaviseo.ui.register.diet.DietAiRegisterScreen
+import com.example.diaviseo.viewmodel.ProfileViewModel
 
 @Composable
 fun MainScreen() {
+    // 화면 뜨자마자 회원정보 불러오기
+    val profileViewModel = ProfileViewModel()
+    // 화면 진입 시 한 번 실행됨
+    LaunchedEffect(Unit) {
+        profileViewModel.fetchMyProfile()
+    }
+    val profile = profileViewModel.myProfile
+    Log.d("Mainscreen profileviewModel", "$profile")
+
     // 화면 이동을 관리해주는 내비게이션 컨트롤러
     val navController = rememberNavController()
-    val userNickname = "김디아" // TODO: ViewModel 등에서 유저 정보 주입
+    val userNickname = "김디아"
     val isFabMenuOpen = remember { mutableStateOf(false) }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
