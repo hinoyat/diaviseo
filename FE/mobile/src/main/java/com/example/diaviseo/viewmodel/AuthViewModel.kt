@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
+import com.example.diaviseo.AppContextHolder
 import com.example.diaviseo.network.PhoneAuthConfirmRequest
 import com.example.diaviseo.network.PhoneAuthTryRequest
 import com.example.diaviseo.network.SignUpWithDiaRequest
@@ -160,7 +161,7 @@ class AuthViewModel (application: Application) : AndroidViewModel(application) {
     //            val response = RetrofitInstance.authApiService.loginWithTest(request)
 
                 val isNewUser = response.data?.newUser ?: true
-                val context = activity.applicationContext
+                val context = AppContextHolder.appContext
                 onResult(true, isNewUser)
 
                 // 기존 회원이면 토큰 넣을테고 아니면 안 넣을테고
