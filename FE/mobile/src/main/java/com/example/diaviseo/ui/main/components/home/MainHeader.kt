@@ -24,6 +24,7 @@ import com.example.diaviseo.ui.theme.*
 import com.example.diaviseo.viewmodel.ProfileViewModel
 import java.util.Locale
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
@@ -38,6 +39,10 @@ fun MainHeader(
     val myProfile by viewModel.myProfile.collectAsState()
     LaunchedEffect(myProfile) {
         Log.d("MainHeader", "nickname 값 변경 감지: ${myProfile?.nickname}")
+    }
+
+    val nickname by remember(myProfile) {
+        mutableStateOf(myProfile?.nickname)
     }
 
     Row(
@@ -55,7 +60,8 @@ fun MainHeader(
 
             // “어서오세요 김디아 님!”
 //            if (userNickname != null) {
-            if (myProfile?.nickname != null) {
+//            if (myProfile?.nickname != null) {
+            if (nickname != null) {
                 Text(
                     buildAnnotatedString {
                         append("어서오세요 ")
@@ -66,7 +72,8 @@ fun MainHeader(
                             )
                         ) {
 //                            append(userNickname)
-                            append(myProfile?.nickname)
+//                            append(myProfile?.nickname)
+                            append(nickname)
                         }
                         append(" 님!")
                     },
