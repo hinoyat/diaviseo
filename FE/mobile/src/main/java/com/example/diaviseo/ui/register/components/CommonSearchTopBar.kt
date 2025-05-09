@@ -1,15 +1,14 @@
 package com.example.diaviseo.ui.register.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -19,39 +18,50 @@ import com.example.diaviseo.ui.theme.regular14
 @Composable
 fun CommonSearchTopBar(
     placeholder: String,
-    navController: NavController
+    navController: NavController,
+    keyword: String,                         // 현재 입력 중인 값
+    onKeywordChange: (String) -> Unit        // 입력 변경 시 호출할 함수
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
+                top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
             )
             .height(72.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 검색 입력 영역
-        Row(
+        // 검색 입력 필드
+        TextField(
+            value = keyword,
+            onValueChange = onKeywordChange,
+            placeholder = {
+                Text(
+                    text = placeholder,
+                    style = regular14,
+                    color = Color.Gray
+                )
+            },
+            singleLine = true,
             modifier = Modifier
                 .weight(1f)
-                .height(56.dp)
-                .background(Color(0xFFF5F5F5), shape = RoundedCornerShape(15.dp))
-                .padding(horizontal = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = "검색",
-                tint = Color.Gray,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = placeholder,
-                style = regular14,
-                color = Color.Gray
-            )
-        }
+                .height(56.dp),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color(0xFFF5F5F5),
+                unfocusedContainerColor = Color(0xFFF5F5F5),
+                disabledContainerColor = Color(0xFFF5F5F5),
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            ),
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "검색",
+                    tint = Color.Gray
+                )
+            },
+            shape = RoundedCornerShape(15.dp)
+        )
 
         Spacer(modifier = Modifier.width(12.dp))
 
@@ -65,3 +75,4 @@ fun CommonSearchTopBar(
         )
     }
 }
+
