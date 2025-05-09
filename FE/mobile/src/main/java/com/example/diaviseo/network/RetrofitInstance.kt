@@ -80,4 +80,8 @@ object RetrofitInstance {
 //        retro.create(HomeApiService::class.java)
 //    }
     // val homeResponse = homeApiService.getHomeData() 라고 사용하면 됩니다
+
+    val profileApiService: ProfileApiService by lazy {
+        retro.create(ProfileApiService::class.java)
+    }
 }
