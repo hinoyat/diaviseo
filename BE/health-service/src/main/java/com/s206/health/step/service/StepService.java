@@ -2,6 +2,7 @@ package com.s206.health.step.service;
 
 import com.s206.health.step.dto.request.StepCreateRequest;
 import com.s206.health.step.dto.response.StepResponse;
+import com.s206.health.step.dto.response.StepWeeklyResponse;
 import com.s206.health.step.entity.Step;
 import com.s206.health.step.repository.StepRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalField;
 import java.time.temporal.WeekFields;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.OptionalDouble;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -100,9 +98,9 @@ public class StepService {
         return mapToResponse(stepOptional.get());
     }
 
-    // 주간 평균 걸음 수 조회
+    // 일별 걸음 수 조회 (7일)
     @Transactional(readOnly = true)
-    public Integer getWeeklyAverageStepCount(Integer userId) {
+    public StepWeeklyResponse getWeeklyStepCounts(Integer userId) {
         LocalDate today = LocalDate.now();
 
         // 현재 날짜가 속한 주의 시작일과 종료일 계산
@@ -110,15 +108,47 @@ public class StepService {
         LocalDate startOfWeek = today.with(fieldISO, 1); // 주의 첫 날
         LocalDate endOfWeek = today.with(fieldISO, 7);   // 주의 마지막 날
 
-        List<Step> weeklySteps = stepRepository.findStepsByDateRange(userId, startOfWeek, endOfWeek);
+        // 일주일 동안의 걸음 수 기록 조회
+        List<Step> weeklySteps = stepRepository.findStepsByDateRange(
+                userId, startOfWeek, endOfWeek);
 
-        // 평균 계산 및 반올림
-        OptionalDouble average = weeklySteps.stream()
+        List<StepWeeklyResponse.StepDailyData> dailyData = new ArrayList<>();
+
+        // 일주일의 각 날짜에 대해 반복
+        for (LocalDate date = startOfWeek; !date.isAfter(endOfWeek); date = date.plusDays(1)) {
+            final LocalDate currentDate = date;
+
+            // 해당 날짜의 걸음 수 기록 찾기
+            Optional<Step> stepForDate = weeklySteps.stream()
+                    .filter(step -> step.getStepDate().equals(currentDate))
+                    .findFirst();
+
+            // 일별 데이터 추가
+            dailyData.add(StepWeeklyResponse.StepDailyData.builder()
+                    .date(date)
+                    .stepCount(stepForDate.map(Step::getStepCount).orElse(0))
+                    .build());
+        }
+
+        // 총 걸음 수 및 평균 계산
+        int totalSteps = weeklySteps.stream()
                 .mapToInt(Step::getStepCount)
-                .average();
+                .sum();
 
-        // 평균 값을 반올림하여 정수로 반환
-        return (int) Math.round(average.orElse(0.0));
+        // 평균 걸음 수 계산 - 항상 7로 나눔 (일주일)
+        double avgSteps = (double) totalSteps / 7;
+
+        // 걸음 수 평균 반올림 후 정수로 변환
+        Integer intAvgSteps = (int) Math.round(avgSteps);
+
+        // 응답 생성
+        return StepWeeklyResponse.builder()
+                .weeklySteps(dailyData)
+                .startDate(startOfWeek)
+                .endDate(endOfWeek)
+                .totalSteps(totalSteps)
+                .avgSteps(intAvgSteps)
+                .build();
     }
 
     // Entity를 Response DTO로 변환하는 헬퍼 메서드

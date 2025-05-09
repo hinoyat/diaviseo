@@ -1,5 +1,6 @@
 package com.s206.health.exercise.controller;
 
+import com.s206.common.dto.ResponseDto;
 import com.s206.health.exercise.dto.request.ExerciseCreateRequest;
 import com.s206.health.exercise.dto.request.ExerciseUpdateRequest;
 import com.s206.health.exercise.dto.response.ExerciseCategoryResponse;
@@ -7,6 +8,7 @@ import com.s206.health.exercise.dto.response.ExerciseListResponse;
 import com.s206.health.exercise.dto.response.ExerciseTypeResponse;
 import com.s206.health.exercise.service.ExerciseService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,61 +23,61 @@ public class ExerciseController {
 
     // 운동 기록 전체 조회
     @GetMapping
-    public ResponseEntity<List<ExerciseListResponse>> getAllExercisesByUser(
+    public ResponseEntity<ResponseDto<List<ExerciseListResponse>>> getAllExercisesByUser(
             @RequestHeader("X-USER-ID") Integer userId) {
         List<ExerciseListResponse> exercises = exerciseService.getAllExercisesByUser(userId);
-        return ResponseEntity.ok(exercises);
+        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "운동 기록 전체 조회 성공",exercises));
     }
 
     // 운동 기록 상세 조회
     @GetMapping("/{exerciseId}")
-    public ResponseEntity<ExerciseListResponse> getExerciseById(
+    public ResponseEntity<ResponseDto<ExerciseListResponse>> getExerciseById(
             @RequestHeader("X-USER-ID") Integer userId,
             @PathVariable Integer exerciseId) {
         ExerciseListResponse exercise = exerciseService.getExerciseById(userId, exerciseId);
-        return ResponseEntity.ok(exercise);
+        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK,"운동 기록 상세 조회 성공", exercise));
     }
 
     // 운동 기록 생성
     @PostMapping
-    public ResponseEntity<ExerciseListResponse> createExercise(
+    public ResponseEntity<ResponseDto<ExerciseListResponse>> createExercise(
             @RequestHeader("X-USER-ID") Integer userId,
             @RequestBody ExerciseCreateRequest request) {
         ExerciseListResponse response = exerciseService.createExercise(userId, request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK,"운동 기록 생성 성공",response));
     }
 
     // 운동 기록 수정
     @PutMapping("/{exerciseId}")
-    public ResponseEntity<ExerciseListResponse> updateExercise(
+    public ResponseEntity<ResponseDto<ExerciseListResponse>> updateExercise(
             @RequestHeader("X-USER-ID") Integer userId,
             @PathVariable Integer exerciseId,
             @RequestBody ExerciseUpdateRequest request) {
         ExerciseListResponse response = exerciseService.updateExercise(userId, exerciseId, request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK,"운동 기록 수정 성공",response));
     }
 
     // 운동 기록 삭제
     @DeleteMapping("/{exerciseId}")
-    public ResponseEntity<Void> deleteExercise(
+    public ResponseEntity<ResponseDto<Void>> deleteExercise(
             @RequestHeader("X-USER-ID") Integer userId,
             @PathVariable Integer exerciseId) {
         exerciseService.deleteExercise(userId, exerciseId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK,"운동 기록 삭제 성공"));
     }
 
     // 운동 카테고리 조회
     @GetMapping("/category")
-    public ResponseEntity<List<ExerciseCategoryResponse>> getAllCategories() {
+    public ResponseEntity<ResponseDto<List<ExerciseCategoryResponse>>> getAllCategories() {
         List<ExerciseCategoryResponse> categories = exerciseService.getAllCategories();
-        return ResponseEntity.ok(categories);
+        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK,"운동 카테고리 조회 성공",categories));
     }
 
     // 운동 카테고리별 운동 조회
     @GetMapping("/category/{exerciseCategoryId}")
-    public ResponseEntity<List<ExerciseTypeResponse>> getExercisesByCategory(
+    public ResponseEntity<ResponseDto<List<ExerciseTypeResponse>>> getExercisesByCategory(
             @PathVariable Integer exerciseCategoryId) {
         List<ExerciseTypeResponse> exercises = exerciseService.getExercisesByCategory(exerciseCategoryId);
-        return ResponseEntity.ok(exercises);
+        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK,"카테고리별 운동 조회 성공",exercises));
     }
 }
