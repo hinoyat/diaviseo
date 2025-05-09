@@ -13,6 +13,7 @@ public class FoodListResponse {
     private Integer foodId;
     private String foodName;
     private Integer calorie;
+    private BigDecimal baseAmount;
     private boolean isFavorite;
 
     public static FoodListResponse toDto(Food food, boolean isFavorite) {
@@ -21,6 +22,7 @@ public class FoodListResponse {
                 .foodName(food.getFoodName())
                 .calorie(food.getCalorie())
                 .isFavorite(isFavorite)
+                .baseAmount(food.getBaseAmount())
                 .build();
     }
 }
