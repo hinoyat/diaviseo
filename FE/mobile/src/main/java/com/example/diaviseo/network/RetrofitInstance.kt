@@ -29,13 +29,12 @@ object RetrofitInstance {
             TokenDataStore.getAccessToken(context).first() ?: ""
         }
 
-        Log.d("Network", "accesstoken 불러오기 : $accessToken")
         val newRequest = chain.request().newBuilder()
             .addHeader("Authorization", "Bearer $accessToken")
             .build()
         var response = chain.proceed(newRequest)
 
-        // 401 오류가 나면 자동으로 토큰 갱신 요청 => 우왕 나중에 써야지
+        // 401 오류가 나면 자동으로 토큰 갱신 요청
         if (response.code == 401) {
             val newResponse = runBlocking { refreshService.refreshAuthToken() }
             // 응답 받은 값으로 토큰 갱신하기
@@ -45,7 +44,7 @@ object RetrofitInstance {
             }
             val newAccessToken = newResponse.data?.accessToken
 
-            // ✅ 새 토큰으로 요청 다시 만들기
+            // 새 토큰으로 요청 다시 만들기
             val newRequest = chain.request().newBuilder()
                 .addHeader("Authorization", "Bearer $newAccessToken")
                 .build()
@@ -93,7 +92,6 @@ object RetrofitInstance {
                         TokenDataStore.getRefreshToken(context).first() ?: ""
                     }
 
-                    Log.d("Network", "refresh 불러오기 : $refreshToken")
                     val newRequest = chain.request().newBuilder()
                         .addHeader("Authorization", "Bearer $refreshToken")
                         .build()
