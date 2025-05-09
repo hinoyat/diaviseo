@@ -122,4 +122,10 @@ object RetrofitInstance {
     val profileApiService: ProfileApiService by lazy {
         retro.create(ProfileApiService::class.java)
     }
+
+    // 식단 (등록) 관련
+    val dietApiService: DietApiService by lazy {
+        retro.create(DietApiService::class.java)
+    }
+
 }

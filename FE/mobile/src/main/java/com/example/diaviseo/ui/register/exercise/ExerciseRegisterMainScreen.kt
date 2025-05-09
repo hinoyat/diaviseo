@@ -20,10 +20,10 @@ fun ExerciseRegisterMainScreen(navController: NavController) {
             .fillMaxSize()
             .padding(horizontal = 22.dp)
                                                         ) {
-        CommonSearchTopBar(
-            placeholder = "운동명으로 검색",
-            navController = navController
-        )
+//        CommonSearchTopBar(
+//            placeholder = "운동명으로 검색",
+//            navController = navController
+//        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
