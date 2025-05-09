@@ -48,9 +48,10 @@ fun MyScreen(navController: NavHostController) {
         )
 
         MyHealthDataList(
-            onEditAllergy = { /* TODO */ },
-            onEditDisease = { /* TODO */ }
+            onEditAllergy = { navController.navigate("edit_allergy") },
+            onEditDisease = { navController.navigate("edit_disease") }
         )
+
 
         MyExtraDataList(
             onEditExercise = { /* TODO */ }
