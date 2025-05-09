@@ -9,6 +9,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.*
 import com.example.diaviseo.ui.components.BottomNavigationBar
 import com.example.diaviseo.ui.main.components.FabOverlayMenu
+import com.example.diaviseo.ui.mypageedit.screen.AllergyEditScreen
+import com.example.diaviseo.ui.mypageedit.screen.DiseaseEditScreen
+import com.example.diaviseo.ui.mypageedit.screen.FaqScreen
+import com.example.diaviseo.ui.mypageedit.screen.PhysicalInfoEditScreen
+import com.example.diaviseo.ui.mypageedit.screen.PreferredExerciseScreen
+import com.example.diaviseo.ui.mypageedit.screen.UserProfileEditScreen
 import com.example.diaviseo.ui.register.bodyregister.BodyDataRegisterScreen
 import com.example.diaviseo.ui.register.diet.DietRegisterMainScreen
 import com.example.diaviseo.ui.register.exercise.ExerciseRegisterMainScreen
@@ -37,7 +43,18 @@ fun MainScreen() {
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val hideBottomBarRoutes = listOf("body_register", "diet_register", "exercise_register","diet_ai_register")
+    val hideBottomBarRoutes = listOf(
+        "body_register",
+        "diet_register",
+        "exercise_register",
+        "diet_ai_register",
+        "edit_allergy",
+        "edit_disease",
+        "edit_exercise",
+        "faq",
+        "edit_profile",
+        "edit_physical_info"
+        )
     val isBottomBarVisible = currentRoute !in hideBottomBarRoutes
 
     Scaffold(
@@ -72,11 +89,43 @@ fun MainScreen() {
                     GoalScreen(navController)
                 }
             }
+            // 마이페이지
             composable("my") {
-                // MyScreen() 등 필요 시 추가
+                Box(modifier = Modifier.padding(innerPadding)) {
+                    MyScreen(navController)
+                }
+            }
+            // 회원 정보 수정
+            composable("edit_profile") {
+                UserProfileEditScreen(navController)
             }
 
-            // ✅ 등록화면은 padding 없음
+            composable("edit_physical_info") {
+                PhysicalInfoEditScreen(
+                    navController = navController,
+                    initialHeight = 168,
+                    initialWeight = 50,
+                    onSave = { height, weight ->
+                        // TODO: ViewModel에 전달하거나 저장 처리
+                    }
+                )
+            }
+
+            // 알러지 질환 스크린
+            composable("edit_allergy") {
+                AllergyEditScreen(navController)
+            }
+            composable("edit_disease") {
+                DiseaseEditScreen(navController)
+            }
+
+            composable("edit_exercise") {
+                PreferredExerciseScreen(navController)
+            }
+            composable("faq") {
+                FaqScreen(navController)
+            }
+
             composable("body_register") {
                 BodyDataRegisterScreen(navController)
             }
