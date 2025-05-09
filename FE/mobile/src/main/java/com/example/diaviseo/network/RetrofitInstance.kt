@@ -7,6 +7,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import com.example.diaviseo.BuildConfig
 import kotlinx.coroutines.runBlocking
 import com.example.diaviseo.datastore.TokenDataStore
+import com.example.diaviseo.network.auth.AuthApiService
+import com.example.diaviseo.network.user.UserApiService
 import kotlinx.coroutines.flow.first
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -119,8 +121,8 @@ object RetrofitInstance {
 //    }
     // val homeResponse = homeApiService.getHomeData() 라고 사용하면 됩니다
 
-    val profileApiService: ProfileApiService by lazy {
-        retro.create(ProfileApiService::class.java)
+    val userApiService: UserApiService by lazy {
+        retro.create(UserApiService::class.java)
     }
 
     // 식단 (등록) 관련
