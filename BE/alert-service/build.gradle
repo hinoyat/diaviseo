@@ -17,16 +17,39 @@ repositories {
 	mavenCentral()
 }
 
+ext {
+	set('springCloudVersion', "2024.0.1")
+}
+
 dependencies {
+
+	implementation files('../common-module/build/libs/common-module-0.0.1-SNAPSHOT-plain.jar')
+
+	// Eureka Client 의존성 추가
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+	implementation 'org.springframework.cloud:spring-cloud-starter-config'
+
+
 	implementation 'org.springframework.boot:spring-boot-starter-amqp'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.amqp:spring-rabbit-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	// Firebase 서비스 사용 (푸시 알림 등)
 	implementation 'com.google.firebase:firebase-admin:9.2.0'
-	implementation 'org.springframework.boot:spring-boot-starter-logging' // Logback
+	implementation 'org.springframework.boot:spring-boot-starter-logging' // Logback 로깅 시스템
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+
+
 }
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
 
 tasks.named('test') {
 	useJUnitPlatform()
