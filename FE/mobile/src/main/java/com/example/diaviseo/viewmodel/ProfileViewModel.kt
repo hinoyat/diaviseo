@@ -1,14 +1,10 @@
 package com.example.diaviseo.viewmodel
 
 import android.util.Log
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.diaviseo.network.FetchProfileResponse
 import com.example.diaviseo.network.RetrofitInstance
+import com.example.diaviseo.network.user.dto.res.FetchProfileResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -22,7 +18,7 @@ class ProfileViewModel : ViewModel() {
     fun fetchMyProfile() {
         viewModelScope.launch {
             try {
-                val response = RetrofitInstance.profileApiService.fetchMyProfile()
+                val response = RetrofitInstance.userApiService.fetchMyProfile()
                 if (response.status == "OK") {
                     _myProfile.value = response.data  // ✅ 성공 시 상태 저장
                 } else {
