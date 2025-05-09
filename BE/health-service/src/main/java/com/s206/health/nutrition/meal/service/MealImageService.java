@@ -15,6 +15,12 @@ public class MealImageService {
     @Autowired
     private MinioClient minioClient;
 
+    @Value("${spring.minio.endpoint}")
+    private String endpoint;
+
+    @Value("${spring.minio.external-endpoint:#{null}}")
+    private String externalEndpoint;
+
     @Value("${spring.minio.bucket.name}")
     private String bucketName;
 
@@ -72,12 +78,20 @@ public class MealImageService {
         }
 
         try {
-            return minioClient.getPresignedObjectUrl(
+            String url = minioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .bucket(bucketName)
                             .object(objectName)
                             .method(Method.GET)
                             .build());
+
+            // 외부 엔드포인트가 설정된 경우, URL을 변환
+            if (externalEndpoint != null && !externalEndpoint.isEmpty() && url.contains(endpoint)) {
+                // 내부 엔드포인트를 외부 엔드포인트로 변경
+                url = url.replace(endpoint, externalEndpoint);
+            }
+
+            return url;
         } catch (Exception e) {
             throw new RuntimeException("이미지 URL 생성 중 오류가 발생했습니다: " + e.getMessage(), e);
         }
