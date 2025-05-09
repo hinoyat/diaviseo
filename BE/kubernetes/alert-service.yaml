@@ -1,32 +1,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: alarm-service
+  name: alert-service
   namespace: msa-apps
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: alarm-service
+      app: alert-service
   template:
     metadata:
       labels:
-        app: alarm-service
+        app: alert-service
     spec:
       containers:
-        - name: alarm-service
-          image: hongbeom1/alarm-service:latest
+        - name: alert-service
+          image: hongbeom1/alert-service:latest
           ports:
             - containerPort: 8084
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: alarm-service
+  name: alert-service
   namespace: msa-apps
 spec:
   selector:
-    app: alarm-service
+    app: alert-service
   ports:
     - port: 8084
       targetPort: 8084
