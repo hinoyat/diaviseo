@@ -7,6 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.*
 import com.example.diaviseo.ui.components.BottomNavigationBar
 import com.example.diaviseo.ui.main.components.FabOverlayMenu
+import com.example.diaviseo.ui.mypageedit.screen.PhysicalInfoEditScreen
+import com.example.diaviseo.ui.mypageedit.screen.UserProfileEditScreen
 import com.example.diaviseo.ui.register.bodyregister.BodyDataRegisterScreen
 import com.example.diaviseo.ui.register.diet.DietRegisterMainScreen
 import com.example.diaviseo.ui.register.exercise.ExerciseRegisterMainScreen
@@ -56,11 +58,29 @@ fun MainScreen() {
                     GoalScreen(navController)
                 }
             }
+            // 마이페이지
             composable("my") {
-                // MyScreen() 등 필요 시 추가
+                Box(modifier = Modifier.padding(innerPadding)) {
+                    MyScreen(navController)
+                }
+            }
+            // 회원 정보 수정
+            composable("edit_profile") {
+                UserProfileEditScreen(navController)
             }
 
-            // ✅ 등록화면은 padding 없음
+            composable("edit_physical_info") {
+                PhysicalInfoEditScreen(
+                    navController = navController,
+                    initialHeight = 168,
+                    initialWeight = 50,
+                    onSave = { height, weight ->
+                        // TODO: ViewModel에 전달하거나 저장 처리
+                    }
+                )
+            }
+
+
             composable("body_register") {
                 BodyDataRegisterScreen(navController)
             }
@@ -73,6 +93,8 @@ fun MainScreen() {
             composable("diet_ai_register") {
                 DietAiRegisterScreen(navController)
             }
+            
+
 
         }
     }
