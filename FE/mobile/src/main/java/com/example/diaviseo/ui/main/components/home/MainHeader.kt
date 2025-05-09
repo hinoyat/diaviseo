@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,7 +21,10 @@ import com.example.diaviseo.ui.theme.*
 import java.util.Locale
 
 @Composable
-fun MainHeader(userNickname: String, navController: NavHostController) {
+fun MainHeader(
+    userNickname: String?,
+    navController: NavHostController
+) {
     val today = remember { Calendar.getInstance().time }
     val formatter = remember { SimpleDateFormat("M월 d일 E요일", Locale.KOREA) }
     val formattedDate = formatter.format(today)
@@ -39,22 +43,26 @@ fun MainHeader(userNickname: String, navController: NavHostController) {
             Spacer(modifier = Modifier.height(6.dp))
 
             // “어서오세요 김디아 님!”
-            Text(
-                buildAnnotatedString {
-                    append("어서오세요 ")
-                    withStyle(
-                        style = SpanStyle(
-                            background = Color(0x661673FF), // 40% 불투명도 main1
-                            fontWeight = FontWeight.Normal
-                        )
-                    ) {
-                        append(userNickname)
-                    }
-                    append(" 님!")
-                },
-                style = medium20,
-                color = Color(0xFF222222)
-            )
+            if (userNickname != null) {
+                Text(
+                    buildAnnotatedString {
+                        append("어서오세요 ")
+                        withStyle(
+                            style = SpanStyle(
+                                background = Color(0x661673FF), // 40% 불투명도 main1
+                                fontWeight = FontWeight.Normal
+                            )
+                        ) {
+                            append(userNickname)
+                        }
+                        append(" 님!")
+                    },
+                    style = medium20,
+                    color = Color(0xFF222222)
+                )
+            } else {
+                CircularProgressIndicator()
+            }
         }
 
         // 알림 버튼

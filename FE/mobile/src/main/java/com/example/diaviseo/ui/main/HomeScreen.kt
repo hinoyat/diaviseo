@@ -18,7 +18,7 @@ import com.example.diaviseo.ui.main.components.home.WeightPredictionSection
 
 @Composable
 fun HomeScreen(
-    userNickname: String,
+    userNickname: String?,
     navController: NavHostController
 ) {
     Box(

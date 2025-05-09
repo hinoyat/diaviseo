@@ -22,12 +22,14 @@ fun MainScreen() {
     LaunchedEffect(Unit) {
         profileViewModel.fetchMyProfile()
     }
-    val profile = profileViewModel.myProfile
-    Log.d("Mainscreen profileviewModel", "$profile")
+    val profile by profileViewModel.myProfile.collectAsState()
+    Log.d("Mainscreen profileviewModel", "프로필은? $profile")
+
+    val userNickname by remember(profile) { mutableStateOf(profile?.nickname) }
 
     // 화면 이동을 관리해주는 내비게이션 컨트롤러
     val navController = rememberNavController()
-    val userNickname = "김디아"
+//    val userNickname = profile?.nickname
     val isFabMenuOpen = remember { mutableStateOf(false) }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
