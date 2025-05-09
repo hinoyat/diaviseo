@@ -1,5 +1,6 @@
 package com.s206.health.nutrition.food.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.s206.health.nutrition.food.entity.Food;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,6 +26,12 @@ public class FoodDetailResponse {
     private boolean isFavorite;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+
+    @JsonProperty("isFavorite")
+    public boolean getIsFavorite() {
+        return isFavorite;
+    }
 
     public static FoodDetailResponse toDto(Food food, boolean isFavorite) {
         return FoodDetailResponse.builder()

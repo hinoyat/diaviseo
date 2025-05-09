@@ -1,5 +1,6 @@
 package com.s206.health.nutrition.food.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.s206.health.nutrition.food.entity.Food;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,6 +16,11 @@ public class FoodListResponse {
     private Integer calorie;
     private BigDecimal baseAmount;
     private boolean isFavorite;
+
+    @JsonProperty("isFavorite")
+    public boolean getIsFavorite() {
+        return isFavorite;
+    }
 
     public static FoodListResponse toDto(Food food, boolean isFavorite) {
         return FoodListResponse.builder()
