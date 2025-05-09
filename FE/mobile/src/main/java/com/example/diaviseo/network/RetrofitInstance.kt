@@ -29,20 +29,31 @@ object RetrofitInstance {
             TokenDataStore.getAccessToken(context).first() ?: ""
         }
 
-        Log.d("Network", "accesstoken 불러오기 : $accessToken")
         val newRequest = chain.request().newBuilder()
             .addHeader("Authorization", "Bearer $accessToken")
             .build()
-        val response = chain.proceed(newRequest)
-        // 401 오류가 나면 자동으로 토큰 갱신 요청 => 우왕 나중에 써야지
-//                if (response.code == 401) {
-//                    val newToken = refreshAuthToken() // 새로운 토큰을 갱신하는 함수
-//                    val newRequest = request.newBuilder()
-//                        .addHeader("Authorization", "Bearer $newToken")
-//                        .build()
-//
-//                    // 새 토큰으로 요청 다시 보내기
-//                    return@addInterceptor chain.proceed(newRequest)
+        var response = chain.proceed(newRequest)
+
+        // 401 오류가 나면 자동으로 토큰 갱신 요청
+        if (response.code == 401) {
+            val newResponse = runBlocking { refreshService.refreshAuthToken() }
+            // 응답 받은 값으로 토큰 갱신하기
+            runBlocking {
+                TokenDataStore.saveAccessToken(context, newResponse.data?.accessToken ?: "")
+                TokenDataStore.saveRefreshToken(context, newResponse.data?.refreshToken ?: "")
+            }
+            val newAccessToken = newResponse.data?.accessToken
+
+            // 새 토큰으로 요청 다시 만들기
+            val newRequest = chain.request().newBuilder()
+                .addHeader("Authorization", "Bearer $newAccessToken")
+                .build()
+
+            response = chain.proceed(newRequest)
+        }
+
+        return@Interceptor response
+        //
         Log.d("Network", "Response Code: ${response.code}")
         response
     }
@@ -61,6 +72,33 @@ object RetrofitInstance {
             .addConverterFactory(GsonConverterFactory.create())
             .client(OkHttpClient.Builder()
                 .addInterceptor(logging)
+                .build())
+            .build()
+            .create(AuthApiService::class.java)
+    }
+
+    // AuthApiService 중 refreshtoken 쪽만
+    val refreshService: AuthApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl(BuildConfig.BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(OkHttpClient.Builder()
+                .addInterceptor(logging)
+                .addInterceptor { chain ->
+                    val context = AppContextHolder.appContext
+
+                    // DataStore의 Flow에서 값 1개만 꺼내기
+                    val refreshToken = runBlocking {
+                        TokenDataStore.getRefreshToken(context).first() ?: ""
+                    }
+
+                    val newRequest = chain.request().newBuilder()
+                        .addHeader("Authorization", "Bearer $refreshToken")
+                        .build()
+                    val response = chain.proceed(newRequest)
+                    Log.d("Network", "Response Code: ${response.code}")
+                    response
+                }
                 .build())
             .build()
             .create(AuthApiService::class.java)

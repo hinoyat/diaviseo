@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.*
 import com.example.diaviseo.ui.components.BottomNavigationBar
 import com.example.diaviseo.ui.main.components.FabOverlayMenu
@@ -23,22 +24,37 @@ import com.example.diaviseo.viewmodel.ProfileViewModel
 @Composable
 fun MainScreen() {
     // 화면 뜨자마자 회원정보 불러오기
-    val profileViewModel = ProfileViewModel()
+    val profileViewModel: ProfileViewModel = viewModel()
     // 화면 진입 시 한 번 실행됨
     LaunchedEffect(Unit) {
         profileViewModel.fetchMyProfile()
     }
-    val profile = profileViewModel.myProfile
-    Log.d("Mainscreen profileviewModel", "$profile")
+
+    val profile by profileViewModel.myProfile.collectAsState()
+    // profile이 바뀔 때마다 로그 찍고싶을 때 사용
+//    LaunchedEffect(profile) {
+//        Log.d("Mainscreen", "nickname 값 변경 감지: ${profile?.nickname}")
+//    }
 
     // 화면 이동을 관리해주는 내비게이션 컨트롤러
     val navController = rememberNavController()
-    val userNickname = "김디아"
+//    val userNickname = profile?.nickname
     val isFabMenuOpen = remember { mutableStateOf(false) }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val hideBottomBarRoutes = listOf("body_register", "diet_register", "exercise_register","diet_ai_register")
+    val hideBottomBarRoutes = listOf(
+        "body_register",
+        "diet_register",
+        "exercise_register",
+        "diet_ai_register",
+        "edit_allergy",
+        "edit_disease",
+        "edit_exercise",
+        "faq",
+        "edit_profile",
+        "edit_physical_info"
+        )
     val isBottomBarVisible = currentRoute !in hideBottomBarRoutes
 
     Scaffold(
@@ -60,7 +76,7 @@ fun MainScreen() {
             composable("home") {
                 // 기존 HomeScreen을 그대로 재사용
                 Box(modifier = Modifier.padding(innerPadding)) {
-                    HomeScreen(userNickname = userNickname, navController = navController)
+                    HomeScreen(navController = navController, viewModel = profileViewModel)
                 }
             }
             composable("chat") {
@@ -122,8 +138,6 @@ fun MainScreen() {
             composable("diet_ai_register") {
                 DietAiRegisterScreen(navController)
             }
-            
-
 
         }
     }
