@@ -101,7 +101,7 @@ public class ExerciseService {
         }
 
         // 1. 운동 종류 존재 여부 확인
-        ExerciseType exerciseType = exerciseTypeRepository.findById(request.getExerciseTypeId())
+        ExerciseType exerciseType = exerciseTypeRepository.findByExerciseNumberAndIsDeletedFalse(request.getExerciseNumber())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 운동 종류입니다."));
 
         // 2. 칼로리 계산
@@ -114,7 +114,7 @@ public class ExerciseService {
 
         Exercise exercise = Exercise.builder()
                 .userId(userId)  // 경로 변수의 userId 사용
-                .exerciseTypeId(request.getExerciseTypeId())
+                .exerciseTypeId(exerciseType.getExerciseNumber()) // 조회한 exerciseType 에서 exerciseTypeId를 가져옴
                 .exerciseDate(exerciseDate)
                 .exerciseTime(request.getExerciseTime())
                 .exerciseCalorie(totalCalorie)
@@ -155,7 +155,7 @@ public class ExerciseService {
         }
 
         // 2. 운동 종류 존재 여부 확인
-        ExerciseType exerciseType = exerciseTypeRepository.findById(request.getExerciseTypeId())
+        ExerciseType exerciseType = exerciseTypeRepository.findByExerciseNumberAndIsDeletedFalse(request.getExerciseNumber())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 운동 종류 입니다."));
 
         // 3. 칼로리
@@ -169,7 +169,7 @@ public class ExerciseService {
         Exercise updatedExercise = Exercise.builder()
                 .exerciseId(exercise.getExerciseId())
                 .userId(exercise.getUserId())  // 기존 userId 유지
-                .exerciseTypeId(request.getExerciseTypeId())
+                .exerciseTypeId(exerciseType.getExerciseNumber())
                 .exerciseDate(request.getExerciseDate())
                 .exerciseTime(request.getExerciseTime())
                 .exerciseCalorie(totalCalorie)
