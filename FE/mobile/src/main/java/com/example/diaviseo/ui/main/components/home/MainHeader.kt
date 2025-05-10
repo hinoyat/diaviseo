@@ -30,7 +30,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun MainHeader(
     navController: NavHostController,
-    viewModel: ProfileViewModel = viewModel()
+    viewModel: ProfileViewModel
 ) {
     val today = remember { Calendar.getInstance().time }
     val formatter = remember { SimpleDateFormat("M월 d일 E요일", Locale.KOREA) }

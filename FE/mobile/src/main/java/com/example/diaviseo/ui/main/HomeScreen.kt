@@ -1,18 +1,18 @@
 package com.example.diaviseo.ui.main
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.background
-import androidx.compose.runtime.LaunchedEffect
-import androidx.navigation.NavHostController
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.diaviseo.R
+import com.example.diaviseo.ui.components.LoadingOverlay
 import com.example.diaviseo.ui.main.components.home.AiAssistantCard
 import com.example.diaviseo.ui.main.components.home.CaloriesGaugeSection
 import com.example.diaviseo.ui.main.components.home.MainHeader
@@ -21,21 +21,36 @@ import com.example.diaviseo.ui.main.components.home.SummaryCard
 import com.example.diaviseo.ui.main.components.home.WeightPredictionSection
 import com.example.diaviseo.viewmodel.HomeViewModel
 import com.example.diaviseo.viewmodel.ProfileViewModel
+import java.time.LocalDate
 
 @Composable
 fun HomeScreen(
     navController: NavHostController,
     viewModel: ProfileViewModel
 ) {
-    val lifecycleOwner = LocalLifecycleOwner.current
-
-    // 화면 뜨자마자 회원정보 불러오기
     val homeViewModel: HomeViewModel = viewModel()
-    // 화면 진입 시 한 번 실행됨
-    LaunchedEffect(Unit) {
-        homeViewModel
+
+    // 현재 이 composable의 BackStackEntry를 State로 구독
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    // 그 엔트리에서 route만 꺼내기
+    val currentRoute: String? = navBackStackEntry?.destination?.route
+
+    // route가 이 화면일 때만 호출
+    val today = remember { LocalDate.now() }
+    LaunchedEffect(currentRoute) {
+        if (currentRoute == "home") {
+            homeViewModel.fetchDailyNutrition(today.toString())
+        }
     }
 
+    val recommendedEat by viewModel.recommendedEat.collectAsState()
+    val recommendedFit by viewModel.recommendedFit.collectAsState()
+
+    val totalCalorie by homeViewModel.totalCalorie.collectAsState()
+
+    val remainingCalorie = recommendedEat - totalCalorie
+
+    LoadingOverlay(isVisible = homeViewModel.isLoading.collectAsState().value)
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -66,8 +81,8 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             CaloriesGaugeSection(
-                consumedCalorie = 1080,
-                remainingCalorie = 150,
+                consumedCalorie = totalCalorie,
+                remainingCalorie = remainingCalorie,
                 burnedCalorie = 180,
                 extraBurned = 100,
                 navController = navController
@@ -75,7 +90,10 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            SummaryCardSection(navController = navController)
+            SummaryCardSection(
+                navController = navController,
+                viewModel = viewModel
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -97,7 +115,13 @@ fun HomeScreen(
 }
 
 @Composable
-fun SummaryCardSection(navController: NavHostController) {
+fun SummaryCardSection(
+    navController: NavHostController,
+    viewModel: ProfileViewModel
+) {
+    val recommendedEat by viewModel.recommendedEat.collectAsState()
+    val recommendedFit by viewModel.recommendedFit.collectAsState()
+
     Row(
         modifier = Modifier
             .fillMaxWidth(),
@@ -106,8 +130,8 @@ fun SummaryCardSection(navController: NavHostController) {
         SummaryCard(
             title = "오늘 활동 칼로리",
             iconResId = R.drawable.main_exercise,
-            current = 96,   // 예시
-            goal = 256,   // 예시
+            current = 96,
+            goal = recommendedFit,
             goalExceeded = false,
             destinationRoute = "exercise_detail",
             navController = navController,
@@ -117,9 +141,9 @@ fun SummaryCardSection(navController: NavHostController) {
         SummaryCard(
             title = "오늘 섭취 칼로리",
             iconResId = R.drawable.main_diet,
-            current = 1796,   // 예시
-            goal = 1533,   // 예시
-            goalExceeded = 1796 > 1533,
+            current = 1796,
+            goal = recommendedEat,
+            goalExceeded = 1796 > recommendedEat,
             destinationRoute = "exercise_detail",
             navController = navController,
             modifier = Modifier.weight(1f)
