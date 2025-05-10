@@ -1,13 +1,16 @@
 package com.example.diaviseo.ui.main
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.background
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.diaviseo.R
 import com.example.diaviseo.ui.main.components.home.AiAssistantCard
@@ -16,13 +19,23 @@ import com.example.diaviseo.ui.main.components.home.MainHeader
 import com.example.diaviseo.ui.main.components.home.StepCountCard
 import com.example.diaviseo.ui.main.components.home.SummaryCard
 import com.example.diaviseo.ui.main.components.home.WeightPredictionSection
+import com.example.diaviseo.viewmodel.HomeViewModel
 import com.example.diaviseo.viewmodel.ProfileViewModel
 
 @Composable
 fun HomeScreen(
     navController: NavHostController,
-    viewModel: ProfileViewModel = viewModel()
+    viewModel: ProfileViewModel
 ) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // 화면 뜨자마자 회원정보 불러오기
+    val homeViewModel: HomeViewModel = viewModel()
+    // 화면 진입 시 한 번 실행됨
+    LaunchedEffect(Unit) {
+        homeViewModel
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -92,7 +105,7 @@ fun SummaryCardSection(navController: NavHostController) {
     ) {
         SummaryCard(
             title = "오늘 활동 칼로리",
-            iconResId = com.example.diaviseo.R.drawable.main_exercise,
+            iconResId = R.drawable.main_exercise,
             current = 96,   // 예시
             goal = 256,   // 예시
             goalExceeded = false,
