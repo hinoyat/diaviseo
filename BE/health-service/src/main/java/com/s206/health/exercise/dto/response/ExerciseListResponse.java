@@ -12,6 +12,7 @@ public class ExerciseListResponse {
     private Integer exerciseId;
     private Integer userId;
     private Integer exerciseTypeId;
+    private Integer exerciseNumber;
     private String exerciseName; // ExerciseType 에서 조회
     private String exerciseCategoryName; // ExerciseCategory 에서 조회
     private LocalDateTime exerciseDate;

@@ -22,6 +22,7 @@ public class ExerciseMapper {
 
         String exerciseName = exerciseType != null ? exerciseType.getExerciseName() : "";
         String categoryName = exerciseCategory != null ? exerciseCategory.getExerciseCategoryName() : "";
+        Integer exerciseNumber = exerciseType != null ? exerciseType.getExerciseNumber() : null;
 
         // 칼로리가 제공되지 않은 경우 운동 시간과 분당 칼로리로 계산
         if (calculatedCalorie == null && exerciseType != null) {
@@ -33,6 +34,7 @@ public class ExerciseMapper {
                 .userId(exercise.getUserId())
                 .exerciseTypeId(exercise.getExerciseTypeId())
                 .exerciseName(exerciseName)
+                .exerciseNumber(exerciseNumber)
                 .exerciseCategoryName(categoryName)
                 .exerciseDate(exercise.getExerciseDate())
                 .exerciseTime(exercise.getExerciseTime())
