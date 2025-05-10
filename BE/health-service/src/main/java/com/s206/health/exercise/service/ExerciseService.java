@@ -114,7 +114,7 @@ public class ExerciseService {
 
         Exercise exercise = Exercise.builder()
                 .userId(userId)  // 경로 변수의 userId 사용
-                .exerciseTypeId(exerciseType.getExerciseNumber()) // 조회한 exerciseType 에서 exerciseTypeId를 가져옴
+                .exerciseTypeId(exerciseType.getExerciseTypeId())
                 .exerciseDate(exerciseDate)
                 .exerciseTime(request.getExerciseTime())
                 .exerciseCalorie(totalCalorie)
@@ -169,7 +169,7 @@ public class ExerciseService {
         Exercise updatedExercise = Exercise.builder()
                 .exerciseId(exercise.getExerciseId())
                 .userId(exercise.getUserId())  // 기존 userId 유지
-                .exerciseTypeId(exerciseType.getExerciseNumber())
+                .exerciseTypeId(exerciseType.getExerciseTypeId())
                 .exerciseDate(request.getExerciseDate())
                 .exerciseTime(request.getExerciseTime())
                 .exerciseCalorie(totalCalorie)
@@ -253,10 +253,10 @@ public class ExerciseService {
                 .map(exerciseType -> ExerciseTypeResponse.builder()
                         .exerciseTypeId(exerciseType.getExerciseTypeId())
                         .exerciseCategoryId(exerciseType.getExerciseCategoryId())
+                        .exerciseNumber(exerciseType.getExerciseNumber())
                         .exerciseName(exerciseType.getExerciseName())
                         .exerciseEnglishName(exerciseType.getExerciseEnglishName())
                         .exerciseCalorie(exerciseType.getExerciseCalorie())
-                        .exerciseNumber(exerciseType.getExerciseNumber())
                         .createdAt(exerciseType.getCreatedAt())
                         .isFavorite(favoriteExerciseTypeIds.contains(exerciseType.getExerciseTypeId()))
                         .build())
