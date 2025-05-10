@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.diaviseo.ui.theme.DiaViseoColors
 
 @Composable
 fun SelectableTag(
@@ -19,8 +20,8 @@ fun SelectableTag(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val backgroundColor = if (isSelected) Color(0xFF0066CC) else Color(0xFFF2F2F2)
-    val textColor = if (isSelected) Color.White else Color.Black
+    val backgroundColor = if (isSelected) DiaViseoColors.Main1 else DiaViseoColors.Callout
+    val textColor = if (isSelected) Color.White else DiaViseoColors.Basic
 
     Box(
         modifier = Modifier

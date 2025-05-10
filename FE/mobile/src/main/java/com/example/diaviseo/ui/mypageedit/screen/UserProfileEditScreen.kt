@@ -21,6 +21,7 @@ import com.example.diaviseo.R
 import com.example.diaviseo.ui.components.CommonTopBar
 import com.example.diaviseo.ui.mypageedit.bottomsheet.EditBirthDateBottomSheet
 import com.example.diaviseo.ui.mypageedit.bottomsheet.EditNicknameBottomSheet
+import com.example.diaviseo.ui.theme.DiaViseoColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,33 +32,29 @@ fun UserProfileEditScreen(navController: NavHostController) {
     var showNicknameSheet by remember { mutableStateOf(false) }
     var showBirthDateSheet by remember { mutableStateOf(false) }
 
-    // 닉네임 BottomSheet
     if (showNicknameSheet) {
         ModalBottomSheet(
+            containerColor = Color.White,
             onDismissRequest = { showNicknameSheet = false },
             sheetState = nicknameSheetState
         ) {
             EditNicknameBottomSheet(
                 initialNickname = "디아25",
-                onSave = {
-                    showNicknameSheet = false
-                },
+                onSave = { showNicknameSheet = false },
                 onDismiss = { showNicknameSheet = false }
             )
         }
     }
 
-    // 생년월일 BottomSheet
     if (showBirthDateSheet) {
         ModalBottomSheet(
+            containerColor = Color.White,
             onDismissRequest = { showBirthDateSheet = false },
             sheetState = birthDateSheetState
         ) {
             EditBirthDateBottomSheet(
                 initialBirthDate = "2000.02.14",
-                onSave = {
-                    showBirthDateSheet = false
-                },
+                onSave = { showBirthDateSheet = false },
                 onDismiss = { showBirthDateSheet = false }
             )
         }
@@ -65,16 +62,14 @@ fun UserProfileEditScreen(navController: NavHostController) {
 
     Scaffold(
         topBar = {
-            CommonTopBar(
-                onLeftActionClick = { navController.popBackStack() }
-            )
+            CommonTopBar(onLeftActionClick = { navController.popBackStack() })
         }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(32.dp))
@@ -89,7 +84,8 @@ fun UserProfileEditScreen(navController: NavHostController) {
                 text = "다이비서",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(top = 8.dp, bottom = 24.dp)
+                modifier = Modifier.padding(top = 8.dp, bottom = 24.dp),
+                color = DiaViseoColors.Basic
             )
 
             Text(
@@ -98,7 +94,8 @@ fun UserProfileEditScreen(navController: NavHostController) {
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier
                     .align(Alignment.Start)
-                    .padding(bottom = 16.dp)
+                    .padding(bottom = 16.dp),
+                color = DiaViseoColors.Basic
             )
 
             ProfileInfoRow(title = "이름", value = "김디아")
@@ -112,26 +109,26 @@ fun UserProfileEditScreen(navController: NavHostController) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 32.dp),
+                    .padding(bottom = 32.dp)
+                    .navigationBarsPadding(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Text(
                     text = "회원탈퇴",
                     fontSize = 14.sp,
-                    color = Color.Gray,
+                    color = DiaViseoColors.Unimportant,
                     modifier = Modifier.clickable { /* TODO */ }
                 )
                 Text(
                     text = "로그아웃",
                     fontSize = 14.sp,
-                    color = Color.Gray,
+                    color = DiaViseoColors.Unimportant,
                     modifier = Modifier.clickable { /* TODO */ }
                 )
             }
         }
     }
 }
-
 
 @Composable
 fun ProfileInfoRow(title: String, value: String, onClick: (() -> Unit)? = null) {
@@ -143,23 +140,28 @@ fun ProfileInfoRow(title: String, value: String, onClick: (() -> Unit)? = null) 
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = title, fontSize = 14.sp, color = Color.Gray)
+        Text(text = title, fontSize = 14.sp, color = DiaViseoColors.Unimportant)
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = value, fontSize = 14.sp)
+            Text(
+                text = value,
+                fontSize = 14.sp,
+                fontWeight = if (onClick != null) FontWeight.Medium else FontWeight.Normal,
+                color = DiaViseoColors.Basic
+            )
             if (onClick != null) {
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowRight,
                     contentDescription = "수정",
-                    tint = Color.Gray
+                    tint = DiaViseoColors.Unimportant
                 )
             }
         }
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun UserProfileEditScreenPreview() {
     val navController = rememberNavController()
     UserProfileEditScreen(navController = navController)
 }
-

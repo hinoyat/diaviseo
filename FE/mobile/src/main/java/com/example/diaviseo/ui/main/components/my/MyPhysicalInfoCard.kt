@@ -11,9 +11,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.diaviseo.ui.theme.DiaViseoColors
 
 @Composable
 fun MyPhysicalInfoCard(
@@ -22,24 +24,28 @@ fun MyPhysicalInfoCard(
     onEditClick: () -> Unit = {}
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // 상단 제목 + 수정 (클릭 제거됨)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "나의 신체정보", fontSize = 16.sp)
+                Text(
+                    text = "나의 신체정보",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = DiaViseoColors.Basic
+                )
                 Text(
                     text = "수정",
                     fontSize = 14.sp,
-                    color = Color.Gray, // 클릭 제거 + 색상 연하게
+                    fontWeight = FontWeight.SemiBold,
+                    color = DiaViseoColors.Main1,
                     modifier = Modifier.clickable { onEditClick() }
                 )
             }
@@ -51,19 +57,23 @@ fun MyPhysicalInfoCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "키", fontSize = 14.sp, color = Color.Gray)
-                Text(text = "${height}cm", fontSize = 16.sp)
+                Text(text = "키", fontSize = 14.sp, color = DiaViseoColors.Unimportant)
+                Text(text = "${height}cm", fontSize = 16.sp, color = DiaViseoColors.Basic)
             }
 
-            Divider(color = Color(0xFFE0E0E0), thickness = 1.dp, modifier = Modifier.padding(vertical = 8.dp))
+            Divider(
+                color = DiaViseoColors.BorderGray,
+                thickness = 1.dp,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "몸무게", fontSize = 14.sp, color = Color.Gray)
-                Text(text = "${weight}kg", fontSize = 16.sp)
+                Text(text = "몸무게", fontSize = 14.sp, color = DiaViseoColors.Unimportant)
+                Text(text = "${weight}kg", fontSize = 16.sp, color = DiaViseoColors.Basic)
             }
         }
     }

@@ -3,19 +3,19 @@ package com.example.diaviseo.ui.mypageedit.bottomsheet
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.diaviseo.R
-import com.example.diaviseo.ui.components.Exercise
-import com.example.diaviseo.ui.components.ExerciseCategory
-import com.example.diaviseo.ui.components.SelectableCategory
-import com.example.diaviseo.ui.components.SelectableExerciseItem
+import com.example.diaviseo.ui.mypageedit.component.Exercise
+import com.example.diaviseo.ui.mypageedit.component.ExerciseCategory
+import com.example.diaviseo.ui.mypageedit.component.SelectableCategory
+import com.example.diaviseo.ui.mypageedit.component.SelectableExerciseItem
 import com.example.diaviseo.ui.components.onboarding.MainButton
+import com.example.diaviseo.ui.theme.DiaViseoColors
 
 @Composable
 fun ExerciseSearchBottomSheetContent(
@@ -107,12 +107,9 @@ fun ExerciseSearchBottomSheetContent(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        // ✅ TODO 자리: 여기서 API 연동 가능
                         if (pendingAction == "add") {
-                            // TODO: 운동 추가 API 호출
                             onSelectExercise(pendingExercise!!)
                         } else {
-                            // TODO: 운동 삭제 API 호출
                             onRemoveExercise(pendingExercise!!)
                         }
 
@@ -120,7 +117,7 @@ fun ExerciseSearchBottomSheetContent(
                         pendingAction = null
                     }
                 ) {
-                    Text("예")
+                    Text("예", color = DiaViseoColors.Main1)
                 }
             },
             dismissButton = {
@@ -130,10 +127,12 @@ fun ExerciseSearchBottomSheetContent(
                         pendingAction = null
                     }
                 ) {
-                    Text("아니오")
+                    Text("아니오", color = DiaViseoColors.Unimportant)
                 }
-            }
+            },
+            containerColor = Color.White
         )
+
     }
 }
 

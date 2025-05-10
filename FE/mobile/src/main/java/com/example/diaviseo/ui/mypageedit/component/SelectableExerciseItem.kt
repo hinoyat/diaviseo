@@ -1,4 +1,4 @@
-package com.example.diaviseo.ui.components
+package com.example.diaviseo.ui.mypageedit.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,6 +16,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.diaviseo.R
+import com.example.diaviseo.ui.theme.DiaViseoColors
 
 // 🔹 더미용 Exercise 모델 (임시)
 data class Exercise(
@@ -50,14 +51,15 @@ fun SelectableExerciseItem(
             )
             Text(
                 text = exercise.name,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
+                color = DiaViseoColors.Basic
             )
         }
 
         Icon(
             imageVector = if (isSelected) Icons.Default.Check else Icons.Default.Add,
             contentDescription = if (isSelected) "선택됨" else "추가",
-            tint = if (isSelected) MaterialTheme.colorScheme.primary else Color(0xFFB0B0FF),
+            tint = if (isSelected) DiaViseoColors.Main1 else DiaViseoColors.Middle,
             modifier = Modifier.size(20.dp)
         )
     }

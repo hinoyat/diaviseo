@@ -1,4 +1,4 @@
-package com.example.diaviseo.ui.components
+package com.example.diaviseo.ui.mypageedit.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.diaviseo.ui.theme.DiaViseoColors
 
 // 🔹 더미 ExerciseCategory 모델 (임시)
 data class ExerciseCategory(
@@ -37,15 +38,14 @@ fun SelectableCategory(
 
             Surface(
                 shape = RoundedCornerShape(20.dp),
-                color = if (isSelected) MaterialTheme.colorScheme.primary
-                else Color(0xFFF0F0F0),
+                color = if (isSelected) DiaViseoColors.Main1 else DiaViseoColors.Callout,
                 modifier = Modifier
                     .clickable { onSelectCategory(category.id) }
             ) {
                 Text(
                     text = category.name,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    color = if (isSelected) Color.White else Color.Black,
+                    color = if (isSelected) Color.White else DiaViseoColors.Basic,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

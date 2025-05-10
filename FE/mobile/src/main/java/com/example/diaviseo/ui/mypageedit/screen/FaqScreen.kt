@@ -5,13 +5,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.diaviseo.ui.components.CommonTopBar
+import com.example.diaviseo.ui.theme.DiaViseoColors
 
 data class FaqItem(val question: String, val answer: String)
 
@@ -49,25 +54,48 @@ fun FaqScreen(navController: NavHostController) {
 fun FaqExpandableItem(faq: FaqItem) {
     var expanded by remember { mutableStateOf(false) }
 
-    Column(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { expanded = !expanded }
-            .padding(vertical = 12.dp)
+            .padding(vertical = 8.dp),
+        shape = MaterialTheme.shapes.medium,
+        color = DiaViseoColors.Callout,
+        tonalElevation = 2.dp
     ) {
-        Text(
-            text = faq.question,
-            fontSize = 16.sp,
-            style = MaterialTheme.typography.titleMedium
-        )
-        AnimatedVisibility(visible = expanded) {
-            Text(
-                text = faq.answer,
-                fontSize = 14.sp,
-                modifier = Modifier.padding(top = 4.dp),
-                style = MaterialTheme.typography.bodyMedium
-            )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = !expanded }
+                .padding(16.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = faq.question,
+                    fontSize = 16.sp,
+                    color = DiaViseoColors.Basic,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = if (expanded) "접기" else "펼치기",
+                    tint = DiaViseoColors.Middle
+                )
+            }
+
+            AnimatedVisibility(visible = expanded) {
+                Text(
+                    text = faq.answer,
+                    fontSize = 14.sp,
+                    color = DiaViseoColors.Unimportant,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 8.dp, end = 4.dp)
+                )
+            }
         }
-        Divider(modifier = Modifier.padding(top = 12.dp))
     }
 }
