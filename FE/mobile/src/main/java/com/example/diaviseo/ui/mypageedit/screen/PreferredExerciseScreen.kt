@@ -12,14 +12,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.diaviseo.R
 import com.example.diaviseo.ui.components.CommonTopBar
-import com.example.diaviseo.ui.components.Exercise
-import com.example.diaviseo.ui.components.ExerciseCategory
-import com.example.diaviseo.ui.components.SelectableExerciseItem
+import com.example.diaviseo.ui.mypageedit.component.Exercise
+import com.example.diaviseo.ui.mypageedit.component.ExerciseCategory
+import com.example.diaviseo.ui.mypageedit.component.SelectableExerciseItem
 import com.example.diaviseo.ui.mypageedit.bottomsheet.ExerciseSearchBottomSheetContent
+import com.example.diaviseo.ui.theme.DiaViseoColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,11 +58,10 @@ fun PreferredExerciseScreen(navController: NavHostController) {
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = {
-                        // TODO: API 저장 호출
                         Toast.makeText(context, "운동 정보가 저장되었습니다", Toast.LENGTH_SHORT).show()
                         navController.popBackStack()
                     }) {
-                        Text("완료", color = Color(0xFF1673FF))
+                        Text("완료", color = DiaViseoColors.Main1)
                     }
                 }
             }
@@ -82,10 +84,13 @@ fun PreferredExerciseScreen(navController: NavHostController) {
                         contentDescription = "운동 없음"
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("아직 추가한 운동이 없어요")
+                    Text("아직 추가한 운동이 없어요", color = DiaViseoColors.Basic)
                     Spacer(modifier = Modifier.height(24.dp))
-                    Button(onClick = { showBottomSheet = true }) {
-                        Text("운동 추가하기")
+                    Button(
+                        onClick = { showBottomSheet = true },
+                        colors = ButtonDefaults.buttonColors(containerColor = DiaViseoColors.Main1)
+                    ) {
+                        Text("운동 추가하기", color = Color.White)
                     }
                 }
             } else {
@@ -109,9 +114,10 @@ fun PreferredExerciseScreen(navController: NavHostController) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
                         onClick = { showBottomSheet = true },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = DiaViseoColors.Main1)
                     ) {
-                        Text("운동 추가하기")
+                        Text("운동 추가하기", color = Color.White)
                     }
                 }
             }
@@ -136,23 +142,30 @@ fun PreferredExerciseScreen(navController: NavHostController) {
                 AlertDialog(
                     onDismissRequest = { pendingExercise = null },
                     title = { Text("운동 삭제") },
-                    text = { Text("${pendingExercise!!.name} 운동을 삭제하시겠습니까?") },
+                    text = { Text("${'$'}{pendingExercise!!.name} 운동을 삭제하시겠습니까?") },
                     confirmButton = {
                         TextButton(onClick = {
-                            // TODO: 삭제 API 호출
                             selectedExercises = selectedExercises - pendingExercise!!
+                            Toast.makeText(context, "운동이 삭제되었습니다", Toast.LENGTH_SHORT).show()
                             pendingExercise = null
                         }) {
-                            Text("예")
+                            Text("예", color = DiaViseoColors.Main1)
                         }
                     },
                     dismissButton = {
                         TextButton(onClick = { pendingExercise = null }) {
-                            Text("아니오")
+                            Text("아니오", color = DiaViseoColors.Unimportant)
                         }
-                    }
+                    },
+                    containerColor = Color.White
                 )
             }
         }
     }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun PreferredExerciseScreenPreview() {
+    PreferredExerciseScreen(navController = rememberNavController())
 }
