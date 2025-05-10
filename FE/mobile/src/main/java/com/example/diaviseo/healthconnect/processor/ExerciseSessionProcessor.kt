@@ -1,7 +1,7 @@
 package com.example.diaviseo.healthconnect.processor
 
 import androidx.health.connect.client.records.ExerciseSessionRecord
-import com.example.diaviseo.network.ExerciseRecordRequest
+import com.example.diaviseo.network.exercise.dto.req.ExerciseRecordRequest
 import java.time.Duration
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
