@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.*
 import com.example.diaviseo.ui.components.BottomNavigationBar
 import com.example.diaviseo.ui.detail.ExerciseDetailScreen
@@ -76,7 +77,10 @@ fun MainScreen() {
             composable("home") {
                 // 기존 HomeScreen을 그대로 재사용
                 Box(modifier = Modifier.padding(innerPadding)) {
-                    HomeScreen(navController = navController, viewModel = profileViewModel)
+                    HomeScreen(
+                        navController = navController,
+                        viewModel = profileViewModel
+                    )
                 }
             }
             composable("chat") {
@@ -142,7 +146,8 @@ fun MainScreen() {
             // 운동 상세화면
             composable("exercise_detail") { backStackEntry ->
                 ExerciseDetailScreen(
-                    navController = navController
+                    navController = navController,
+                    viewModel = profileViewModel
                 )
             }
         }
