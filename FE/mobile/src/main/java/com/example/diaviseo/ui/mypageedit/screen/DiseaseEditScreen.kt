@@ -1,16 +1,13 @@
 package com.example.diaviseo.ui.mypageedit.screen
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -69,20 +66,41 @@ fun DiseaseEditScreen(
                         Toast.makeText(context, "저장이 완료되었습니다.", Toast.LENGTH_SHORT).show()
                         showConfirmDialog = false
                         navController?.popBackStack()
-                    }
-                ) { Text("저장") }
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = Color(0xFF1673FF) // ✅ 파란색
+                    )
+                ) {
+                    Text("저장")
+                }
             },
             dismissButton = {
                 TextButton(
                     onClick = {
                         showConfirmDialog = false
                         navController?.popBackStack()
-                    }
-                ) { Text("저장 안 함") }
-            }
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = Color.Gray // ✅ 회색
+                    )
+                ) {
+                    Text("저장 안 함")
+                }
+            },
+            containerColor = Color.White
         )
     }
-
+    BackHandler {
+        // 핸드폰 뒤로가기까지 포함해서 처리
+        if (isSearchMode) {
+            isSearchMode = false
+            searchValue = TextFieldValue("")
+        } else if (hasChanges) {
+            showConfirmDialog = true
+        } else {
+            navController?.popBackStack()
+        }
+    }
     Scaffold(
         topBar = {
             Column {
