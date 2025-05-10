@@ -10,6 +10,7 @@ import com.example.diaviseo.ui.theme.DiaViseoColors
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
+import com.example.diaviseo.ui.theme.*
 
 /**
  * [MainButton] - 디아비전 앱 전용 공통 버튼 컴포저블
@@ -48,7 +49,10 @@ fun MainButton(
         )
     )
         {
-            Text(text=text)
+            Text(
+                text=text,
+                style = regular16
+            )
         }
 
 }
