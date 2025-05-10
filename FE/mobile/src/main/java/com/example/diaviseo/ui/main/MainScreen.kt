@@ -25,7 +25,7 @@ fun MainScreen() {
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val hideBottomBarRoutes = listOf("body_register", "diet_register", "exercise_register", "diet_ai_register", "exercise_detail/{date}")
+    val hideBottomBarRoutes = listOf("body_register", "diet_register", "exercise_register", "diet_ai_register", "exercise_detail")
     val isBottomBarVisible = currentRoute !in hideBottomBarRoutes
 
     Scaffold(
