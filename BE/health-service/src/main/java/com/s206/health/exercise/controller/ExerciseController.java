@@ -5,6 +5,7 @@ import com.s206.health.exercise.dto.request.ExerciseCreateRequest;
 import com.s206.health.exercise.dto.request.ExerciseUpdateRequest;
 import com.s206.health.exercise.dto.response.ExerciseCategoryResponse;
 import com.s206.health.exercise.dto.response.ExerciseListResponse;
+import com.s206.health.exercise.dto.response.ExerciseTypeDetailResponse;
 import com.s206.health.exercise.dto.response.ExerciseTypeResponse;
 import com.s206.health.exercise.service.ExerciseService;
 import lombok.RequiredArgsConstructor;
@@ -89,6 +90,15 @@ public class ExerciseController {
             @PathVariable Integer exerciseCategoryId) {
         List<ExerciseTypeResponse> exercises = exerciseService.getExercisesByCategory(exerciseCategoryId, userId);
         return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK,"카테고리별 운동 조회 성공",exercises));
+    }
+
+    // 특정 운동 상세 조회
+    @GetMapping("types/{exerciseTypeId}")
+    public ResponseEntity<ResponseDto<ExerciseTypeDetailResponse>> getExerciseTypeDetail(
+            @RequestHeader("X-USER-ID") Integer userId,
+            @PathVariable Integer exerciseTypeId) {
+        ExerciseTypeDetailResponse response = exerciseService.getExerciseTypeDetail(exerciseTypeId, userId);
+        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "운동 상세 조회 성공", response));
     }
 
     // 최근에 한 운동 조회

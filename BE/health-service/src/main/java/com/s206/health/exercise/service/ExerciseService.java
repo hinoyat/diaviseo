@@ -6,6 +6,7 @@ import com.s206.health.exercise.dto.request.ExerciseCreateRequest;
 import com.s206.health.exercise.dto.request.ExerciseUpdateRequest;
 import com.s206.health.exercise.dto.response.ExerciseCategoryResponse;
 import com.s206.health.exercise.dto.response.ExerciseListResponse;
+import com.s206.health.exercise.dto.response.ExerciseTypeDetailResponse;
 import com.s206.health.exercise.dto.response.ExerciseTypeResponse;
 import com.s206.health.exercise.entity.Exercise;
 import com.s206.health.exercise.entity.ExerciseCategory;
@@ -260,6 +261,30 @@ public class ExerciseService {
                         .isFavorite(favoriteExerciseTypeIds.contains(exerciseType.getExerciseTypeId()))
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    // 특정 운동 상세 조회
+    @Transactional(readOnly = true)
+    public ExerciseTypeDetailResponse getExerciseTypeDetail(Integer exerciseTypeId, Integer userId) {
+        // 1. 운동 타입 정보 조회
+        ExerciseType exerciseType = exerciseTypeRepository.findById(exerciseTypeId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 운동 입니다."));
+
+        // 2. 운동 카테고리 정보 조회
+        ExerciseCategory exerciseCategory = exerciseCategoryRepository.findById(exerciseType.getExerciseCategoryId())
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 운동 카테고리입니다."));
+
+        // 3. 즐겨찾기 여부 확인
+        boolean isFavorite = favoriteExerciseRepository
+                .findByUserIdAndExerciseTypeExerciseTypeId(userId, exerciseTypeId)
+                .isPresent();
+
+        // 4. 응답 DTO
+        return ExerciseTypeDetailResponse.fromEntity(
+                exerciseType,
+                exerciseCategory.getExerciseCategoryName(),
+                isFavorite
+        );
     }
 
     // 최근에 한 운동 조회
