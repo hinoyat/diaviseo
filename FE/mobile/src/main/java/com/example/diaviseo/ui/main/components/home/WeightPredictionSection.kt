@@ -34,8 +34,8 @@ fun WeightPredictionSection(calorieDifference: Int) {
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             val (textPart, highlight) = when {
-                calorieDifference > 10 -> "증가" to Color(0xFFFF3434)
-                calorieDifference < -10 -> "감소" to Color(0xFF1673FF)
+                calorieDifference > 50 -> "증가" to Color(0xFFFF3434)
+                calorieDifference < -50 -> "감소" to Color(0xFF1673FF)
                 else -> "유지" to Color(0xFF464646)
             }
 

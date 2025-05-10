@@ -40,15 +40,20 @@ fun HomeScreen(
     LaunchedEffect(currentRoute) {
         if (currentRoute == "home") {
             homeViewModel.fetchDailyNutrition(today.toString())
+            homeViewModel.fetchDailyExercise(today.toString())
         }
     }
 
     val recommendedEat by viewModel.recommendedEat.collectAsState()
     val recommendedFit by viewModel.recommendedFit.collectAsState()
+    val tdee by viewModel.tdee.collectAsState()
 
     val totalCalorie by homeViewModel.totalCalorie.collectAsState()
+    val totalExerciseCalorie by homeViewModel.totalExerciseCalorie.collectAsState()
 
     val remainingCalorie = recommendedEat - totalCalorie
+    val extraBurned = recommendedFit - totalExerciseCalorie
+    val calorieDifference = totalCalorie - tdee - totalExerciseCalorie
 
     LoadingOverlay(isVisible = homeViewModel.isLoading.collectAsState().value)
     Box(
@@ -75,7 +80,7 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             WeightPredictionSection(
-                calorieDifference = -50 // 예시 데이터
+                calorieDifference = calorieDifference // 예시 데이터
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -83,8 +88,8 @@ fun HomeScreen(
             CaloriesGaugeSection(
                 consumedCalorie = totalCalorie,
                 remainingCalorie = remainingCalorie,
-                burnedCalorie = 180,
-                extraBurned = 100,
+                burnedCalorie = totalExerciseCalorie,
+                extraBurned = extraBurned,
                 navController = navController
             )
 
@@ -92,7 +97,8 @@ fun HomeScreen(
 
             SummaryCardSection(
                 navController = navController,
-                viewModel = viewModel
+                viewModel = viewModel,
+                homeViewModel = homeViewModel
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -117,10 +123,14 @@ fun HomeScreen(
 @Composable
 fun SummaryCardSection(
     navController: NavHostController,
-    viewModel: ProfileViewModel
+    viewModel: ProfileViewModel,
+    homeViewModel: HomeViewModel
 ) {
     val recommendedEat by viewModel.recommendedEat.collectAsState()
     val recommendedFit by viewModel.recommendedFit.collectAsState()
+
+    val totalCalorie by homeViewModel.totalCalorie.collectAsState()
+    val totalExerciseCalorie by homeViewModel.totalExerciseCalorie.collectAsState()
 
     Row(
         modifier = Modifier
@@ -130,7 +140,7 @@ fun SummaryCardSection(
         SummaryCard(
             title = "오늘 활동 칼로리",
             iconResId = R.drawable.main_exercise,
-            current = 96,
+            current = totalExerciseCalorie,
             goal = recommendedFit,
             goalExceeded = false,
             destinationRoute = "exercise_detail",
@@ -141,9 +151,9 @@ fun SummaryCardSection(
         SummaryCard(
             title = "오늘 섭취 칼로리",
             iconResId = R.drawable.main_diet,
-            current = 1796,
+            current = totalCalorie,
             goal = recommendedEat,
-            goalExceeded = 1796 > recommendedEat,
+            goalExceeded = totalCalorie > recommendedEat,
             destinationRoute = "exercise_detail",
             navController = navController,
             modifier = Modifier.weight(1f)
