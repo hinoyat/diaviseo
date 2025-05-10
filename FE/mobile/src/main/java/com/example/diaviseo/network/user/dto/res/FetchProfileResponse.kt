@@ -1,9 +1,4 @@
-package com.example.diaviseo.network
-
-import retrofit2.http.*
-
-// 서버 응답받을 데이터
-// 그 중에서도 공통 데이터 => AuthApiService에 존재
+package com.example.diaviseo.network.user.dto.res
 
 data class FetchProfileResponse(
     val name: String,
@@ -23,9 +18,3 @@ data class FetchProfileResponse(
     val isDeleted: Boolean,
     val notificationEnabled: Boolean
 )
-
-interface ProfileApiService {
-    @GET("users/me")
-    suspend fun fetchMyProfile(
-    ): ApiResponse<FetchProfileResponse>
-}

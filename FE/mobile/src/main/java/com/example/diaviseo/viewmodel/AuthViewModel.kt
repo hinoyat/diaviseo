@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 
-import com.example.diaviseo.network.GoogleLoginRequest
 import com.example.diaviseo.network.RetrofitInstance
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -19,10 +18,11 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import com.example.diaviseo.AppContextHolder
-import com.example.diaviseo.network.PhoneAuthConfirmRequest
-import com.example.diaviseo.network.PhoneAuthTryRequest
-import com.example.diaviseo.network.SignUpWithDiaRequest
-import com.example.diaviseo.network.TestLoginRequest
+import com.example.diaviseo.network.auth.dto.req.GoogleLoginRequest
+import com.example.diaviseo.network.user.UserApiService
+import com.example.diaviseo.network.user.dto.req.PhoneAuthConfirmRequest
+import com.example.diaviseo.network.user.dto.req.PhoneAuthTryRequest
+import com.example.diaviseo.network.user.dto.req.SignUpWithDiaRequest
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import org.json.JSONObject
@@ -152,13 +152,8 @@ class AuthViewModel (application: Application) : AndroidViewModel(application) {
             isLoading = true  // 💡 스피너 ON
 
             try {
-                // 진짜 구글 로그인일 경우
                 val request = GoogleLoginRequest("google", idToken)
                 val response = RetrofitInstance.authApiService.loginWithGoogle(request)
-
-                // 테스트 경우
-    //            val request = TestLoginRequest("s12c1s206@gmail.com", "google")
-    //            val response = RetrofitInstance.authApiService.loginWithTest(request)
 
                 val isNewUser = response.data?.newUser ?: true
                 val context = AppContextHolder.appContext
@@ -167,8 +162,6 @@ class AuthViewModel (application: Application) : AndroidViewModel(application) {
                 // 기존 회원이면 토큰 넣을테고 아니면 안 넣을테고
                 TokenDataStore.saveAccessToken(context, response.data?.accessToken ?: "")
                 TokenDataStore.saveRefreshToken(context, response.data?.refreshToken ?: "") // 선택적 저장
-//                TokenDataStore.saveAccessToken(context, "1234")
-//                TokenDataStore.saveRefreshToken(context, "1234")
 
                 // 메인스레드에서 Toast 띄우 기
 //                  withContext(Dispatchers.Main) {
@@ -198,7 +191,7 @@ class AuthViewModel (application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 val request = PhoneAuthTryRequest(phone.value)
-                val response = RetrofitInstance.authApiService.phoneAuthTry(request)
+                val response = RetrofitInstance.userApiService.phoneAuthTry(request)
 
                 val msg = response.message
                 // 메시지를 흘려보냄
@@ -231,7 +224,7 @@ class AuthViewModel (application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 val request = PhoneAuthConfirmRequest(phone.value, authCode.value)
-                val response = RetrofitInstance.authApiService.phoneAuthConfirm(request)
+                val response = RetrofitInstance.userApiService.phoneAuthConfirm(request)
 
                 val msg = response.message
                 // 메시지를 흘려보냄
@@ -293,7 +286,7 @@ class AuthViewModel (application: Application) : AndroidViewModel(application) {
                     true,
                     true
                 )
-                val response = RetrofitInstance.authApiService.signUpWithDia(request)
+                val response = RetrofitInstance.userApiService.signUpWithDia(request)
 
                 if (response.status == "CREATED"){
                     val requestGoogle = GoogleLoginRequest("google", idToken.value)

@@ -71,7 +71,9 @@ fun AllergyEditScreen(
                 if (isSearchMode) {
                     CommonSearchTopBar(
                         placeholder = "어떤 알러지가 있으신가요?",
-                        navController = navController ?: rememberNavController()
+                        navController = navController ?: rememberNavController(),
+                        keyword = "바보바보바보 allergyeditscreen 입니다",
+                        onKeywordChange = {/*컴포넌트 만들고 새롭게 추가한 파라미터인가 보구만...*/}
                     )
                 } else {
                     Text(

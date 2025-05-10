@@ -1,9 +1,7 @@
 package com.example.diaviseo.ui.signup.socialSignup
 
 import android.app.Activity
-import android.app.Application
 import android.util.Log
-import android.widget.Toast
 import androidx.credentials.*
 import com.example.diaviseo.BuildConfig
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
@@ -11,28 +9,8 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import kotlinx.coroutines.*
 import androidx.credentials.exceptions.GetCredentialException
-import com.example.diaviseo.datastore.TokenDataStore
-import com.example.diaviseo.network.GoogleLoginRequest
-import com.example.diaviseo.network.RetrofitInstance
 
 object GoogleLoginManager {
-    fun performTest(
-        activity: Activity,
-        onSuccess: (email: String, name: String, idToken: String, activity: Activity) -> Unit,
-        onError: (Throwable) -> Unit
-    ) {
-        val scope = CoroutineScope(Dispatchers.Main)
-
-        scope.launch {
-            try {
-                onSuccess("", "", "", activity)
-                Log.d("TestLoginAPI START", "여기를 성공적으로 거침")
-            } catch (e : GetCredentialException) {
-                onError(e)
-            }
-        }
-    }
-
     fun performLogin(
         activity: Activity,
         onSuccess: (email: String, name: String, idToken: String, activity: Activity) -> Unit,
