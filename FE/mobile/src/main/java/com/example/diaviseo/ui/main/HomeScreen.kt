@@ -96,7 +96,7 @@ fun SummaryCardSection(navController: NavHostController) {
             current = 96,   // 예시
             goal = 256,   // 예시
             goalExceeded = false,
-            destinationRoute = "exerciseDetail",
+            destinationRoute = "exercise_detail",
             navController = navController,
             modifier = Modifier.weight(1f)
         )
@@ -107,7 +107,7 @@ fun SummaryCardSection(navController: NavHostController) {
             current = 1796,   // 예시
             goal = 1533,   // 예시
             goalExceeded = 1796 > 1533,
-            destinationRoute = "dietDetail",
+            destinationRoute = "exercise_detail",
             navController = navController,
             modifier = Modifier.weight(1f)
         )

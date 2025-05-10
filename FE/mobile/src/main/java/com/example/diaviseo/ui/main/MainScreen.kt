@@ -1,6 +1,5 @@
 package com.example.diaviseo.ui.main
 
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -8,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.*
 import com.example.diaviseo.ui.components.BottomNavigationBar
+import com.example.diaviseo.ui.detail.ExerciseDetailScreen
 import com.example.diaviseo.ui.main.components.FabOverlayMenu
 import com.example.diaviseo.ui.mypageedit.screen.AllergyEditScreen
 import com.example.diaviseo.ui.mypageedit.screen.DiseaseEditScreen
@@ -53,7 +53,8 @@ fun MainScreen() {
         "edit_exercise",
         "faq",
         "edit_profile",
-        "edit_physical_info"
+        "edit_physical_info",
+        "exercise_detail"
         )
     val isBottomBarVisible = currentRoute !in hideBottomBarRoutes
 
@@ -76,7 +77,10 @@ fun MainScreen() {
             composable("home") {
                 // 기존 HomeScreen을 그대로 재사용
                 Box(modifier = Modifier.padding(innerPadding)) {
-                    HomeScreen(navController = navController, viewModel = profileViewModel)
+                    HomeScreen(
+                        navController = navController,
+                        viewModel = profileViewModel
+                    )
                 }
             }
             composable("chat") {
@@ -139,6 +143,13 @@ fun MainScreen() {
                 DietAiRegisterScreen(navController)
             }
 
+            // 운동 상세화면
+            composable("exercise_detail") { backStackEntry ->
+                ExerciseDetailScreen(
+                    navController = navController,
+                    viewModel = profileViewModel
+                )
+            }
         }
     }
     // 조건부 UI는 Scaffold 바깥에!

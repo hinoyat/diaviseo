@@ -39,7 +39,7 @@ fun SummaryCard(
             .clip(RoundedCornerShape(12.dp))
             .background(Color.White)
             .clickable {
-//                navController.navigate(destinationRoute)
+                navController.navigate(destinationRoute)
             }
             .padding(12.dp)
     ) {

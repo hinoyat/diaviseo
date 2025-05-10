@@ -14,13 +14,14 @@ import com.example.diaviseo.ui.theme.DiaViseoColors
 import java.time.LocalDate
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.example.diaviseo.ui.theme.semibold16
 import com.example.diaviseo.viewmodel.GoalViewModel
 
 @Composable
 fun GoalContent(
     selectedTab: String,
-    today: LocalDate
+    navController: NavHostController
 ) {
     val goalViewModel: GoalViewModel = viewModel()
     val selectedDate by goalViewModel.selectedDate.collectAsState()
@@ -91,7 +92,10 @@ fun GoalContent(
                     isToday = isToday,
                     type = GoalBannerType.EXERCISE,
                     onClick = {
-                        // TODO: 해당 날짜의 운동 상세 화면으로 이동
+                        navController.navigate("exercise_detail") {
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
                 )
             }
