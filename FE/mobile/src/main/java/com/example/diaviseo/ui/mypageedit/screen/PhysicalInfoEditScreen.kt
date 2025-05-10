@@ -5,6 +5,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -12,6 +13,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.diaviseo.ui.components.CommonTopBar
+import com.example.diaviseo.ui.theme.DiaViseoColors
 
 @Composable
 fun PhysicalInfoEditScreen(
@@ -34,14 +36,14 @@ fun PhysicalInfoEditScreen(
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(horizontal = 24.dp, vertical = 32.dp)
+                .padding(horizontal = 16.dp, vertical = 32.dp)
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "이 정보는 회원 정보 기준입니다.\n건강 기록은 다른 메뉴에서 확인해주세요.",
                 fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = DiaViseoColors.Unimportant,
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
@@ -90,13 +92,15 @@ fun PhysicalInfoEditScreen(
                         // 예: 스낵바 or Toast
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = DiaViseoColors.Main1)
             ) {
-                Text("저장")
+                Text("저장", color = Color.White)
             }
         }
     }
 }
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun PhysicalInfoEditScreenPreview() {
