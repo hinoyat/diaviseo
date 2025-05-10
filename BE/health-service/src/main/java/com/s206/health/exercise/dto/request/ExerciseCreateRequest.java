@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class ExerciseCreateRequest {
-    private Integer exerciseTypeId;
+    private Integer exerciseNumber;
     private LocalDateTime exerciseDate;
     private Integer exerciseTime;
     private Integer exerciseCalorie;
