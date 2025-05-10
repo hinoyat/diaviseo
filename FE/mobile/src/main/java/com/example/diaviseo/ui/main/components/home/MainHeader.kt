@@ -39,6 +39,9 @@ fun MainHeader(
     val myProfile by viewModel.myProfile.collectAsState()
     LaunchedEffect(myProfile) {
         Log.d("MainHeader", "nickname 값 변경 감지: ${myProfile?.nickname}")
+        Log.d("mainscreen profile", "기초대사량 : ${viewModel.bmr.value}")
+        Log.d("mainscreen profile", "권장섭취량 : ${viewModel.recommendedEat.value}")
+        Log.d("mainscreen profile", "권장운동량 : ${viewModel.recommendedFit.value}")
     }
 
     val nickname by remember(myProfile) {
