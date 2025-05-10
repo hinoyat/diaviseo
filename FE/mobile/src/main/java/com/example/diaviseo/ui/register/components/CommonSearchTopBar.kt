@@ -14,14 +14,20 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.diaviseo.ui.theme.medium14
 import com.example.diaviseo.ui.theme.regular14
+import androidx.compose.ui.focus.onFocusChanged
+
 
 @Composable
 fun CommonSearchTopBar(
     placeholder: String,
     navController: NavController,
     keyword: String,                         // 현재 입력 중인 값
-    onKeywordChange: (String) -> Unit        // 입력 변경 시 호출할 함수
+    onKeywordChange: (String) -> Unit,        // 입력 변경 시 호출할 함수
+    onFocusChanged: ((Boolean) -> Unit)? = null, // 검색창 클릭시 검색 결과창 띄우기 위함 (null도 허용)
+    onCancelClick: (() -> Unit)? = null  // 취소 로직 위임
 ) {
+
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -45,7 +51,10 @@ fun CommonSearchTopBar(
             singleLine = true,
             modifier = Modifier
                 .weight(1f)
-                .height(56.dp),
+                .height(56.dp)
+                .onFocusChanged { focusState ->
+                    onFocusChanged?.invoke(focusState.isFocused) // ✅ null 체크 후 호출
+                },
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color(0xFFF5F5F5),
                 unfocusedContainerColor = Color(0xFFF5F5F5),
@@ -70,8 +79,9 @@ fun CommonSearchTopBar(
             text = "취소",
             style = medium14,
             color = Color.Black,
-            modifier = Modifier
-                .clickable { navController.popBackStack() }
+            modifier = Modifier.clickable {
+                onCancelClick?.invoke() ?: navController.popBackStack() // null일 땐 기본 뒤로가기
+            }
         )
     }
 }
