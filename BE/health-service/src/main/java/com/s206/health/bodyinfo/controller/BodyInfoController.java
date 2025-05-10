@@ -10,6 +10,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,5 +48,13 @@ public class BodyInfoController {
 	) {
 		BodyInfoResponse response = bodyInfoService.updateBodyInfo(userId, bodyId, request);
 		return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "체성분 정보가 성공적으로 수정되었습니다.", response));
+	}
+
+	@DeleteMapping("/{bodyId}")
+	public ResponseEntity<ResponseDto<Void>> deleteBodyInfo(
+			@RequestHeader("X-USER-ID") Integer userId,
+			@PathVariable Integer bodyId) {
+		bodyInfoService.deleteBodyInfo(userId, bodyId);
+		return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "체성분 정보가 성공적으로 삭제되었습니다.", null));
 	}
 }
