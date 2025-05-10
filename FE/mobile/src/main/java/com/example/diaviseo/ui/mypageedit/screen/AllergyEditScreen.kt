@@ -1,6 +1,7 @@
 package com.example.diaviseo.ui.mypageedit.screen
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -66,20 +67,42 @@ fun AllergyEditScreen(
                         Toast.makeText(context, "저장이 완료되었습니다.", Toast.LENGTH_SHORT).show()
                         showConfirmDialog = false
                         navController?.popBackStack()
-                    }
-                ) { Text("저장") }
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = Color(0xFF1673FF) // ✅ 파란색
+                    )
+                ) {
+                    Text("저장")
+                }
             },
             dismissButton = {
                 TextButton(
                     onClick = {
                         showConfirmDialog = false
                         navController?.popBackStack()
-                    }
-                ) { Text("저장 안 함") }
-            }
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = Color.Gray // ✅ 회색
+                    )
+                ) {
+                    Text("저장 안 함")
+                }
+            },
+            containerColor = Color.White
         )
-    }
 
+    }
+    BackHandler {
+        // 핸드폰 뒤로가기까지 포함해서 처리
+        if (isSearchMode) {
+            isSearchMode = false
+            searchValue = TextFieldValue("")
+        } else if (hasChanges) {
+            showConfirmDialog = true
+        } else {
+            navController?.popBackStack()
+        }
+    }
     Scaffold(
         topBar = {
             Column {
@@ -203,7 +226,7 @@ fun AllergyEditScreen(
                     }
                 }
 
-                Divider(modifier = Modifier.padding(vertical = 8.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
             }
 
             // 필터링된 알러지 목록
