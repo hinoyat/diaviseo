@@ -12,14 +12,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.diaviseo.R
-import com.example.diaviseo.ui.main.MyScreen
+import com.example.diaviseo.ui.theme.DiaViseoColors
 
 @Composable
 fun MyHeaderSection(userName: String = "김디아") {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -28,24 +27,28 @@ fun MyHeaderSection(userName: String = "김디아") {
                 text = "$userName 님",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = androidx.compose.ui.graphics.Color(0xFF0066CC) // 파란색
+                color = DiaViseoColors.Main1
             )
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "오늘도 건강하세요!",
-                fontSize = 16.sp
+                fontSize = 16.sp,
+                color = DiaViseoColors.Unimportant
             )
         }
 
         Image(
             painter = painterResource(id = R.drawable.charac_main_nontext),
             contentDescription = "다이아비서 캐릭터",
-            modifier = Modifier
-                .size(64.dp)
+            modifier = Modifier.size(64.dp)
         )
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun MyHeaderSectionPreview() {
-    MyHeaderSection()
+    Column(modifier = Modifier.padding(16.dp)) {
+        MyHeaderSection()
+    }
 }
