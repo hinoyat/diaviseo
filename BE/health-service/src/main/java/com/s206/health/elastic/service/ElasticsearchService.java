@@ -2,12 +2,17 @@ package com.s206.health.elastic.service;
 
 import com.s206.health.elastic.document.ElasticFood;
 import com.s206.health.elastic.repository.ElasticRepository;
+import com.s206.health.nutrition.favorite.repository.FavoriteFoodRepository;
+import com.s206.health.nutrition.food.dto.response.FoodListResponse;
+import com.s206.health.nutrition.food.entity.Food;
 import com.s206.health.nutrition.food.repository.FoodRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -18,6 +23,7 @@ public class ElasticsearchService {
 
     private final ElasticRepository elasticRepository; // Elasticsearch 레포지토리
     private final FoodRepository foodRepository; // MySQL 음식 레포지토리
+    private final FavoriteFoodRepository favoriteFoodRepository;
 
     // 음식 저장
     public ElasticFood save(ElasticFood food) {
@@ -25,8 +31,22 @@ public class ElasticsearchService {
     }
 
     // 이름으로 음식 검색
-    public List<ElasticFood> searchByName(String name) {
-        return elasticRepository.findByNameContaining(name);
+    public List<FoodListResponse> searchByName(String name, Integer userId) {
+        List<ElasticFood> elasticFoods = elasticRepository.findByNameContaining(name);
+        List<FoodListResponse> result = new ArrayList<>();
+
+        for (ElasticFood elasticFood : elasticFoods) {
+            Optional<Food> foodOpt = foodRepository.findById(elasticFood.getFoodId());
+
+            if (foodOpt.isPresent()) {
+                Food food = foodOpt.get();
+                // 실제 즐겨찾기 정보 조회
+                boolean isFavorite = favoriteFoodRepository.existsByUserIdAndFoodFoodId(userId, food.getFoodId());
+                result.add(FoodListResponse.toDto(food, isFavorite));
+            }
+        }
+
+        return result;
     }
 
     // 모든 음식 조회
