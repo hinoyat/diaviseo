@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.first
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import okhttp3.Interceptor
+import com.example.diaviseo.network.exercise.ExerciseApiService
 
 object RetrofitInstance {
     // 1. 로그용 Interceptor
@@ -128,6 +129,9 @@ object RetrofitInstance {
     // 식단 (등록) 관련
     val dietApiService: DietApiService by lazy {
         retro.create(DietApiService::class.java)
+    }
+    val exerciseApiService: ExerciseApiService by lazy {
+        retro.create(ExerciseApiService::class.java)
     }
 
 }
