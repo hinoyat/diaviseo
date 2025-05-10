@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -25,6 +26,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
+@ToString
 public class BodyInfo {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,17 +39,13 @@ public class BodyInfo {
 	@Column(nullable = false)
 	private InputType inputType;
 
-	// 커스텀 컨버터를 지정하는 역할.
-	@Convert(converter = DecimalEncryptConverter.class)
 	@Column(nullable = false)
 	private BigDecimal weight;
 
-	@Convert(converter = DecimalEncryptConverter.class)
 	@Column(nullable = true)
 	private BigDecimal bodyFat;
 
 	@Column(name = "skeletal_muscle", nullable = true)
-	@Convert(converter = DecimalEncryptConverter.class)
 	private BigDecimal muscleMass;
 
 	@CreationTimestamp
@@ -76,5 +74,11 @@ public class BodyInfo {
 		}
 		this.updatedAt = LocalDateTime.now();
 		return this;
+	}
+
+	public void markAsDeleted() {
+		this.updatedAt = LocalDateTime.now();
+		this.deletedAt = LocalDateTime.now();
+		this.isDeleted = true;
 	}
 }
