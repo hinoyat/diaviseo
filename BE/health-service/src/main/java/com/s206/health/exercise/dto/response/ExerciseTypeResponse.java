@@ -19,4 +19,5 @@ public class ExerciseTypeResponse {
     private Integer exerciseCalorie;
     private Integer exerciseNumber;
     private LocalDateTime createdAt;
+    private Boolean isFavorite;
 }

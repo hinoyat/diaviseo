@@ -10,6 +10,8 @@ import com.s206.health.exercise.dto.response.ExerciseTypeResponse;
 import com.s206.health.exercise.entity.Exercise;
 import com.s206.health.exercise.entity.ExerciseCategory;
 import com.s206.health.exercise.entity.ExerciseType;
+import com.s206.health.exercise.favorite.entity.FavoriteExercise;
+import com.s206.health.exercise.favorite.repository.FavoriteExerciseRepository;
 import com.s206.health.exercise.mapper.ExerciseMapper;
 import com.s206.health.exercise.repository.ExerciseCategoryRepository;
 import com.s206.health.exercise.repository.ExerciseRepository;
@@ -21,10 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +34,7 @@ public class ExerciseService {
     private final ExerciseTypeRepository exerciseTypeRepository;
     private final ExerciseCategoryRepository exerciseCategoryRepository;
     private final ExerciseMapper exerciseMapper;
+    private final FavoriteExerciseRepository favoriteExerciseRepository;
 
     // 특정 사용자의 운동 기록 전체 조회
     @Transactional(readOnly = true)
@@ -235,14 +235,18 @@ public class ExerciseService {
 
     // 카테고리별 운동 조회
     @Transactional(readOnly = true)
-    public List<ExerciseTypeResponse> getExercisesByCategory(Integer exerciseCategoryId) {
-        // 카테고리 존재 여부 확인
-        ExerciseCategory category = exerciseCategoryRepository.findById(exerciseCategoryId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 운동 카테고리입니다."));
-
+    public List<ExerciseTypeResponse> getExercisesByCategory(Integer exerciseCategoryId, Integer userId) {
         // 해당 카테고리의 운동 타입 조회
         List<ExerciseType> exerciseTypes = exerciseTypeRepository
                 .findByExerciseCategoryIdAndIsDeletedFalse(exerciseCategoryId);
+
+        // 사용자의 즐겨찾기 목록 조회
+        List<FavoriteExercise> favorites = favoriteExerciseRepository.findAllByUserId(userId);
+
+        // 즐겨찾기한 운동 타입 ID 목록 생성
+        Set<Integer> favoriteExerciseTypeIds = favorites.stream()
+                .map(favorite -> favorite.getExerciseType().getExerciseTypeId())
+                .collect(Collectors.toSet());
 
         return exerciseTypes.stream()
                 .map(exerciseType -> ExerciseTypeResponse.builder()
@@ -253,6 +257,7 @@ public class ExerciseService {
                         .exerciseCalorie(exerciseType.getExerciseCalorie())
                         .exerciseNumber(exerciseType.getExerciseNumber())
                         .createdAt(exerciseType.getCreatedAt())
+                        .isFavorite(favoriteExerciseTypeIds.contains(exerciseType.getExerciseTypeId()))
                         .build())
                 .collect(Collectors.toList());
     }

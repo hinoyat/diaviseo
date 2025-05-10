@@ -85,8 +85,9 @@ public class ExerciseController {
     // 운동 카테고리별 운동 조회
     @GetMapping("/category/{exerciseCategoryId}")
     public ResponseEntity<ResponseDto<List<ExerciseTypeResponse>>> getExercisesByCategory(
+            @RequestHeader("X-USER-ID") Integer userId,
             @PathVariable Integer exerciseCategoryId) {
-        List<ExerciseTypeResponse> exercises = exerciseService.getExercisesByCategory(exerciseCategoryId);
+        List<ExerciseTypeResponse> exercises = exerciseService.getExercisesByCategory(exerciseCategoryId, userId);
         return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK,"카테고리별 운동 조회 성공",exercises));
     }
 
