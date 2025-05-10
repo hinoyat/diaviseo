@@ -63,4 +63,18 @@ public class BodyInfo {
 	@Column(nullable = false)
 	private Boolean isDeleted = false;
 
+
+	public BodyInfo updatePartial(BigDecimal weight, BigDecimal bodyFat, BigDecimal muscleMass) {
+		if (weight != null) {
+			this.weight = weight;
+		}
+		if (bodyFat != null) {
+			this.bodyFat = bodyFat;
+		}
+		if (muscleMass != null) {
+			this.muscleMass = muscleMass;
+		}
+		this.updatedAt = LocalDateTime.now();
+		return this;
+	}
 }
