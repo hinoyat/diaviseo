@@ -1,30 +1,38 @@
 package com.example.diaviseo.ui.mypageedit.screen
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.diaviseo.network.user.dto.req.UserUpdateRequest
 import com.example.diaviseo.ui.components.CommonTopBar
 import com.example.diaviseo.ui.theme.DiaViseoColors
+import com.example.diaviseo.viewmodel.ProfileViewModel
 
 @Composable
 fun PhysicalInfoEditScreen(
     navController: NavHostController,
-    initialHeight: Int = 168,
-    initialWeight: Int = 50,
-    onSave: (Int, Int) -> Unit = { _, _ -> }
+    viewModel: ProfileViewModel
 ) {
-    var height by remember { mutableStateOf(TextFieldValue(initialHeight.toString())) }
-    var weight by remember { mutableStateOf(TextFieldValue(initialWeight.toString())) }
+    var height by remember { mutableStateOf("") }
+    var weight by remember { mutableStateOf("") }
 
+    val context = LocalContext.current
+    val profile = viewModel.myProfile.collectAsState().value
+    LaunchedEffect(profile) {
+        height = profile?.height?.toString() ?: ""
+        weight = profile?.weight?.toString() ?: ""
+    }
     Scaffold(
         topBar = {
             CommonTopBar(
@@ -47,11 +55,10 @@ fun PhysicalInfoEditScreen(
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
-            // 키 입력
             OutlinedTextField(
                 value = height,
                 onValueChange = {
-                    if (it.text.length <= 3 && it.text.all { ch -> ch.isDigit() }) {
+                    if (it.length <= 6 && it.matches(Regex("^\\d*\\.?\\d{0,2}$"))) {
                         height = it
                     }
                 },
@@ -60,13 +67,13 @@ fun PhysicalInfoEditScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
+
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 몸무게 입력
             OutlinedTextField(
                 value = weight,
                 onValueChange = {
-                    if (it.text.length <= 3 && it.text.all { ch -> ch.isDigit() }) {
+                    if (it.length <= 6 && it.matches(Regex("^\\d*\\.?\\d{0,2}$"))) {
                         weight = it
                     }
                 },
@@ -75,21 +82,34 @@ fun PhysicalInfoEditScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
+
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(
                 onClick = {
-                    val heightValue = height.text.toIntOrNull()
-                    val weightValue = weight.text.toIntOrNull()
+                    val h = height.toDoubleOrNull()
+                    val w = weight.toDoubleOrNull()
 
-                    if (heightValue != null && weightValue != null &&
-                        heightValue in 100..250 && weightValue in 30..300
-                    ) {
-                        onSave(heightValue, weightValue)
-                        navController.popBackStack()
+                    if (h != null && w != null && h in 100.0..250.0 && w in 30.0..300.0) {
+                        viewModel.updateUserProfile(
+                            request = UserUpdateRequest(
+                                height = h,
+                                weight = w
+                            ),
+                            onSuccess = {
+                                viewModel.fetchMyProfile()
+                                navController.popBackStack()
+                            },
+                            onError = { msg ->
+                                Toast.makeText(context, "수정 실패: $msg", Toast.LENGTH_SHORT).show()
+                            }
+                        )
                     } else {
-                        // 유효성 검사 실패 시 처리
-                        // 예: 스낵바 or Toast
+                        Toast.makeText(
+                            context,
+                            "정상적인 숫자를 입력해주세요",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -99,15 +119,4 @@ fun PhysicalInfoEditScreen(
             }
         }
     }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun PhysicalInfoEditScreenPreview() {
-    val navController = rememberNavController()
-    PhysicalInfoEditScreen(
-        navController = navController,
-        initialHeight = 170,
-        initialWeight = 65
-    )
 }
