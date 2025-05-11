@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class MonthRange {
 
 	private int monthIndex; // 1 ~ 7
-	private LocalDate startDate;q
+	private LocalDate startDate;
 	private LocalDate endDate;
 
 }

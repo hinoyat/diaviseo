@@ -5,6 +5,7 @@ import com.s206.health.bodyinfo.dto.request.BodyInfoCreateRequest;
 import com.s206.health.bodyinfo.dto.request.BodyInfoPatchRequest;
 import com.s206.health.bodyinfo.dto.response.BodyInfoProjection;
 import com.s206.health.bodyinfo.dto.response.BodyInfoResponse;
+import com.s206.health.bodyinfo.dto.response.MonthlyAverageBodyInfoResponse;
 import com.s206.health.bodyinfo.dto.response.WeeklyAverageBodyInfoResponse;
 import com.s206.health.bodyinfo.service.BodyInfoService;
 import jakarta.validation.Valid;
@@ -99,15 +100,36 @@ public class BodyInfoController {
 				ResponseDto.success(HttpStatus.OK, "주간 체성분 정보 조회가 성공적으로 처리됐습니다.", response));
 	}
 
-	@GetMapping("/monthly")
-	public ResponseEntity<ResponseDto<List<WeeklyAverageBodyInfoResponse>>> getMonthlyAverages(
+	@GetMapping("/weekly-avg")
+	public ResponseEntity<ResponseDto<List<WeeklyAverageBodyInfoResponse>>> getWeeklyAverages(
 			@RequestHeader("X-USER-ID") Integer userId,
-			@RequestParam @DateTimeFormat(iso = ISO.DATE) LocalDate endDate
+			@RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate endDate
 	) {
-		List<WeeklyAverageBodyInfoResponse> response = bodyInfoService.getMonthlyBodyInfo(userId,
+		if (endDate == null) {
+			endDate = LocalDate.now();
+		}
+
+		List<WeeklyAverageBodyInfoResponse> response = bodyInfoService.getWeeklyAverages(userId,
 				endDate);
 
 		return ResponseEntity.ok(
-				ResponseDto.success(HttpStatus.OK, "월간 체성분 정보 조회가 성공적으로 처리됐습니다.", response));
+				ResponseDto.success(HttpStatus.OK, "7주간 주별 평균 체성분 정보 조회가 성공적으로 처리됐습니다.", response));
+	}
+
+	@GetMapping("/monthly-avg")
+	public ResponseEntity<ResponseDto<List<MonthlyAverageBodyInfoResponse>>> getMonthlyAverages(
+			@RequestHeader("X-USER-ID") Integer userId,
+			@RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate endDate
+	) {
+		if (endDate == null) {
+			endDate = LocalDate.now();
+		}
+
+		List<MonthlyAverageBodyInfoResponse> response = bodyInfoService.getMonthlyAverages(userId,
+				endDate);
+
+		return ResponseEntity.ok(
+				ResponseDto.success(HttpStatus.OK, "7개월간 월별 평균 체성분 정보 조회가 성공적으로 처리됐습니다.",
+						response));
 	}
 }
