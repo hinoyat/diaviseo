@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -13,28 +14,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.example.diaviseo.network.FoodItem
+import com.example.diaviseo.network.food.dto.res.FoodItem
+import com.example.diaviseo.ui.components.AddRemoveIconButton
 
 @Composable
 fun SearchSuggestionList(
     results: List<FoodItem>,
+    selectedItems: List<Int>,
+    onToggleSelect: (FoodItem) -> Unit,
     modifier: Modifier = Modifier,
-    onItemClick: (FoodItem) -> Unit
-) {
+    onFoodClick: (FoodItem) -> Unit,
+    ) {
     Surface(
-        modifier = modifier
-            .zIndex(10f),
-//        shadowElevation = 6.dp,
+        modifier = modifier,
         shape = RoundedCornerShape(15.dp),
-        color = Color(0xFFF5F5F5)
+        color = Color.White
     ) {
         if (results.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp),
+                    .padding(horizontal = 16.dp, vertical = 20.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -47,23 +48,63 @@ fun SearchSuggestionList(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 300.dp)
+                    .padding(horizontal = 4.dp)
+                    .heightIn(max = 400.dp)
             ) {
                 items(results) { item ->
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onItemClick(item) }
-                            .padding(horizontal = 16.dp, vertical = 14.dp)
+                            .padding(vertical = 12.dp)
                     ) {
-                        Text(
-                            text = item.name,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color.Black,
-                            fontSize = 16.sp
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clickable { onFoodClick(item) }
+
+                            ) {
+                                Text(
+                                    text = item.foodName,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = Color.Black,
+                                    fontSize = 16.sp
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "1인분 (${item.baseAmount.toInt()}g)",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.Gray,
+                                    fontSize = 13.sp
+                                )
+                            }
+
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "${item.calorie}kcal",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.Black,
+                                    fontSize = 14.sp
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+
+                                AddRemoveIconButton(
+                                    isSelected = selectedItems.contains(item.foodId),
+                                    onClick = { onToggleSelect(item) }
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Divider(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = Color(0xFFF0F0F0),
+                            thickness = 1.dp
                         )
                     }
-//                    Divider(color = Color(0xFFF0F0F0), thickness = 1.dp)
                 }
             }
         }
