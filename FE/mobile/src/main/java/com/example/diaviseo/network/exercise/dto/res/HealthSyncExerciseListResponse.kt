@@ -1,6 +1,6 @@
 package com.example.diaviseo.network.exercise.dto.res
 
-data class ExerciseRecordResponse(
+data class HealthSyncExerciseResponse(
     val exerciseId: Int,
     val userId: Int,
     val exerciseTypeId: Int,
@@ -11,4 +11,11 @@ data class ExerciseRecordResponse(
     val exerciseTime: Int,
     val exerciseCalorie: Int,
     val createdAt: String
+)
+
+data class HealthSyncExerciseListResponse(
+    val timestamp: String,
+    val status: String,
+    val message: String,
+    val data: List<HealthSyncExerciseResponse>
 )
