@@ -9,15 +9,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.diaviseo.network.user.dto.res.FetchProfileResponse
 import com.example.diaviseo.ui.components.CommonTopBar
 import com.example.diaviseo.ui.components.my.*
 import com.example.diaviseo.ui.theme.DiaViseoColors
+import com.example.diaviseo.viewmodel.ProfileViewModel
 
 @Composable
 fun MyScreen(navController: NavHostController) {
     var isAlarmEnabled by remember { mutableStateOf(true) }
+
+    val profileViewModel: ProfileViewModel = viewModel()
+    val profile by profileViewModel.myProfile.collectAsState()
+    LaunchedEffect(Unit) {
+        profileViewModel.fetchMyProfile()
+    }
 
     Column(
         modifier = Modifier
@@ -28,10 +37,10 @@ fun MyScreen(navController: NavHostController) {
         CommonTopBar(onLeftActionClick = { /* TODO */ })
 
         Spacer(Modifier.height(16.dp))
-        HeaderSection()
+        HeaderSection(userName = profile?.nickname ?: "불러오는 중")
         Spacer(Modifier.height(16.dp))
 
-        ProfileSection(navController)
+        ProfileSection(navController, profile)
         Spacer(Modifier.height(24.dp))
 
         HealthSection(navController)
@@ -49,17 +58,18 @@ fun MyScreen(navController: NavHostController) {
 }
 
 @Composable
-private fun HeaderSection() {
-    MyHeaderSection(userName = "김디아")
+private fun HeaderSection(userName: String) {
+    MyHeaderSection(userName = userName)
 }
 
 @Composable
-private fun ProfileSection(navController: NavHostController) {
+private fun ProfileSection(navController: NavHostController, profile: FetchProfileResponse?) {
+
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         MyProfileEditCard(navController = navController)
         MyPhysicalInfoCard(
-            height = 168,
-            weight = 50,
+            height = profile?.height ?: 0.0,
+            weight =  profile?.weight ?: 0.0,
             onEditClick = {
                 navController.navigate("edit_physical_info")
             }
