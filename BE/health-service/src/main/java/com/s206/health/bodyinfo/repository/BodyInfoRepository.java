@@ -1,5 +1,6 @@
 package com.s206.health.bodyinfo.repository;
 
+import com.s206.health.bodyinfo.dto.response.BodyInfoProjection;
 import com.s206.health.bodyinfo.entity.BodyInfo;
 import java.time.LocalDate;
 import java.util.List;
@@ -17,4 +18,25 @@ public interface BodyInfoRepository extends JpaRepository<BodyInfo, Integer> {
 	@Query(value = "SELECT * FROM body_tb b WHERE b.user_id = :userId AND b.measurement_date = :date AND b.is_deleted = false ORDER BY b.created_at DESC LIMIT 1", nativeQuery = true)
 	Optional<BodyInfo> findLatestBodyInfoByMeasurementDate(@Param("userId") Integer userId,
 			@Param("date") LocalDate date);
+
+	@Query("SELECT b.measurementDate AS measurementDate, " +
+			"b.weight AS weight, " +
+			"b.muscleMass AS muscleMass, " +
+			"b.bodyFat AS bodyFat " +
+			"FROM BodyInfo b " +
+			"WHERE b.userId = :userId " +
+			"AND b.isDeleted = false " +
+			"AND b.measurementDate BETWEEN :startDate AND :endDate " +
+			"AND b.createdAt = (" +
+			"    SELECT MAX(b2.createdAt) " +
+			"    FROM BodyInfo b2 " +
+			"    WHERE b2.userId = b.userId " +
+			"    AND b2.measurementDate = b.measurementDate " +
+			"    AND b2.isDeleted = false" +
+			")")
+	List<BodyInfoProjection> findByUserIdAndMeasurementDateBetween(
+			@Param("userId") Integer userId,
+			@Param("startDate") LocalDate startDate,
+			@Param("endDate") LocalDate endDate
+	);
 }
