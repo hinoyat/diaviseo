@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -32,7 +31,6 @@ import com.example.diaviseo.ui.main.components.goal.DonutChartWithLegend
 import com.example.diaviseo.viewmodel.GoalViewModel
 import com.example.diaviseo.viewmodel.ProfileViewModel
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.geometry.Offset
 import com.example.diaviseo.network.meal.dto.res.MealFoodResponse
 import com.example.diaviseo.network.meal.dto.res.MealNutritionResponse
 import com.example.diaviseo.network.meal.dto.res.MealTimeNutritionResponse
@@ -84,6 +82,7 @@ fun MealDetailScreen(
     val nickname by remember(myProfile) {
         mutableStateOf(myProfile?.nickname)
     }
+//    val recommendedEat by viewModel.recommendedEat
 
     // 몇월 며칠 날짜 파싱
     val day = selectedDate.dayOfMonth.toString()
@@ -301,6 +300,8 @@ fun MealDetailScreen(
                             gradient = mealType.gradient,
                             mealIconRes = mealType.iconRes,
                             onEditClick = { /* TODO */ }
+//                            사진들 목록 리스트 들어올 예정
+
                         )
                     }
                     timeData != null && timeData.foods.isEmpty() -> {
