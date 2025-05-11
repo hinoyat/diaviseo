@@ -1,5 +1,6 @@
 package com.example.diaviseo.ui.mypageedit.screen
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,13 +16,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.diaviseo.R
+import com.example.diaviseo.network.user.dto.req.UserUpdateRequest
 import com.example.diaviseo.ui.components.CommonTopBar
 import com.example.diaviseo.ui.mypageedit.bottomsheet.EditBirthDateBottomSheet
 import com.example.diaviseo.ui.mypageedit.bottomsheet.EditNicknameBottomSheet
 import com.example.diaviseo.ui.theme.DiaViseoColors
+import com.example.diaviseo.viewmodel.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,6 +36,13 @@ fun UserProfileEditScreen(navController: NavHostController) {
     var showNicknameSheet by remember { mutableStateOf(false) }
     var showBirthDateSheet by remember { mutableStateOf(false) }
 
+    val profileViewModel: ProfileViewModel = viewModel()
+    val profile by profileViewModel.myProfile.collectAsState()
+
+    LaunchedEffect(Unit) {
+        profileViewModel.fetchMyProfile()
+    }
+
     if (showNicknameSheet) {
         ModalBottomSheet(
             containerColor = Color.White,
@@ -39,10 +50,17 @@ fun UserProfileEditScreen(navController: NavHostController) {
             sheetState = nicknameSheetState
         ) {
             EditNicknameBottomSheet(
-                initialNickname = "디아25",
-                onSave = { showNicknameSheet = false },
+                initialNickname = profile?.nickname ?: "",
+                onSave = { newName ->
+                    profileViewModel.updateUserProfile(
+                        request = UserUpdateRequest(nickname = newName),
+                        onSuccess = { showNicknameSheet = false },
+                        onError = { msg -> Log.e("EditNickname", "수정 실패: $msg") }
+                    )
+                },
                 onDismiss = { showNicknameSheet = false }
             )
+
         }
     }
 
@@ -53,10 +71,18 @@ fun UserProfileEditScreen(navController: NavHostController) {
             sheetState = birthDateSheetState
         ) {
             EditBirthDateBottomSheet(
-                initialBirthDate = "2000.02.14",
-                onSave = { showBirthDateSheet = false },
+                initialBirthDate = profile?.birthday?.replace("-", ".") ?: "",
+                onSave = { input ->
+                    val isoFormatted = input.replace(".", "-")
+                    profileViewModel.updateUserProfile(
+                        request = UserUpdateRequest(birthday = isoFormatted),
+                        onSuccess = { showBirthDateSheet = false },
+                        onError = { msg -> Log.e("EditBirth", "수정 실패: $msg") }
+                    )
+                },
                 onDismiss = { showBirthDateSheet = false }
             )
+
         }
     }
 
@@ -76,12 +102,12 @@ fun UserProfileEditScreen(navController: NavHostController) {
 
             Image(
                 painter = painterResource(id = R.drawable.charac_main_nontext),
-                contentDescription = "다이아비서",
+                contentDescription = "디아비서",
                 modifier = Modifier.size(96.dp)
             )
 
             Text(
-                text = "다이비서",
+                text = "디아비서",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(top = 8.dp, bottom = 24.dp),
@@ -98,11 +124,15 @@ fun UserProfileEditScreen(navController: NavHostController) {
                 color = DiaViseoColors.Basic
             )
 
-            ProfileInfoRow(title = "이름", value = "김디아")
-            ProfileInfoRow(title = "성별", value = "여성")
-            ProfileInfoRow(title = "핸드폰 번호", value = "010-1234-5678")
-            ProfileInfoRow(title = "닉네임", value = "디아25", onClick = { showNicknameSheet = true })
-            ProfileInfoRow(title = "생년월일", value = "2000년 2월 14일", onClick = { showBirthDateSheet = true })
+            ProfileInfoRow(title = "이름", value = profile?.name ?: "")
+            ProfileInfoRow(title = "성별", value = if (profile?.gender == "M") "남성" else "여성")
+            ProfileInfoRow(title = "핸드폰 번호", value = profile?.phone ?: "")
+            ProfileInfoRow(title = "닉네임", value = profile?.nickname ?: "", onClick = { showNicknameSheet = true })
+            ProfileInfoRow(
+                title = "생년월일",
+                value = profile?.birthday?.replace("-", "년 ")?.replace("-", "월 ")?.plus("일") ?: "",
+                onClick = { showBirthDateSheet = true }
+            )
 
             Spacer(modifier = Modifier.weight(1f))
 
