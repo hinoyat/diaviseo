@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
@@ -37,17 +38,17 @@ fun MealCard(
     nutrition: MealNutritionResponse,  // "탄수화물" to 56.9, ...
     foods: List<MealFoodResponse>,
     gradient: Brush,
-    mealIconRes: String,
+    mealIconRes: Int,
     onEditClick: () -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
-    val mealIcon = when (mealIconRes) {
-        "BREAKFAST" -> R.drawable.morning
-        "LUNCH" -> R.drawable.lunch
-        "DINNER" -> R.drawable.night
-        else -> R.drawable.apple
-    }
+//    val mealIcon = when (mealIconRes) {
+//        "BREAKFAST" -> R.drawable.morning
+//        "LUNCH" -> R.drawable.lunch
+//        "DINNER" -> R.drawable.night
+//        else -> R.drawable.apple
+//    }
 
     Column(
         modifier = Modifier
@@ -65,7 +66,7 @@ fun MealCard(
         // 상단: 아이콘, 타이틀, 시간, kcal
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
-                painter = painterResource(id = mealIcon),
+                painter = painterResource(id = mealIconRes),
                 contentDescription = "식사 아이콘",
                 modifier = Modifier.size(32.dp),
                 contentScale = ContentScale.Fit
@@ -92,37 +93,77 @@ fun MealCard(
         Spacer(modifier = Modifier.height(8.dp))
 
         // 영양 성분
-        NutritionRow("탄수화물", nutrition.totalCarbohydrate, DiaViseoColors.Carbohydrate)
-        NutritionRow("단백질", nutrition.totalProtein, DiaViseoColors.Protein)
-        NutritionRow("지방", nutrition.totalFat, DiaViseoColors.Fat)
-        NutritionRow("당류", nutrition.totalSugar, DiaViseoColors.Sugar)
+        Column {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                NutritionRow(
+                    label = "탄수화물",
+                    value = nutrition.totalCarbohydrate,
+                    color = DiaViseoColors.Carbohydrate,
+                    modifier = Modifier.weight(1f)
+                )
+                NutritionRow(
+                    label = "단백질",
+                    value = nutrition.totalProtein,
+                    color = DiaViseoColors.Protein,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(modifier = Modifier.fillMaxWidth()) {
+                NutritionRow(
+                    label = "지방",
+                    value = nutrition.totalFat,
+                    color = DiaViseoColors.Fat,
+                    modifier = Modifier.weight(1f)
+                )
+                NutritionRow(
+                    label = "당류",
+                    value = nutrition.totalSugar,
+                    color = DiaViseoColors.Sugar,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
 
 
         Spacer(modifier = Modifier.height(12.dp))
 
         // 음식 리스트
-        foods.forEach {
-            MealFoodRow(
-                name = it.foodName,
-                quantityLabel = "${it.quantity} 인분",
-                kcal = it.totalCalorie
-            )
-        }
-
-        AnimatedVisibility(visible = isExpanded) {
-            Column {
-                Spacer(modifier = Modifier.height(8.dp))
-                foods.forEach {
-                    MacroBreakdownRow(it)
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                MainButton(
-                    text = "수정하기",
-                    onClick = onEditClick,
-                    modifier = Modifier.fillMaxWidth()
+        if (!isExpanded) {
+            foods.forEach {
+                MealFoodRow(
+                    name = it.foodName,
+                    quantityLabel = "${it.quantity} 인분",
+                    kcal = it.totalCalorie
                 )
             }
+        } else {
+            AnimatedVisibility(visible = isExpanded) {
+                Column {
+                    foods.forEach {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        MealFoodRow(
+                            name = it.foodName,
+                            quantityLabel = "${it.quantity} 인분",
+                            kcal = it.totalCalorie
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        MacroBreakdownRow(it)
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    MainButton(
+                        text = "수정하기",
+                        onClick = onEditClick,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
         }
+
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -130,7 +171,8 @@ fun MealCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { isExpanded = !isExpanded },
-            horizontalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
@@ -147,10 +189,15 @@ fun MealCard(
 }
 
 @Composable
-fun NutritionRow(label: String, value: Double, color: Color) {
+fun NutritionRow(
+    label: String,
+    value: Double,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(bottom = 2.dp)
+        modifier = modifier.padding(bottom = 4.dp)
     ) {
         Box(
             modifier = Modifier
@@ -158,27 +205,52 @@ fun NutritionRow(label: String, value: Double, color: Color) {
                 .background(color = color)
         )
         Spacer(modifier = Modifier.width(6.dp))
-        Text(text = "$label ${"%.1f".format(value)}g", style = regular14, color = DiaViseoColors.Basic)
+        Text(
+            text = "$label ${"%.1f".format(value)}g",
+            style = regular14,
+            color = DiaViseoColors.Basic
+        )
     }
 }
 
 @Composable
 fun MacroBreakdownRow(food: MealFoodResponse) {
+    val macros = listOf(
+        Triple("탄", food.totalCarbohydrate, DiaViseoColors.Carbohydrate),
+        Triple("단", food.totalProtein, DiaViseoColors.Protein),
+        Triple("지", food.totalFat, DiaViseoColors.Fat),
+        Triple("당", food.totalSugar, DiaViseoColors.Sugar)
+    )
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        listOf(
-            "탄" to food.totalCarbohydrate,
-            "단" to food.totalProtein,
-            "지" to food.totalFat,
-            "당" to food.totalSugar
-        ).forEach { (label, value) ->
-            Text(
-                text = "$label ${"%.1f".format(value)}g",
-                color = DiaViseoColors.Basic,
-                style = regular14
-            )
+        macros.forEach { (label, value, color) ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .background(color, shape = CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = label,
+                        style = bold14,
+                        color = Color.White
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                Text(
+                    text = "${"%.1f".format(value)}g",
+                    style = regular14,
+                    color = DiaViseoColors.Basic
+                )
+            }
         }
     }
 }
