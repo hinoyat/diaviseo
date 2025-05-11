@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.geometry.Offset
 import com.example.diaviseo.network.meal.dto.res.MealFoodResponse
 import com.example.diaviseo.network.meal.dto.res.MealNutritionResponse
+import com.example.diaviseo.R
 
 @SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
@@ -187,4 +188,15 @@ fun MealDetailScreen(
             }
         )
     }
+}
+
+enum class MealTimeType(
+    val label: String,
+    val gradient: Brush,
+    val iconRes: Int
+) {
+    BREAKFAST("아침", Brush.linearGradient(listOf(Color(0xFFFFFEB4), Color.White)), R.drawable.morning),
+    LUNCH("점심", Brush.linearGradient(listOf(Color(0xFFFFDBB4), Color.White)), R.drawable.lunch),
+    DINNER("저녁", Brush.linearGradient(listOf(Color(0xFFC5B4FF), Color.White)), R.drawable.night),
+    SNACK("간식", Brush.linearGradient(listOf(Color(0xFFFFB4B4), Color.White)), R.drawable.apple)
 }
