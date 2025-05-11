@@ -154,7 +154,7 @@ fun SummaryCardSection(
             current = totalCalorie,
             goal = recommendedEat,
             goalExceeded = totalCalorie > recommendedEat,
-            destinationRoute = "exercise_detail",
+            destinationRoute = "meal_detail",
             navController = navController,
             modifier = Modifier.weight(1f)
         )
