@@ -1,8 +1,6 @@
 package com.s206.health.bodyinfo.entity;
 
-import com.s206.health.persistence.converter.DecimalEncryptConverter;
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -11,11 +9,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -25,7 +25,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
+@ToString
 public class BodyInfo {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer bodyId;
@@ -37,18 +39,17 @@ public class BodyInfo {
 	@Column(nullable = false)
 	private InputType inputType;
 
-	// 커스텀 컨버터를 지정하는 역할.
-	@Convert(converter = DecimalEncryptConverter.class)
 	@Column(nullable = false)
 	private BigDecimal weight;
 
-	@Convert(converter = DecimalEncryptConverter.class)
 	@Column(nullable = true)
 	private BigDecimal bodyFat;
 
 	@Column(name = "skeletal_muscle", nullable = true)
-	@Convert(converter = DecimalEncryptConverter.class)
 	private BigDecimal muscleMass;
+
+	@Column(name = "measurement_date", nullable = false)
+	private LocalDate measurementDate;
 
 	@CreationTimestamp
 	@Column(nullable = false, updatable = false)
@@ -64,7 +65,8 @@ public class BodyInfo {
 	private Boolean isDeleted = false;
 
 
-	public BodyInfo updatePartial(BigDecimal weight, BigDecimal bodyFat, BigDecimal muscleMass) {
+	public BodyInfo updatePartial(BigDecimal weight, BigDecimal bodyFat, BigDecimal muscleMass,
+			LocalDate measurementDate) {
 		if (weight != null) {
 			this.weight = weight;
 		}
@@ -74,7 +76,18 @@ public class BodyInfo {
 		if (muscleMass != null) {
 			this.muscleMass = muscleMass;
 		}
+
+		if (measurementDate != null) {
+			this.measurementDate = measurementDate;
+		}
+		
 		this.updatedAt = LocalDateTime.now();
 		return this;
+	}
+
+	public void markAsDeleted() {
+		this.updatedAt = LocalDateTime.now();
+		this.deletedAt = LocalDateTime.now();
+		this.isDeleted = true;
 	}
 }

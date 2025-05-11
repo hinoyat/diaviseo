@@ -4,6 +4,7 @@ data class ExerciseRecordResponse(
     val exerciseId: Int,
     val userId: Int,
     val exerciseTypeId: Int,
+    val exerciseNumber: Int,
     val exerciseName: String,
     val exerciseCategoryName: String,
     val exerciseDate: String,

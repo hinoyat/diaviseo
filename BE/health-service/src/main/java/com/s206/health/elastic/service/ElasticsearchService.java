@@ -3,16 +3,22 @@ package com.s206.health.elastic.service;
 import com.s206.health.elastic.document.ElasticFood;
 import com.s206.health.elastic.repository.ElasticRepository;
 import com.s206.health.nutrition.favorite.repository.FavoriteFoodRepository;
+import com.s206.health.nutrition.food.dto.response.FoodDetailResponse;
 import com.s206.health.nutrition.food.dto.response.FoodListResponse;
 import com.s206.health.nutrition.food.entity.Food;
 import com.s206.health.nutrition.food.repository.FoodRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.Criteria;
+import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
+import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -24,6 +30,7 @@ public class ElasticsearchService {
     private final ElasticRepository elasticRepository; // Elasticsearch 레포지토리
     private final FoodRepository foodRepository; // MySQL 음식 레포지토리
     private final FavoriteFoodRepository favoriteFoodRepository;
+    private final ElasticsearchOperations elasticsearchOperations;
 
     // 음식 저장
     public ElasticFood save(ElasticFood food) {
@@ -31,22 +38,53 @@ public class ElasticsearchService {
     }
 
     // 이름으로 음식 검색
-    public List<FoodListResponse> searchByName(String name, Integer userId) {
-        List<ElasticFood> elasticFoods = elasticRepository.findByNameContaining(name);
-        List<FoodListResponse> result = new ArrayList<>();
+    public List<FoodDetailResponse> searchByName(String name, Integer userId) {
+        // CriteriaQuery 사용 (직관적인 방식으로 쿼리 작성)
+        Criteria criteria = new Criteria("name")
+                .contains(name) // 부분 일치 확인
+                .or("name").matches(name); // 전체 일치 확인
 
-        for (ElasticFood elasticFood : elasticFoods) {
-            Optional<Food> foodOpt = foodRepository.findById(elasticFood.getFoodId());
+        Query searchQuery = new CriteriaQuery(criteria);
 
-            if (foodOpt.isPresent()) {
-                Food food = foodOpt.get();
-                // 실제 즐겨찾기 정보 조회
-                boolean isFavorite = favoriteFoodRepository.existsByUserIdAndFoodFoodId(userId, food.getFoodId());
-                result.add(FoodListResponse.toDto(food, isFavorite));
-            }
+        // elasticsearchOperations를 사용하여 쿼리 실행
+        SearchHits<ElasticFood> searchHits = elasticsearchOperations.search(searchQuery, ElasticFood.class);
+
+        // 검색된 모든 foodId 추출
+        List<Integer> foodIds = searchHits.getSearchHits().stream()
+                .map(hit -> hit.getContent().getFoodId())
+                .collect(Collectors.toList());
+
+        if (foodIds.isEmpty()) {
+            return new ArrayList<>();
         }
 
-        return result;
+        // 모든 foodId를 한 번에 조회 (IN 쿼리 사용)
+        List<Food> foods = foodRepository.findAllByFoodIdIn(foodIds);
+
+        // 즐겨찾기 정보 한 번에 조회 (IN 쿼리 사용)
+        Set<Integer> favoriteFoodIds = new HashSet<>();
+        if (userId != null) {
+            favoriteFoodIds = favoriteFoodRepository.findAllByUserIdAndFoodFoodIdIn(userId, foodIds)
+                    .stream()
+                    .map(favoriteFood -> favoriteFood.getFood().getFoodId())
+                    .collect(Collectors.toSet());
+        }
+
+        // 결과 변환
+        List<FoodDetailResponse> result = new ArrayList<>();
+        for (Food food : foods) {
+            boolean isFavorite = favoriteFoodIds.contains(food.getFoodId());
+            result.add(FoodDetailResponse.toDto(food, isFavorite));
+        }
+
+        // 검색 결과 순서 유지 (Elasticsearch 결과 순서와 일치시키기)
+        Map<Integer, FoodDetailResponse> responseMap = result.stream()
+                .collect(Collectors.toMap(FoodDetailResponse::getFoodId, Function.identity()));
+
+        return foodIds.stream()
+                .map(id -> responseMap.get(id))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     // 모든 음식 조회

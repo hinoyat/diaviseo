@@ -1,28 +1,61 @@
 package com.example.diaviseo.ui.main
+
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.background
-import androidx.navigation.NavHostController
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.diaviseo.R
+import com.example.diaviseo.ui.components.LoadingOverlay
 import com.example.diaviseo.ui.main.components.home.AiAssistantCard
 import com.example.diaviseo.ui.main.components.home.CaloriesGaugeSection
 import com.example.diaviseo.ui.main.components.home.MainHeader
 import com.example.diaviseo.ui.main.components.home.StepCountCard
 import com.example.diaviseo.ui.main.components.home.SummaryCard
 import com.example.diaviseo.ui.main.components.home.WeightPredictionSection
+import com.example.diaviseo.viewmodel.HomeViewModel
 import com.example.diaviseo.viewmodel.ProfileViewModel
+import java.time.LocalDate
 
 @Composable
 fun HomeScreen(
     navController: NavHostController,
-    viewModel: ProfileViewModel = viewModel()
+    viewModel: ProfileViewModel
 ) {
+    val homeViewModel: HomeViewModel = viewModel()
+
+    // 현재 이 composable의 BackStackEntry를 State로 구독
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    // 그 엔트리에서 route만 꺼내기
+    val currentRoute: String? = navBackStackEntry?.destination?.route
+
+    // route가 이 화면일 때만 호출
+    val today = remember { LocalDate.now() }
+    LaunchedEffect(currentRoute) {
+        if (currentRoute == "home") {
+            homeViewModel.fetchDailyNutrition(today.toString())
+            homeViewModel.fetchDailyExercise(today.toString())
+        }
+    }
+
+    val recommendedEat by viewModel.recommendedEat.collectAsState()
+    val recommendedFit by viewModel.recommendedFit.collectAsState()
+    val tdee by viewModel.tdee.collectAsState()
+
+    val totalCalorie by homeViewModel.totalCalorie.collectAsState()
+    val totalExerciseCalorie by homeViewModel.totalExerciseCalorie.collectAsState()
+
+    val remainingCalorie = recommendedEat - totalCalorie
+    val extraBurned = recommendedFit - totalExerciseCalorie
+    val calorieDifference = totalCalorie - tdee - totalExerciseCalorie
+
+    LoadingOverlay(isVisible = homeViewModel.isLoading.collectAsState().value)
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -47,22 +80,26 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             WeightPredictionSection(
-                calorieDifference = -50 // 예시 데이터
+                calorieDifference = calorieDifference // 예시 데이터
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             CaloriesGaugeSection(
-                consumedCalorie = 1080,
-                remainingCalorie = 150,
-                burnedCalorie = 180,
-                extraBurned = 100,
+                consumedCalorie = totalCalorie,
+                remainingCalorie = remainingCalorie,
+                burnedCalorie = totalExerciseCalorie,
+                extraBurned = extraBurned,
                 navController = navController
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            SummaryCardSection(navController = navController)
+            SummaryCardSection(
+                navController = navController,
+                viewModel = viewModel,
+                homeViewModel = homeViewModel
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -84,7 +121,17 @@ fun HomeScreen(
 }
 
 @Composable
-fun SummaryCardSection(navController: NavHostController) {
+fun SummaryCardSection(
+    navController: NavHostController,
+    viewModel: ProfileViewModel,
+    homeViewModel: HomeViewModel
+) {
+    val recommendedEat by viewModel.recommendedEat.collectAsState()
+    val recommendedFit by viewModel.recommendedFit.collectAsState()
+
+    val totalCalorie by homeViewModel.totalCalorie.collectAsState()
+    val totalExerciseCalorie by homeViewModel.totalExerciseCalorie.collectAsState()
+
     Row(
         modifier = Modifier
             .fillMaxWidth(),
@@ -92,9 +139,9 @@ fun SummaryCardSection(navController: NavHostController) {
     ) {
         SummaryCard(
             title = "오늘 활동 칼로리",
-            iconResId = com.example.diaviseo.R.drawable.main_exercise,
-            current = 96,   // 예시
-            goal = 256,   // 예시
+            iconResId = R.drawable.main_exercise,
+            current = totalExerciseCalorie,
+            goal = recommendedFit,
             goalExceeded = false,
             destinationRoute = "exercise_detail",
             navController = navController,
@@ -104,9 +151,9 @@ fun SummaryCardSection(navController: NavHostController) {
         SummaryCard(
             title = "오늘 섭취 칼로리",
             iconResId = R.drawable.main_diet,
-            current = 1796,   // 예시
-            goal = 1533,   // 예시
-            goalExceeded = 1796 > 1533,
+            current = totalCalorie,
+            goal = recommendedEat,
+            goalExceeded = totalCalorie > recommendedEat,
             destinationRoute = "exercise_detail",
             navController = navController,
             modifier = Modifier.weight(1f)

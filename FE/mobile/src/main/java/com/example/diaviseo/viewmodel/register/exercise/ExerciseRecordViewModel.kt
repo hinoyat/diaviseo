@@ -49,7 +49,7 @@ class ExerciseRecordViewModel : ViewModel(){
 
 
         return ExerciseRecordRequest(
-            exerciseTypeId = exercise.id,
+            exerciseNumber = exercise.id,
             exerciseDate = formattedDate,
             exerciseTime = time
         )
