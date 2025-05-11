@@ -99,7 +99,6 @@ fun ExerciseDetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding) // Scaffold 안쪽 padding 처리
-                .navigationBarsPadding() // 하단 소프트바 대응
                 .verticalScroll(rememberScrollState())
         ) {
             Spacer(modifier = Modifier.height(16.dp))
