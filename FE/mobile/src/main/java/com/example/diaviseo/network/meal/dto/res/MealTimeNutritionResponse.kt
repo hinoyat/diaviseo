@@ -8,6 +8,7 @@ data class MealTimeNutritionResponse(
     val foods: List<MealFoodResponse>,
     val nutrition: MealNutritionResponse,
     val createdAt: String,
-    val updatedAt: String
+    val updatedAt: String,
+    val mealTimeImageUrl: String?
 )
 
