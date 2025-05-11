@@ -14,6 +14,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import okhttp3.Interceptor
 import com.example.diaviseo.network.exercise.ExerciseApiService
+import com.example.diaviseo.network.meal.MealApiService
 
 object RetrofitInstance {
     // 1. 로그용 Interceptor
@@ -132,6 +133,10 @@ object RetrofitInstance {
     }
     val exerciseApiService: ExerciseApiService by lazy {
         retro.create(ExerciseApiService::class.java)
+    }
+
+    val mealApiService: MealApiService by lazy {
+        retro.create(MealApiService::class.java)
     }
 
 }

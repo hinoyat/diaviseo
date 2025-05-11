@@ -23,6 +23,9 @@ class ProfileViewModel : ViewModel() {
     private val _bmr = MutableStateFlow(0.0)
     val bmr: StateFlow<Double> = _bmr
 
+    private val _tdee = MutableStateFlow(0)
+    val tdee: StateFlow<Int> = _tdee
+
     private val _recommendedEat = MutableStateFlow(0)
     val recommendedEat: StateFlow<Int> = _recommendedEat
 
@@ -54,17 +57,18 @@ class ProfileViewModel : ViewModel() {
                                 (10 * weight) + (6.25 * height) - (5 * age) - 161
                             }
                             _bmr.value = calBmr
+                            _tdee.value = (_bmr.value * 1.375).roundToInt()
 
                             _recommendedEat.value = when (profile.goal) {
-                                "WEIGHT_LOSS" -> (_bmr.value * 1.4).roundToInt() - 500
-                                "WEIGHT_GAIN" -> (_bmr.value * 1.4).roundToInt() + 300
-                                else -> (_bmr.value * 1.4).roundToInt()
+                                "WEIGHT_LOSS" -> _tdee.value - 400
+                                "WEIGHT_GAIN" -> _tdee.value + 250
+                                else -> _tdee.value
                             }
 
                             _recommendedFit.value = when (profile.goal) {
-                                "WEIGHT_LOSS" -> (_bmr.value * 1.4 * 0.15).roundToInt() + 150
-                                "WEIGHT_GAIN" -> (_bmr.value * 1.4 * 0.15).roundToInt() + 70
-                                else -> (_bmr.value * 1.4 * 0.15).roundToInt()
+                                "WEIGHT_LOSS" -> (_tdee.value * 0.15).roundToInt() + 150
+                                "WEIGHT_GAIN" -> (_tdee.value * 0.15).roundToInt() + 70
+                                else -> (_tdee.value * 0.15).roundToInt()
                             }
                         }
                     }
