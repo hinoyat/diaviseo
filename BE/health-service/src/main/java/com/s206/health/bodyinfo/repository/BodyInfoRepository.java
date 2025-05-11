@@ -1,10 +1,20 @@
 package com.s206.health.bodyinfo.repository;
 
 import com.s206.health.bodyinfo.entity.BodyInfo;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface BodyInfoRepository extends JpaRepository<BodyInfo, Integer> {
 
 	List<BodyInfo> findByUserId(Integer userId);
+
+	Optional<BodyInfo> findByBodyIdAndIsDeletedFalse(Integer bodyId);
+
+	@Query(value = "SELECT * FROM body_tb b WHERE b.user_id = :userId AND b.measurement_date = :date AND b.is_deleted = false ORDER BY b.created_at DESC LIMIT 1", nativeQuery = true)
+	Optional<BodyInfo> findLatestBodyInfoByMeasurementDate(@Param("userId") Integer userId,
+			@Param("date") LocalDate date);
 }
