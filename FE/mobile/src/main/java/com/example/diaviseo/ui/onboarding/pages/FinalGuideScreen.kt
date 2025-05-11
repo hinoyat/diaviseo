@@ -31,14 +31,21 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
 import android.util.Log
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.diaviseo.healthconnect.HealthConnectManager
 import com.example.diaviseo.healthconnect.HealthConnectPermissionHandler
-import com.example.diaviseo.healthconnect.HealthConnectLogger
 import com.example.diaviseo.healthconnect.processor.StepDataProcessor
 import com.example.diaviseo.healthconnect.processor.ExerciseSessionRecordProcessor
+import com.example.diaviseo.viewmodel.register.exercise.ExerciseSyncViewModel
 
 @Composable
-fun FinalGuideScreen(navController: NavController, goalViewModel: GoalViewModel, authViewModel: AuthViewModel) {
+fun FinalGuideScreen(
+    navController: NavController,
+    goalViewModel: GoalViewModel,
+    authViewModel: AuthViewModel
+) {
+    val syncViewModel: ExerciseSyncViewModel = viewModel()
+
     var showDialog by remember { mutableStateOf(false) }
 
     val name = authViewModel.name.collectAsState().value
@@ -46,7 +53,6 @@ fun FinalGuideScreen(navController: NavController, goalViewModel: GoalViewModel,
     val genderCode = authViewModel.gender.collectAsState().value
     val heightStr = authViewModel.height.collectAsState().value
     val weightStr = authViewModel.weight.collectAsState().value
-//    val goalString = goalViewModel.goal.collectAsState().value
     val goalString = authViewModel.goal.collectAsState().value
 
     val height = heightStr.toFloatOrNull() ?: 160f
@@ -110,12 +116,10 @@ fun FinalGuideScreen(navController: NavController, goalViewModel: GoalViewModel,
                 textAlign = TextAlign.Justify,
                 modifier = Modifier.fillMaxWidth(),
             )
-
         }
     }
+
     val particle = if (goalDisplayText == "체중 유지") "를" else "을"
-
-
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -123,49 +127,60 @@ fun FinalGuideScreen(navController: NavController, goalViewModel: GoalViewModel,
         contract = PermissionController.createRequestPermissionResultContract()
     ) { granted ->
         val manager = HealthConnectManager.createIfAvailable(context)
+
+        // 사용자가 권한을 허용했는지에 따라 내부 로직 실행
         if (manager != null) {
             HealthConnectPermissionHandler.handlePermissionResult(
                 granted = granted,
                 manager = manager,
                 scope = coroutineScope
             )
-        } else {
-            Log.e("HealthConnect", "권한 결과 처리 중 HCManager null")
-        }
-    }
 
-    LaunchedEffect(Unit) {
-        coroutineScope.launch {
-            HealthConnectLogger.logRawSteps(context)
-            HealthConnectLogger.logRawExerciseSessions(context)
-        }
-    }
-    // 서버 전송을 위한 가공된 걸음 수 데이터도 출력
-
-        LaunchedEffect(Unit) {
             coroutineScope.launch {
-                val manager = HealthConnectManager.createIfAvailable(context)
-                if (manager != null) {
-                    val stepRecords = manager.readSteps()
-                    val processed = StepDataProcessor.process(stepRecords)
-                    processed.forEach {
-                        Log.d("StepProcessed", it.toString())
-                    }
-                }
-            }
-        }
-    LaunchedEffect(Unit) {
-        coroutineScope.launch {
-            val manager = HealthConnectManager.createIfAvailable(context)
-            if (manager != null) {
+                // 1. Health Connect에서 운동 기록 읽기
                 val sessionRecords = manager.readExerciseSessions()
-                val processed = sessionRecords.map {
-                    ExerciseSessionRecordProcessor.toRequest(it)
-                }
-                processed.forEach {
+                val processedExercises = ExerciseSessionRecordProcessor.toRequestList(sessionRecords)
+                Log.d("ExerciseProcessed", "✅ 운동 ${processedExercises.size}건")
+                processedExercises.forEach {
                     Log.d("ExerciseProcessed", it.toString())
                 }
+
+                //  2. Health Connect에서 걸음 수 기록 읽기
+                val stepRecords = manager.readSteps()
+                val processedSteps = StepDataProcessor.process(stepRecords)
+                Log.d("StepProcessed", "✅ 걸음 수 ${processedSteps.size}건")
+                processedSteps.forEach {
+                    Log.d("StepProcessed", it.toString())
+                }
+
+                // 3. 서버에 운동 데이터 전송
+                if (processedExercises.isNotEmpty()) {
+                    syncViewModel.syncExerciseRecords(
+                        requests = processedExercises,
+                        onSuccess = {
+                            Log.d("ExerciseSync", "✅ 운동 데이터 서버 전송 성공")
+                        },
+                        onError = {
+                            Log.e("ExerciseSync", "❌ 운동 데이터 서버 전송 실패", it)
+                        }
+                    )
+                }
+
+                // 4. 서버에 걸음 수 데이터 전송
+                if (processedSteps.isNotEmpty()) {
+                    syncViewModel.syncStepRecords(
+                        requests = processedSteps,
+                        onSuccess = {
+                            Log.d("StepSync", "✅ 걸음 수 서버 전송 성공")
+                        },
+                        onError = {
+                            Log.e("StepSync", "❌ 걸음 수 서버 전송 실패", it)
+                        }
+                    )
+                }
             }
+        } else {
+            Log.e("HealthConnect", "권한 결과 처리 중 HCManager null")
         }
     }
 
@@ -179,9 +194,7 @@ fun FinalGuideScreen(navController: NavController, goalViewModel: GoalViewModel,
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(
-                    WindowInsets.safeDrawing.only(WindowInsetsSides.Top).asPaddingValues()
-                )
+                .padding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top).asPaddingValues())
                 .padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -210,9 +223,7 @@ fun FinalGuideScreen(navController: NavController, goalViewModel: GoalViewModel,
 
                 Button(
                     onClick = { showDialog = true },
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .defaultMinSize(minHeight = 32.dp),
+                    modifier = Modifier.wrapContentWidth().defaultMinSize(minHeight = 32.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFFF0F0F0),
                         contentColor = Color.DarkGray
@@ -230,13 +241,6 @@ fun FinalGuideScreen(navController: NavController, goalViewModel: GoalViewModel,
                 if (showDialog) {
                     AlertDialog(
                         onDismissRequest = { showDialog = false },
-//                        title = {
-//                            Text(
-//                                "건강 가이드",
-//                                fontWeight = FontWeight.SemiBold,
-//                                modifier = Modifier.fillMaxWidth(),
-//                                textAlign = TextAlign.Center
-//                            ) },
                         text = {
                             guideText()
                         },
@@ -266,8 +270,6 @@ fun FinalGuideScreen(navController: NavController, goalViewModel: GoalViewModel,
                 )
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // ✅ Health Connect 연동 버튼 클릭 시 동작
-                // 연동 버튼 클릭 시 로직
                 Button(
                     onClick = {
                         val manager = HealthConnectManager.createIfAvailable(context)
@@ -295,7 +297,6 @@ fun FinalGuideScreen(navController: NavController, goalViewModel: GoalViewModel,
                 ) {
                     Text("헬스 커넥트 연동하기", color = Color.White)
                 }
-
 
                 Spacer(modifier = Modifier.height(60.dp))
 

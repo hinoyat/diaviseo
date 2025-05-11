@@ -18,6 +18,9 @@ import com.example.diaviseo.network.meal.MealApiService
 import com.example.diaviseo.network.food.FoodApiService
 
 object RetrofitInstance {
+    // 재발급 동기화를 위한 lock 객체
+    private val refreshLock = Any()
+
     // 1. 로그용 Interceptor
     val logging = HttpLoggingInterceptor { message ->
         Log.d("RetrofitLog", message)  // 로그 태그 설정 가능
@@ -30,39 +33,51 @@ object RetrofitInstance {
         val context = AppContextHolder.appContext
 
         // DataStore의 Flow에서 값 1개만 꺼내기
-        val accessToken = runBlocking {
-            TokenDataStore.getAccessToken(context).first() ?: ""
+        var accessToken = runBlocking {
+            TokenDataStore.getAccessToken(context).first().orEmpty()
         }
 
-        val newRequest = chain.request().newBuilder()
+        var request = chain.request().newBuilder()
             .addHeader("Authorization", "Bearer $accessToken")
             .build()
-        var response = chain.proceed(newRequest)
+        var response = chain.proceed(request)
 
         // 401 오류가 나면 자동으로 토큰 갱신 요청
         if (response.code == 401) {
-            val newResponse = runBlocking { refreshService.refreshAuthToken() }
-            // 응답 받은 값으로 토큰 갱신하기
-            runBlocking {
-                TokenDataStore.saveAccessToken(context, newResponse.data?.accessToken ?: "")
-                TokenDataStore.saveRefreshToken(context, newResponse.data?.refreshToken ?: "")
+            // 기존 응답 닫아주고
+            response.close()
+
+            synchronized(refreshLock) {
+                // (중요) 다른 스레드가 이미 토큰을 갱신했는지 다시 확인
+                val latestToken = runBlocking {
+                    TokenDataStore.getAccessToken(context).first().orEmpty()
+                }
+                if (latestToken != accessToken) {
+                    // 이미 갱신된 토큰이므로 그걸 사용
+                    accessToken = latestToken
+                } else {
+                    // 진짜 첫 스레드만 이 지점에서 재발급 수행
+                    val newResp = runBlocking { refreshService.refreshAuthToken() }
+                    val newAccess = newResp.data?.accessToken.orEmpty()
+                    val newRefresh = newResp.data?.refreshToken.orEmpty()
+
+                    runBlocking {
+                        TokenDataStore.saveAccessToken(context, newAccess)
+                        TokenDataStore.saveRefreshToken(context, newRefresh)
+                    }
+                    accessToken = newAccess
+                }
             }
-            val newAccessToken = newResponse.data?.accessToken
 
-            // 새 토큰으로 요청 다시 만들기
-            val newRequest = chain.request().newBuilder()
-                .addHeader("Authorization", "Bearer $newAccessToken")
+            // 4) 갱신된 토큰으로 원래 요청 재구성 & 재시도
+            request = chain.request().newBuilder()
+                .header("Authorization", "Bearer $accessToken")
                 .build()
-
-            response = chain.proceed(newRequest)
+            response = chain.proceed(request)
         }
-
-        return@Interceptor response
-        //
         Log.d("Network", "Response Code: ${response.code}")
         response
     }
-
 
     // 3. OkHttpClient 구성
     val client = OkHttpClient.Builder()

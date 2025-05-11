@@ -2,7 +2,12 @@ package com.s206.health.bodyinfo.service;
 
 import com.s206.health.bodyinfo.dto.request.BodyInfoCreateRequest;
 import com.s206.health.bodyinfo.dto.request.BodyInfoPatchRequest;
+import com.s206.health.bodyinfo.dto.response.BodyInfoProjection;
 import com.s206.health.bodyinfo.dto.response.BodyInfoResponse;
+import com.s206.health.bodyinfo.dto.response.MonthRange;
+import com.s206.health.bodyinfo.dto.response.MonthlyAverageBodyInfoResponse;
+import com.s206.health.bodyinfo.dto.response.WeekRange;
+import com.s206.health.bodyinfo.dto.response.WeeklyAverageBodyInfoResponse;
 import com.s206.health.bodyinfo.entity.BodyInfo;
 import com.s206.health.bodyinfo.mapper.BodyMapper;
 import com.s206.health.bodyinfo.repository.BodyInfoRepository;
@@ -11,9 +16,15 @@ import com.s206.health.client.UserClient;
 import com.s206.health.client.dto.response.UserDetailResponse;
 import jakarta.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -124,6 +135,213 @@ public class BodyInfoService {
 
 		log.info("사용자 ID: {}의 {} 날짜 체성분 정보 조회 완료", userId, date);
 		return bodyMapper.toDto(bodyInfo, bmi, bmr);
+	}
+
+	@Transactional(readOnly = true)
+	public List<BodyInfoProjection> getWeeklyBodyInfo(Integer userId, LocalDate endDate
+	) {
+		LocalDate startDate = endDate.minusDays(6);
+		log.debug("조회 기간: {} ~ {}", startDate, endDate);
+
+		List<BodyInfoProjection> bodyInfos = bodyInfoRepository.findByUserIdAndMeasurementDateBetween(
+				userId, startDate, endDate);
+
+		bodyInfos = fillMissingDates(bodyInfos, startDate, endDate);
+		log.info("사용자 ID: {}의 주간 체성분 정보 조회 완료 ({}개 데이터)", userId, bodyInfos.size());
+		return bodyInfos;
+	}
+
+	@Transactional(readOnly = true)
+	public List<WeeklyAverageBodyInfoResponse> getWeeklyAverages(Integer userId,
+			LocalDate endDate) {
+		log.info("사용자 ID: {}의 월간 체성분 정보 조회 시작", userId);
+
+		List<WeekRange> weekRanges = generateRecentSevenWeeks(endDate);
+		log.debug("생성된 주차 범위: {}", weekRanges);
+
+		LocalDate start = weekRanges.get(0).getStartDate();
+		LocalDate end = weekRanges.get(6).getEndDate();
+
+		List<BodyInfoProjection> rawData = bodyInfoRepository.findByUserIdAndMeasurementDateBetween(
+				userId, start, end);
+		log.debug("조회된 데이터 수: {}", rawData.size());
+
+		List<WeeklyAverageBodyInfoResponse> result = calculateWeeklyAverages(rawData, weekRanges);
+		log.info("사용자 ID: {}의 월간 체성분 정보 조회 완료 ({}개 주차)", userId, result.size());
+
+		return result;
+	}
+
+	@Transactional(readOnly = true)
+	public List<MonthlyAverageBodyInfoResponse> getMonthlyAverages(Integer userId,
+			LocalDate endDate) {
+		log.info("사용자 ID: {}의 7개월간 월별 평균 체성분 정보 조회 시작", userId);
+
+		List<MonthRange> monthRanges = generateRecentSevenMonths(endDate);
+		log.debug("생성된 월별 범위: {}", monthRanges);
+
+		LocalDate start = monthRanges.get(0).getStartDate();
+		LocalDate end = monthRanges.get(6).getEndDate();
+		log.debug("조회 기간: {} ~ {}", start, end);
+
+		List<BodyInfoProjection> rawData =
+				bodyInfoRepository.findByUserIdAndMeasurementDateBetween(userId, start, end);
+		log.debug("조회된 데이터 수: {}", rawData.size());
+
+		List<MonthlyAverageBodyInfoResponse> result = calculateMonthlyAverages(rawData,
+				monthRanges);
+		log.info("사용자 ID: {}의 7개월간 월별 평균 체성분 정보 조회 완료 ({}개 월)", userId, result.size());
+
+		return result;
+	}
+
+
+	private List<MonthRange> generateRecentSevenMonths(LocalDate referenceDate) {
+		List<MonthRange> monthRanges = new ArrayList<>(7);
+
+		for (int monthOffset = 6; monthOffset >= 0; monthOffset--) {
+			LocalDate endMonth = referenceDate.minusMonths(monthOffset);
+			LocalDate startDate = endMonth.withDayOfMonth(1);
+			LocalDate endDate = endMonth.withDayOfMonth(endMonth.lengthOfMonth());
+			int monthIndex = 7 - monthOffset; // 가장 과거 월을 1번으로 시작
+
+			monthRanges.add(new MonthRange(monthIndex, startDate, endDate));
+		}
+
+		return monthRanges;
+	}
+
+	private List<WeekRange> generateRecentSevenWeeks(LocalDate referenceDate) {
+		List<WeekRange> weekRanges = new ArrayList<>(7);
+
+		for (int weekOffset = 6; weekOffset >= 0; weekOffset--) {
+			LocalDate endDate = referenceDate.minusDays(weekOffset * 7L);
+			LocalDate startDate = endDate.minusDays(6);
+			int weekNumber = 7 - weekOffset; // 가장 과거 주차를 1번으로 시작
+
+			weekRanges.add(new WeekRange(weekNumber, startDate, endDate));
+		}
+
+		return weekRanges;
+	}
+
+	private List<MonthlyAverageBodyInfoResponse> calculateMonthlyAverages(
+			List<BodyInfoProjection> data,
+			List<MonthRange> monthRanges
+	) {
+		List<MonthlyAverageBodyInfoResponse> result = new ArrayList<>();
+
+		for (MonthRange month : monthRanges) {
+			List<BodyInfoProjection> monthlyData = data.stream()
+					.filter(d -> !d.getMeasurementDate().isBefore(month.getStartDate()) &&
+							!d.getMeasurementDate().isAfter(month.getEndDate()))
+					.toList();
+
+			BigDecimal avgWeight = averageExcludingZero(
+					monthlyData.stream().map(BodyInfoProjection::getWeight));
+			BigDecimal avgMuscle = averageExcludingZero(
+					monthlyData.stream().map(BodyInfoProjection::getMuscleMass));
+			BigDecimal avgFat = averageExcludingZero(
+					monthlyData.stream().map(BodyInfoProjection::getBodyFat));
+
+			result.add(new MonthlyAverageBodyInfoResponse(
+					month.getMonthIndex(),
+					roundToTwo(avgWeight),
+					roundToTwo(avgMuscle),
+					roundToTwo(avgFat)
+			));
+		}
+
+		return result;
+	}
+
+	private List<WeeklyAverageBodyInfoResponse> calculateWeeklyAverages(
+			List<BodyInfoProjection> data,
+			List<WeekRange> weekRanges
+	) {
+		List<WeeklyAverageBodyInfoResponse> result = new ArrayList<>();
+
+		for (WeekRange week : weekRanges) {
+			// 주간 범위 내 데이터 필터링
+			List<BodyInfoProjection> weekData = data.stream()
+					.filter(d -> !d.getMeasurementDate().isBefore(week.getStartDate()) &&
+							!d.getMeasurementDate().isAfter(week.getEndDate()))
+					.toList();
+
+			// 0 제외 후 평균 계산
+			BigDecimal avgWeight = averageExcludingZero(
+					weekData.stream().map(BodyInfoProjection::getWeight));
+			BigDecimal avgMuscle = averageExcludingZero(
+					weekData.stream().map(BodyInfoProjection::getMuscleMass));
+			BigDecimal avgFat = averageExcludingZero(
+					weekData.stream().map(BodyInfoProjection::getBodyFat));
+
+			result.add(new WeeklyAverageBodyInfoResponse(
+					week.getWeekNumber(),
+					roundToTwo(avgWeight), roundToTwo(avgMuscle), roundToTwo(avgFat)
+			));
+		}
+
+		return result;
+	}
+
+	private BigDecimal averageExcludingZero(Stream<BigDecimal> values) {
+		List<BigDecimal> valid = values
+				.filter(v -> v != null && v.compareTo(BigDecimal.ZERO) != 0)
+				.toList();
+
+		if (valid.isEmpty()) {
+			return BigDecimal.ZERO;
+		}
+
+		BigDecimal sum = valid.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+		return sum.divide(BigDecimal.valueOf(valid.size()), 10, RoundingMode.HALF_UP); // 반올림은 M5에서
+	}
+
+	private BigDecimal roundToTwo(BigDecimal value) {
+		return value.setScale(2, RoundingMode.HALF_UP);
+	}
+
+
+	private List<BodyInfoProjection> fillMissingDates(
+			List<BodyInfoProjection> rawData,
+			LocalDate startDate,
+			LocalDate endDate
+	) {
+		Map<LocalDate, BodyInfoProjection> dataMap = rawData.stream()
+				.collect(Collectors.toMap(
+						BodyInfoProjection::getMeasurementDate,
+						Function.identity()
+				));
+
+		List<BodyInfoProjection> filled = new ArrayList<>();
+
+		for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+			BodyInfoProjection projection = dataMap.getOrDefault(date, zeroProjection(date));
+			filled.add(projection);
+		}
+
+		return filled;
+	}
+
+	private BodyInfoProjection zeroProjection(LocalDate date) {
+		return new BodyInfoProjection() {
+			public LocalDate getMeasurementDate() {
+				return date;
+			}
+
+			public BigDecimal getWeight() {
+				return BigDecimal.ZERO;
+			}
+
+			public BigDecimal getMuscleMass() {
+				return BigDecimal.ZERO;
+			}
+
+			public BigDecimal getBodyFat() {
+				return BigDecimal.ZERO;
+			}
+		};
 	}
 }
 
