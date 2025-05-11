@@ -2,6 +2,7 @@ package com.s206.health.bodyinfo.service;
 
 import com.s206.health.bodyinfo.dto.request.BodyInfoCreateRequest;
 import com.s206.health.bodyinfo.dto.request.BodyInfoPatchRequest;
+import com.s206.health.bodyinfo.dto.response.BodyInfoProjection;
 import com.s206.health.bodyinfo.dto.response.BodyInfoResponse;
 import com.s206.health.bodyinfo.entity.BodyInfo;
 import com.s206.health.bodyinfo.mapper.BodyMapper;
@@ -13,7 +14,11 @@ import jakarta.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -124,6 +129,61 @@ public class BodyInfoService {
 
 		log.info("사용자 ID: {}의 {} 날짜 체성분 정보 조회 완료", userId, date);
 		return bodyMapper.toDto(bodyInfo, bmi, bmr);
+	}
+
+	@Transactional(readOnly = true)
+	public List<BodyInfoProjection> getWeeklyBodyInfo(Integer userId, LocalDate endDate
+	) {
+		LocalDate startDate = endDate.minusDays(6);
+		log.debug("조회 기간: {} ~ {}", startDate, endDate);
+
+		List<BodyInfoProjection> bodyInfos = bodyInfoRepository.findByUserIdAndMeasurementDateBetween(
+				userId, startDate, endDate);
+
+		bodyInfos = fillMissingDates(bodyInfos, startDate, endDate);
+		log.info("사용자 ID: {}의 주간 체성분 정보 조회 완료 ({}개 데이터)", userId, bodyInfos.size());
+		return bodyInfos;
+	}
+
+	public List<BodyInfoProjection> fillMissingDates(
+			List<BodyInfoProjection> rawData,
+			LocalDate startDate,
+			LocalDate endDate
+	) {
+		Map<LocalDate, BodyInfoProjection> dataMap = rawData.stream()
+				.collect(Collectors.toMap(
+						BodyInfoProjection::getMeasurementDate,
+						Function.identity()
+				));
+
+		List<BodyInfoProjection> filled = new ArrayList<>();
+
+		for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+			BodyInfoProjection projection = dataMap.getOrDefault(date, zeroProjection(date));
+			filled.add(projection);
+		}
+
+		return filled;
+	}
+
+	private BodyInfoProjection zeroProjection(LocalDate date) {
+		return new BodyInfoProjection() {
+			public LocalDate getMeasurementDate() {
+				return date;
+			}
+
+			public BigDecimal getWeight() {
+				return BigDecimal.ZERO;
+			}
+
+			public BigDecimal getMuscleMass() {
+				return BigDecimal.ZERO;
+			}
+
+			public BigDecimal getBodyFat() {
+				return BigDecimal.ZERO;
+			}
+		};
 	}
 }
 

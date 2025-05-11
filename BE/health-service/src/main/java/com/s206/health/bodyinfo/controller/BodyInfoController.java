@@ -3,6 +3,7 @@ package com.s206.health.bodyinfo.controller;
 import com.s206.common.dto.ResponseDto;
 import com.s206.health.bodyinfo.dto.request.BodyInfoCreateRequest;
 import com.s206.health.bodyinfo.dto.request.BodyInfoPatchRequest;
+import com.s206.health.bodyinfo.dto.response.BodyInfoProjection;
 import com.s206.health.bodyinfo.dto.response.BodyInfoResponse;
 import com.s206.health.bodyinfo.service.BodyInfoService;
 import jakarta.validation.Valid;
@@ -73,7 +74,7 @@ public class BodyInfoController {
 	public ResponseEntity<ResponseDto<BodyInfoResponse>> findByDate(
 			@RequestHeader("X-USER-ID") Integer userId,
 			@RequestParam @DateTimeFormat(iso = ISO.DATE) LocalDate date) {
-		 
+
 		if (date.isAfter(LocalDate.now())) {
 			throw new IllegalArgumentException("미래 날짜는 입력할 수 없습니다.");
 		}
@@ -85,5 +86,23 @@ public class BodyInfoController {
 		BodyInfoResponse response = bodyInfoService.findByUserIdAndDate(userId, date);
 		return ResponseEntity.ok(
 				ResponseDto.success(HttpStatus.OK, "유저 체성분 정보 조회가 성공적으로 처리됐습니다.", response));
+	}
+
+	@GetMapping("/weekly")
+	public ResponseEntity<ResponseDto<List<BodyInfoProjection>>> getWeeklyBodyInfo(
+			@RequestHeader("X-USER-ID") Integer userId,
+			@RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate endDate) {
+
+//		if (endDate == null) {
+//			endDate = LocalDate.now();
+//		}
+//
+//		if (endDate.isAfter(LocalDate.now())) {
+//			throw new IllegalArgumentException("미래 날짜는 입력할 수 없습니다.");
+//		}
+
+		List<BodyInfoProjection> response = bodyInfoService.getWeeklyBodyInfo(userId, endDate);
+		return ResponseEntity.ok(
+				ResponseDto.success(HttpStatus.OK, "주간 체성분 정보 조회가 성공적으로 처리됐습니다.", response));
 	}
 }
