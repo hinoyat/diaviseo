@@ -20,6 +20,7 @@ import com.example.diaviseo.ui.register.diet.DietRegisterMainScreen
 import com.example.diaviseo.ui.register.exercise.ExerciseRegisterMainScreen
 import com.example.diaviseo.ui.register.diet.DietAiRegisterScreen
 import com.example.diaviseo.viewmodel.ProfileViewModel
+import com.example.diaviseo.ui.register.diet.dietGraph
 
 @Composable
 fun MainScreen() {
@@ -54,7 +55,8 @@ fun MainScreen() {
         "faq",
         "edit_profile",
         "edit_physical_info",
-        "exercise_detail"
+        "exercise_detail",
+        "diet_confirm"
         )
     val isBottomBarVisible = currentRoute !in hideBottomBarRoutes
 
@@ -133,9 +135,10 @@ fun MainScreen() {
             composable("body_register") {
                 BodyDataRegisterScreen(navController)
             }
-            composable("diet_register") {
-                DietRegisterMainScreen(navController)
-            }
+//            composable("diet_register") {
+//                DietRegisterMainScreen(navController)
+//            }
+            dietGraph(navController)
             composable("exercise_register") {
                 ExerciseRegisterMainScreen(navController)
             }
