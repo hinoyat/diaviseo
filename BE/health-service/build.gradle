@@ -65,6 +65,9 @@ dependencies {
     // 엑셀파일
     implementation 'org.apache.poi:poi:5.2.3'
     implementation 'org.apache.poi:poi-ooxml:5.2.3'
+
+    // OCR
+    implementation 'net.sourceforge.tess4j:tess4j:5.7.0'
 }
 
 dependencyManagement {
