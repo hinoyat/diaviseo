@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
@@ -80,6 +81,11 @@ public class MealService {
                     // eatingTime 업데이트
                     mealTime.updateEatingTime(mealTimeRequest.getEatingTime());
 
+                    // mealTimeImageUrl 업데이트 - 여기에 코드 추가
+                    if (mealTimeRequest.getMealTimeImageUrl() != null && !mealTimeRequest.getMealTimeImageUrl().isEmpty()) {
+                        mealTime.updateMealTimeImageUrl(mealTimeRequest.getMealTimeImageUrl());
+                    }
+
                     // 새 음식 추가
                     addFoodsToMealTime(mealTime, mealTimeRequest.getFoods());
                     log.info("[UPDATE] 기존 시간대 업데이트: 시간대={}", mealTimeRequest.getMealType());
@@ -89,6 +95,7 @@ public class MealService {
                             .meal(meal)
                             .mealType(mealTimeRequest.getMealType())
                             .eatingTime(mealTimeRequest.getEatingTime())
+                            .mealTimeImageUrl(mealTimeRequest.getMealTimeImageUrl()) // 이미지 URL 설정
                             .build();
 
                     // 음식 추가
@@ -123,6 +130,79 @@ public class MealService {
                 mealTime.getMealFoods().add(mealFood);
             }
         }
+    }
+
+    @Transactional
+    public MealDetailResponse createOrUpdateMealWithImages(MealCreateRequest request, List<MultipartFile> images, Integer userId) {
+        log.info("[CREATE/UPDATE_WITH_IMAGES] userId={} → 식단 및 이미지 등록/수정 요청: 날짜={}", userId, request.getMealDate());
+
+        // 1. 이미지가 존재하면 업로드
+        Map<MealType, String> imageUrlMap = new HashMap<>();
+        if (images != null && !images.isEmpty()) {
+            int imageIndex = 0;
+
+            // 요청에 있는 각 mealTime에 이미지 할당
+            for (MealTimeRequest mealTimeRequest : request.getMealTimes()) {
+                if (imageIndex < images.size()) {
+                    MultipartFile image = images.get(imageIndex);
+                    if (image != null && !image.isEmpty()) {
+                        // 이미지 업로드
+                        String objectName = mealImageService.uploadMealImage(image);
+
+                        // mealTimeRequest에 이미지 URL 설정
+                        imageUrlMap.put(mealTimeRequest.getMealType(), objectName);
+                        imageIndex++;
+                    }
+                }
+            }
+        }
+
+        // 2. 이미지 URL을 MealTimeRequest에 설정 (새 객체 생성 방식)
+        List<MealTimeRequest> updatedMealTimes = new ArrayList<>();
+        for (MealTimeRequest originalRequest : request.getMealTimes()) {
+            String imageUrl = imageUrlMap.get(originalRequest.getMealType());
+
+            if (imageUrl != null) {
+                // 새 객체 생성하여 이미지 URL 설정
+                MealTimeRequest newRequest = MealTimeRequest.builder()
+                        .mealType(originalRequest.getMealType())
+                        .eatingTime(originalRequest.getEatingTime())
+                        .foods(originalRequest.getFoods())
+                        .mealTimeImageUrl(imageUrl)  // 새 이미지 URL 설정
+                        .build();
+                updatedMealTimes.add(newRequest);
+            } else {
+                updatedMealTimes.add(originalRequest);
+            }
+        }
+
+        // 새 MealCreateRequest 객체 생성
+        MealCreateRequest updatedRequest = MealCreateRequest.builder()
+                .mealDate(request.getMealDate())
+                .isMeal(request.getIsMeal())
+                .mealTimes(updatedMealTimes)
+                .build();
+
+        // 3. 기존 식단 등록/수정 로직 호출
+        MealDetailResponse response = createOrUpdateMeal(updatedRequest, userId);
+
+        // 4. 이미지 URL을 완전한 URL로 변환
+        for (MealTimeResponse mealTimeResponse : response.getMealTimes()) {
+            String mealTimeImageUrl = mealTimeResponse.getMealTimeImageUrl();
+            if (mealTimeImageUrl != null && !mealTimeImageUrl.isEmpty()) {
+                mealTimeResponse.setMealTimeImageUrl(mealImageService.getMealImageUrl(mealTimeImageUrl));
+            }
+
+            for (MealFoodResponse foodResponse : mealTimeResponse.getFoods()) {
+                String imageUrl = foodResponse.getFoodImageUrl();
+                if (imageUrl != null && !imageUrl.isEmpty()) {
+                    foodResponse.setFoodImageUrl(mealImageService.getMealImageUrl(imageUrl));
+                }
+            }
+        }
+
+        log.info("[CREATE/UPDATE_WITH_IMAGES] 식단 및 이미지 등록/수정 완료: mealId={}", response.getMealId());
+        return response;
     }
 
     // 특정 시간대만 수정하는 메서드

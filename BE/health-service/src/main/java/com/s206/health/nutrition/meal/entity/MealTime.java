@@ -54,6 +54,14 @@ public class MealTime {
     @Column(nullable = false)
     private Boolean isDeleted = false;
 
+    @Column(length = 250)
+    private String mealTimeImageUrl;
+
+
+    public void updateMealTimeImageUrl(String mealTimeImageUrl) {
+        this.mealTimeImageUrl = mealTimeImageUrl;
+    }
+
     public void updateEatingTime(LocalTime eatingTime) {
         this.eatingTime = eatingTime;
     }
