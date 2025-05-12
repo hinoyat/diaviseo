@@ -39,4 +39,8 @@ public interface BodyInfoRepository extends JpaRepository<BodyInfo, Integer> {
 			@Param("startDate") LocalDate startDate,
 			@Param("endDate") LocalDate endDate
 	);
+
+	@Query("SELECT DISTINCT b.userId FROM BodyInfo b WHERE b.userId IN (:userIds) AND b.measurementDate = :date AND b.isDeleted = false")
+	List<Integer> findUserIdsWithWeightUpdate(@Param("userIds") List<Integer> userIds,
+			@Param("date") LocalDate date);
 }
