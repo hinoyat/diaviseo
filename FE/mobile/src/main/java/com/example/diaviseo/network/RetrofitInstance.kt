@@ -16,6 +16,7 @@ import okhttp3.Interceptor
 import com.example.diaviseo.network.exercise.ExerciseApiService
 import com.example.diaviseo.network.meal.MealApiService
 import com.example.diaviseo.network.food.FoodApiService
+import com.example.diaviseo.network.foodset.FoodSetApiService
 
 object RetrofitInstance {
     // 재발급 동기화를 위한 lock 객체
@@ -158,5 +159,9 @@ object RetrofitInstance {
 
     val foodApiService: FoodApiService by lazy {
         retro.create(FoodApiService::class.java)
+    }
+
+    val foodSetApiService: FoodSetApiService by lazy {
+        retro.create(FoodSetApiService::class.java)
     }
 }
