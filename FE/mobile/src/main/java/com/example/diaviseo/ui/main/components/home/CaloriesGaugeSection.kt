@@ -27,6 +27,12 @@ fun CaloriesGaugeSection(
     extraBurned: Int,
     navController: NavHostController
 ) {
+    val textMessage = if (remainingCalorie >= 0) {
+        "$remainingCalorie kcal 더 먹을 수 있어요 🥄"
+    } else {
+        "오늘 ${-remainingCalorie} kcal 초과했어요 🥲"
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -83,7 +89,7 @@ fun CaloriesGaugeSection(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "$remainingCalorie kcal 더 먹을 수 있어요 🥄",
+                        text = textMessage,
                         style = medium15,
                         color = Color(0xFF222222),
                         modifier = Modifier.padding(bottom = 8.dp)
