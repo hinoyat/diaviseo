@@ -10,12 +10,14 @@ import com.example.diaviseo.ui.components.LoadingOverlay
 import java.time.LocalDate
 import com.example.diaviseo.ui.main.components.goal.*
 import com.example.diaviseo.viewmodel.goal.GoalViewModel
+import com.example.diaviseo.viewmodel.goal.MealViewModel
 
 @Composable
 fun GoalScreen(navController: NavHostController) {
     val selectedTab = remember { mutableStateOf("식단") }
     val today = remember { LocalDate.now() }
     val goalViewModel: GoalViewModel = viewModel()
+    val mealViewModel: MealViewModel = viewModel()
 
     val showDatePicker by goalViewModel.showDatePicker.collectAsState()
     val selectedDate by goalViewModel.selectedDate.collectAsState()

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.diaviseo.network.RetrofitInstance
 import com.example.diaviseo.network.meal.dto.res.DailyNutritionResponse
+import com.example.diaviseo.network.meal.dto.res.NutritionStatsEntry
 import com.example.diaviseo.network.user.dto.res.FetchProfileResponse
 import com.example.diaviseo.network.user.dto.res.UserPhysicalInfoResponse
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,6 +32,9 @@ class MealViewModel: ViewModel() {
 
     private val _nowPhysicalInfo = MutableStateFlow<UserPhysicalInfoResponse?>(null)
     val nowPhysicalInfo: StateFlow<UserPhysicalInfoResponse?> = _nowPhysicalInfo
+
+    private val _mealStatistic = MutableStateFlow<List<NutritionStatsEntry>?>(null)
+    val mealStatistic: StateFlow<List<NutritionStatsEntry>?> = _mealStatistic
 
     private val _carbRatio =  MutableStateFlow(0.00)
     val carbRatio: StateFlow<Double> = _carbRatio
@@ -102,6 +106,25 @@ class MealViewModel: ViewModel() {
                 }
             } catch (e: Exception) {
                 Log.e("MealViewModel", "일일 신체 칼로리 예외 발생: ${e.message}")
+            }
+        }
+    }
+
+    fun fetchMealStatistic(periodType: String, endDate: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = RetrofitInstance.mealApiService.fetchMealStatistic(periodType = periodType ,endDate = endDate)
+                if (response.status == "OK") {
+                    _mealStatistic.value = response.data?.data
+                    Log.d("MealViewModel", "식단통계 잘 들어감?!?!?!?!? ${_mealStatistic.value}")
+
+                    _isLoading.value = false
+                } else {
+                    Log.e("MealViewModel", "식단 통계 불러오기 실패: ${response.message}")
+                }
+            } catch (e: Exception) {
+                Log.e("MealViewModel", "식단 통계 칼로리 예외 발생: ${e.message}")
             }
         }
     }

@@ -59,6 +59,8 @@ fun GoalContent(
         mealViewModel.fetchPhysicalInfo(selectedDate.toString())
         delay(100)
         mealViewModel.fetchDailyNutrition(selectedDate.toString())
+
+        mealViewModel.fetchMealStatistic("DAY", selectedDate.toString())
     }
 
     LoadingOverlay(isLoading)
