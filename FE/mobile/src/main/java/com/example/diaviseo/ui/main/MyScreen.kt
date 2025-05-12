@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.diaviseo.network.user.dto.req.UserUpdateRequest
 import com.example.diaviseo.network.user.dto.res.FetchProfileResponse
 import com.example.diaviseo.ui.components.CommonTopBar
 import com.example.diaviseo.ui.components.my.*
@@ -50,8 +51,12 @@ fun MyScreen(navController: NavHostController) {
         Spacer(Modifier.height(32.dp))
 
         SettingSection(
-            isAlarmEnabled = isAlarmEnabled,
-            onToggle = { isAlarmEnabled = it },
+            isAlarmEnabled = profile?.notificationEnabled ?: true, // ✅ 프로필에서 바로 가져옴
+            onToggle = {
+                profileViewModel.updateUserProfile(
+                    UserUpdateRequest(notificationEnabled = it) // ✅ 이것만 보내면 돼
+                )
+            },
             onFaqClick = { navController.navigate("faq") }
         )
     }
