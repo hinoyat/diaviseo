@@ -65,12 +65,12 @@ public class FoodSetService {
     }
 
     @Transactional(readOnly = true)
-    public List<FoodSetListResponse> getAllFoodSetsByUser(Integer userId) {
+    public List<FoodSetDetailResponse> getAllFoodSetsByUser(Integer userId) {
         log.info("[LIST] userId={} → 음식 세트 목록 조회 요청", userId);
 
         return foodSetRepository.findAll().stream()
                 .filter(fs -> fs.getUserId().equals(userId))
-                .map(FoodSetListResponse::toDto)
+                .map(FoodSetDetailResponse::toDto)
                 .toList();
     }
 

@@ -32,6 +32,10 @@ fun DietRegisterMainScreen(
     var selectedFoodForDetail by remember { mutableStateOf<FoodDetailResponse?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
+    LaunchedEffect(Unit) {
+        viewModel.fetchFoodSets()
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -81,7 +85,10 @@ fun DietRegisterMainScreen(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 when (selectedTab) {
-                    0 -> DietSuggestionScreen()
+                    0 -> DietSuggestionScreen(
+                        viewModel = viewModel,
+                        navController = navController
+                    )
                     1 -> FavoriteFoodsContent()
                 }
 

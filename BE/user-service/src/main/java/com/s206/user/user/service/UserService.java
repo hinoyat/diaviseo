@@ -3,6 +3,8 @@ package com.s206.user.user.service;
 import com.s206.common.exception.types.BadRequestException;
 import com.s206.common.exception.types.ConflictException;
 import com.s206.common.exception.types.NotFoundException;
+import com.s206.user.physical.dto.request.UserPhysicalInfoSaveRequest;
+import com.s206.user.physical.service.UserPhysicalInfoService;
 import com.s206.user.user.dto.request.UserCreateRequest;
 import com.s206.user.user.dto.request.UserUpdateRequest;
 import com.s206.user.user.dto.response.UserDetailResponse;
@@ -22,6 +24,7 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserPhysicalInfoService userPhysicalInfoService;
 
     @Transactional
     public UserDetailResponse createUser(UserCreateRequest request) {
@@ -49,6 +52,10 @@ public class UserService {
                 .build();
 
         userRepository.save(user);
+
+        // 신체 정보 갱신
+        saveIfRelevantInfoChanged(user);
+
         return UserDetailResponse.toDto(user);
     }
 
@@ -81,6 +88,7 @@ public class UserService {
             if (request.getHeight().compareTo(BigDecimal.ZERO) <= 0) {
                 throw new BadRequestException("키는 0보다 커야 합니다.");
             }
+            saveIfRelevantInfoChanged(user);
             user.updateHeight(request.getHeight());
         }
 
@@ -88,6 +96,7 @@ public class UserService {
             if (request.getWeight().compareTo(BigDecimal.ZERO) <= 0) {
                 throw new BadRequestException("몸무게는 0보다 커야 합니다.");
             }
+            saveIfRelevantInfoChanged(user);
             user.updateWeight(request.getWeight());
         }
 
@@ -95,6 +104,7 @@ public class UserService {
             if (request.getBirthday().isAfter(LocalDate.now())) {
                 throw new BadRequestException("생일은 미래일 수 없습니다.");
             }
+            saveIfRelevantInfoChanged(user);
             user.updateBirthday(request.getBirthday());
         }
 
@@ -104,6 +114,7 @@ public class UserService {
 
         if (request.getGoal() != null) {
             user.updateGoal(request.getGoal());
+            saveIfRelevantInfoChanged(user);
         }
 
         return UserDetailResponse.toDto(user);
@@ -139,6 +150,16 @@ public class UserService {
         }
 
         return user;
+    }
+
+    public void saveIfRelevantInfoChanged(User user) {
+        userPhysicalInfoService.saveOrUpdate(user.getUserId(), UserPhysicalInfoSaveRequest.builder()
+                .height(user.getHeight())
+                .weight(user.getWeight())
+                .birthday(user.getBirthday())
+                .goal(user.getGoal())
+                .date(LocalDate.now())
+                .build());
     }
 
 }

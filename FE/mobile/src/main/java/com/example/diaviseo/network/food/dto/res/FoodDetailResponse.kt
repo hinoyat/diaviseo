@@ -13,5 +13,5 @@ data class FoodDetailResponse(
     val transFat: Double,
     val cholesterol: Double,
     val isFavorite: Boolean,
-    val baseAmount: Double
+    val baseAmount: String
     )

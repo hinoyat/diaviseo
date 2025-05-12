@@ -4,6 +4,7 @@ import com.s206.health.nutrition.foodset.entity.FoodSet;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
@@ -21,6 +22,12 @@ public class FoodSetDetailResponse {
         private Integer foodId;
         private String foodName;
         private Float quantity;
+        private BigDecimal carbohydrate;
+        private BigDecimal protein;
+        private BigDecimal fat;
+        private BigDecimal sweet;
+        private BigDecimal sodium;
+        private String baseAmount;
         private Integer calorie;
     }
 
@@ -30,6 +37,12 @@ public class FoodSetDetailResponse {
                         .foodId(f.getFood().getFoodId())
                         .foodName(f.getFood().getFoodName())
                         .quantity(f.getQuantity())
+                        .carbohydrate(f.getFood().getCarbohydrate())
+                        .protein(f.getFood().getProtein())
+                        .fat(f.getFood().getFat())
+                        .sweet(f.getFood().getSweet())
+                        .sodium(f.getFood().getSodium())
+                        .baseAmount(f.getFood().getBaseAmount())
                         .calorie(f.getFood().getCalorie())
                         .build())
                 .toList();

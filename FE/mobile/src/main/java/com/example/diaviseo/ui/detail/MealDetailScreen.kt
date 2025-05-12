@@ -155,7 +155,8 @@ fun MealDetailScreen(
                     totalSodium = 150.00
                 ),
                 createdAt = "2025-05-07T17:15:16.205127",
-                updatedAt = "2025-05-07T17:15:16.205127"
+                updatedAt = "2025-05-07T17:15:16.205127",
+                mealTimeImageUrl = "https://picsum.photos/300/300"
             ),
             MealTimeNutritionResponse(
                 mealTimeId = 2,
@@ -163,15 +164,16 @@ fun MealDetailScreen(
                 eatingTime = "08:30:00",
                 foods = listOf(),
                 nutrition = MealNutritionResponse(
-                    totalCalorie = 910,
-                    totalCarbohydrate = 128.00,
-                    totalProtein = 72.80,
-                    totalFat = 11.60,
-                    totalSugar = 0.60,
-                    totalSodium = 150.00
+                    totalCalorie = 0,
+                    totalCarbohydrate = 0.00,
+                    totalProtein = 0.0,
+                    totalFat = 0.0,
+                    totalSugar = 0.0,
+                    totalSodium = 0.00
                 ),
                 createdAt = "2025-05-07T17:15:16.205127",
-                updatedAt = "2025-05-07T17:15:16.205127"
+                updatedAt = "2025-05-07T17:15:16.205127",
+                mealTimeImageUrl = null
             ),
             MealTimeNutritionResponse(
                 mealTimeId = 3,
@@ -226,7 +228,8 @@ fun MealDetailScreen(
                     totalSodium = 150.00
                 ),
                 createdAt = "2025-05-07T17:15:16.205127",
-                updatedAt = "2025-05-07T17:15:16.205127"
+                updatedAt = "2025-05-07T17:15:16.205127",
+                mealTimeImageUrl = "https://picsum.photos/500/700"
             ),
 //            MealTimeNutritionResponse(
 //                mealTimeId = 4,
@@ -299,9 +302,8 @@ fun MealDetailScreen(
                             foods = timeData.foods,
                             gradient = mealType.gradient,
                             mealIconRes = mealType.iconRes,
-                            onEditClick = { /* TODO */ }
-//                            사진들 목록 리스트 들어올 예정
-
+                            onEditClick = { /* TODO */ },
+                            imgUrl = timeData.mealTimeImageUrl
                         )
                     }
                     timeData != null && timeData.foods.isEmpty() -> {

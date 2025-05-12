@@ -15,6 +15,7 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.data.elasticsearch.core.query.Query;
+import org.springframework.data.elasticsearch.core.query.StringQuery;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -39,52 +40,30 @@ public class ElasticsearchService {
 
     // 이름으로 음식 검색
     public List<FoodDetailResponse> searchByName(String name, Integer userId) {
-        // CriteriaQuery 사용 (직관적인 방식으로 쿼리 작성)
-        Criteria criteria = new Criteria("name")
-                .contains(name) // 부분 일치 확인
-                .or("name").matches(name); // 전체 일치 확인
+        log.info("검색어: {}", name);
 
-        Query searchQuery = new CriteriaQuery(criteria);
+        // findByNameFlexible 메서드는 wildcard와 match_phrase_prefix를 조합하여
+        // 부분 문자열 검색과 접두사 검색을 동시에 지원
+        List<ElasticFood> results = elasticRepository.findByNameFlexible(name);
+        log.info("검색 결과: {}", results.size());
 
-        // elasticsearchOperations를 사용하여 쿼리 실행
-        SearchHits<ElasticFood> searchHits = elasticsearchOperations.search(searchQuery, ElasticFood.class);
-
-        // 검색된 모든 foodId 추출
-        List<Integer> foodIds = searchHits.getSearchHits().stream()
-                .map(hit -> hit.getContent().getFoodId())
-                .collect(Collectors.toList());
-
-        if (foodIds.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        // 모든 foodId를 한 번에 조회 (IN 쿼리 사용)
-        List<Food> foods = foodRepository.findAllByFoodIdIn(foodIds);
-
-        // 즐겨찾기 정보 한 번에 조회 (IN 쿼리 사용)
-        Set<Integer> favoriteFoodIds = new HashSet<>();
-        if (userId != null) {
-            favoriteFoodIds = favoriteFoodRepository.findAllByUserIdAndFoodFoodIdIn(userId, foodIds)
-                    .stream()
-                    .map(favoriteFood -> favoriteFood.getFood().getFoodId())
-                    .collect(Collectors.toSet());
-        }
-
-        // 결과 변환
         List<FoodDetailResponse> result = new ArrayList<>();
-        for (Food food : foods) {
-            boolean isFavorite = favoriteFoodIds.contains(food.getFoodId());
-            result.add(FoodDetailResponse.toDto(food, isFavorite));
+
+        for (ElasticFood elasticFood : results) {
+            // ElasticFood의 foodId로 MySQL에서 실제 Food 엔티티 조회
+            Optional<Food> foodOpt = foodRepository.findById(elasticFood.getFoodId());
+
+            if (foodOpt.isPresent()) {
+                Food food = foodOpt.get();
+                // 사용자의 즐겨찾기 여부 확인
+                boolean isFavorite = favoriteFoodRepository.existsByUserIdAndFoodFoodId(userId, food.getFoodId());
+                // Food 엔티티를 FoodDetailResponse DTO로 변환하여 결과에 추가
+                result.add(FoodDetailResponse.toDto(food, isFavorite));
+            }
         }
 
-        // 검색 결과 순서 유지 (Elasticsearch 결과 순서와 일치시키기)
-        Map<Integer, FoodDetailResponse> responseMap = result.stream()
-                .collect(Collectors.toMap(FoodDetailResponse::getFoodId, Function.identity()));
-
-        return foodIds.stream()
-                .map(id -> responseMap.get(id))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        log.info("최종 결과 개수: {}", result.size());
+        return result;
     }
 
     // 모든 음식 조회

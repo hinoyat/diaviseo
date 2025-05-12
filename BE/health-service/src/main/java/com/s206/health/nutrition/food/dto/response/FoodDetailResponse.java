@@ -22,7 +22,7 @@ public class FoodDetailResponse {
     private BigDecimal saturatedFat;
     private BigDecimal transFat;
     private BigDecimal cholesterol;
-    private BigDecimal baseAmount;
+    private String baseAmount;
     private boolean isFavorite;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

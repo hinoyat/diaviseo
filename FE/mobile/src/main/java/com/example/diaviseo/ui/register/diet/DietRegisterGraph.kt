@@ -39,5 +39,18 @@ fun NavGraphBuilder.dietGraph(navController: NavHostController) {
                 viewModel = viewModel
             )
         }
+        // 음식 세트 등록 화면
+        composable("food_set_register") { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry("diet_graph")
+            }
+            val viewModel = viewModel<DietSearchViewModel>(parentEntry)
+
+            FoodSetRegisterScreen(
+                navController = navController,
+                viewModel = viewModel
+            )
+        }
+
     }
 }

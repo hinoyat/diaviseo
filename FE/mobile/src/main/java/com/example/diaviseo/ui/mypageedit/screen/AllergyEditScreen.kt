@@ -30,70 +30,33 @@ import androidx.navigation.compose.rememberNavController
 import com.example.diaviseo.ui.components.onboarding.MainButton
 import com.example.diaviseo.ui.register.components.CommonSearchTopBar
 import com.example.diaviseo.ui.theme.DiaViseoColors
+import com.example.diaviseo.viewmodel.condition.AllergyViewModel
 
 @Composable
 fun AllergyEditScreen(
-    navController: NavHostController? = null
+    navController: NavHostController? = null,
+    viewModel: AllergyViewModel
 ) {
     val context = LocalContext.current
-    val allergyList = listOf(
-        "계란", "우유", "땅콩", "복숭아", "게", "새우", "고등어",
-        "꽃가루", "밀", "대두", "유당분해물", "MSG 민감", "카페인 민감"
-    )
-
-    // 상태 관리 - 더미 데이터로 시작
-    var selected by remember { mutableStateOf(listOf("우유", "땅콩", "대두")) }
-    var initialSelected by remember { mutableStateOf(selected) }
-    var searchValue by remember { mutableStateOf(TextFieldValue("")) }
-    var isSearchMode by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
-    // 변경사항 감지
-    val hasChanges = selected != initialSelected
+    val allergyList = viewModel.allergyList
+    val userAllergySet = viewModel.userAllergySet
+    val initialAllergySet = viewModel.initialUserAllergySet
 
-    // 저장 확인 대화상자 상태
+    var searchValue by remember { mutableStateOf(TextFieldValue("")) }
+    var isSearchMode by remember { mutableStateOf(false) }
     var showConfirmDialog by remember { mutableStateOf(false) }
 
-    // 저장 확인 대화상자
-    if (showConfirmDialog) {
-        AlertDialog(
-            onDismissRequest = { showConfirmDialog = false },
-            title = { Text("변경사항 저장") },
-            text = { Text("변경된 내용을 저장하시겠습니까?") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        initialSelected = selected.toList()
-                        Toast.makeText(context, "저장이 완료되었습니다.", Toast.LENGTH_SHORT).show()
-                        showConfirmDialog = false
-                        navController?.popBackStack()
-                    },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = Color(0xFF1673FF) // ✅ 파란색
-                    )
-                ) {
-                    Text("저장")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        showConfirmDialog = false
-                        navController?.popBackStack()
-                    },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = Color.Gray // ✅ 회색
-                    )
-                ) {
-                    Text("저장 안 함")
-                }
-            },
-            containerColor = Color.White
-        )
+    val hasChanges = userAllergySet != initialAllergySet
 
+    // 로딩
+    LaunchedEffect(Unit) {
+        viewModel.loadAllergyData()
     }
+
+    // 뒤로가기 핸들링
     BackHandler {
-        // 핸드폰 뒤로가기까지 포함해서 처리
         if (isSearchMode) {
             isSearchMode = false
             searchValue = TextFieldValue("")
@@ -103,6 +66,36 @@ fun AllergyEditScreen(
             navController?.popBackStack()
         }
     }
+
+    // 저장 확인 다이얼로그
+    if (showConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog = false },
+            title = { Text("변경사항 저장") },
+            text = { Text("변경된 내용을 저장하시겠습니까?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.commitChanges()
+                        Toast.makeText(context, "저장이 완료되었습니다.", Toast.LENGTH_SHORT).show()
+                        showConfirmDialog = false
+                        navController?.popBackStack()
+                    }
+                ) { Text("저장", color = DiaViseoColors.Main1) }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.revertChanges()
+                        showConfirmDialog = false
+                        navController?.popBackStack()
+                    }
+                ) { Text("저장 안 함", color = DiaViseoColors.Unimportant) }
+            },
+            containerColor = Color.White
+        )
+    }
+
     Scaffold(
         topBar = {
             Column {
@@ -120,7 +113,6 @@ fun AllergyEditScreen(
                     }
                 )
 
-                // 변경사항 표시 배너
                 AnimatedVisibility(
                     visible = hasChanges,
                     enter = fadeIn(),
@@ -136,13 +128,11 @@ fun AllergyEditScreen(
                     ) {
                         Text(
                             text = "변경사항이 있습니다",
-                            style = MaterialTheme.typography.bodyMedium,
                             color = Color(0xFF0066CC)
                         )
-
                         TextButton(
                             onClick = {
-                                selected = initialSelected.toList()
+                                viewModel.revertChanges()
                                 Toast.makeText(context, "변경사항이 취소되었습니다.", Toast.LENGTH_SHORT).show()
                             },
                             colors = ButtonDefaults.textButtonColors(
@@ -157,33 +147,24 @@ fun AllergyEditScreen(
         },
         containerColor = Color.White
     ) { innerPadding ->
-        // 단일 Column으로 모든 콘텐츠를 포함 (하단 버튼까지)
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(scrollState)
                 .padding(horizontal = 16.dp)
-                .navigationBarsPadding() // 기기 네비게이션 바 고려
+                .navigationBarsPadding()
                 .padding(bottom = 16.dp)
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
-            // 초기 선택 알림 (첫 진입 시)
-            if (selected == initialSelected && selected.isNotEmpty() && !isSearchMode) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "${selected.size}개의 알러지가 이미 선택되어 있습니다",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = DiaViseoColors.Basic
-                    )
-                }
+            if (userAllergySet == initialAllergySet && userAllergySet.isNotEmpty() && !isSearchMode) {
+                Text(
+                    text = "${userAllergySet.size}개의 알러지가 이미 선택되어 있습니다",
+                    fontWeight = FontWeight.SemiBold,
+                    color = DiaViseoColors.Basic,
+                    modifier = Modifier.padding(vertical = 12.dp)
+                )
             }
 
             if (isSearchMode) {
@@ -198,51 +179,45 @@ fun AllergyEditScreen(
             } else {
                 Text(
                     text = "섭취 시 알러지가 반응이 일어나는 알러지를 선택해주세요",
-                    style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
             }
 
-            // 선택된 알러지 섹션
-            if (selected.isNotEmpty()) {
+            // 선택된 알러지
+            if (userAllergySet.isNotEmpty()) {
                 Text(
-                    text = "선택된 알러지 (${selected.size}개)",
-                    style = MaterialTheme.typography.titleSmall,
+                    text = "선택된 알러지 (${userAllergySet.size}개)",
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
-
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.padding(bottom = 16.dp)
                 ) {
-                    selected.forEach { item ->
-                        SelectableTag(
-                            text = item,
-                            isSelected = true,
-                            onClick = { selected = selected - item }
-                        )
+                    userAllergySet.forEach { id ->
+                        allergyList.find { it.allergyId == id }?.let { allergy ->
+                            SelectableTag(
+                                text = allergy.allergyName,
+                                isSelected = true,
+                                onClick = { viewModel.toggleAllergy(id) }
+                            )
+                        }
                     }
                 }
-
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
             }
 
-            // 필터링된 알러지 목록
             val filteredList = if (isSearchMode) {
-                allergyList.filter { it.contains(searchValue.text, ignoreCase = true) }
-            } else {
-                allergyList
-            }
+                allergyList.filter {
+                    it.allergyName.contains(searchValue.text, ignoreCase = true)
+                }
+            } else allergyList
 
             Text(
                 text = if (isSearchMode) {
                     if (filteredList.isEmpty()) "검색 결과가 없습니다" else "검색 결과"
-                } else {
-                    "알러지 목록"
-                },
-                style = MaterialTheme.typography.titleSmall,
+                } else "알러지 목록",
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
@@ -251,19 +226,15 @@ fun AllergyEditScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                filteredList.forEach { item ->
-                    val isItemSelected = item in selected
+                filteredList.forEach { allergy ->
                     SelectableTag(
-                        text = item,
-                        isSelected = isItemSelected,
-                        onClick = {
-                            selected = if (isItemSelected) selected - item else selected + item
-                        }
+                        text = allergy.allergyName,
+                        isSelected = viewModel.isSelected(allergy.allergyId),
+                        onClick = { viewModel.toggleAllergy(allergy.allergyId) }
                     )
                 }
             }
 
-            // 검색 결과가 없을 때 메시지
             if (isSearchMode && filteredList.isEmpty()) {
                 Column(
                     modifier = Modifier
@@ -271,18 +242,12 @@ fun AllergyEditScreen(
                         .padding(vertical = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
-                        text = "찾는 알러지가 목록에 없습니다",
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Medium
-                    )
+                    Text("찾는 알러지가 목록에 없습니다")
                 }
             }
 
-            // "찾는 알러지가 없나요?" 메시지
             if (!isSearchMode) {
                 Spacer(modifier = Modifier.height(24.dp))
-
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -292,7 +257,6 @@ fun AllergyEditScreen(
                     Text(
                         text = "🔍 찾는 알러지가 없나요?",
                         color = DiaViseoColors.Unimportant,
-                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.clickable {
                             isSearchMode = true
@@ -302,9 +266,7 @@ fun AllergyEditScreen(
                 }
             }
 
-            // 버튼 영역 - 메인 컬럼 내부로 이동
             Spacer(modifier = Modifier.height(32.dp))
-
             Text(
                 text = "※ 입력한 정보가 필요한 알러지가 있는 경우 전문가에게 상담을 권장합니다.\n일부 데이터는 고려되지 않을 수 있습니다.",
                 style = MaterialTheme.typography.bodySmall,
@@ -312,30 +274,21 @@ fun AllergyEditScreen(
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
-            // 완료 버튼
             MainButton(
                 text = if (hasChanges)
-                    "${selected.size}개 선택 저장하기"
+                    "${userAllergySet.size}개 선택 저장하기"
                 else
-                    "${selected.size}개 선택 완료",
+                    "${userAllergySet.size}개 선택 완료",
                 onClick = {
                     if (hasChanges) {
-                        // 변경사항이 있으면 저장 로직 실행 후 화면 이동
-                        initialSelected = selected.toList()
+                        viewModel.commitChanges()
                         Toast.makeText(context, "저장이 완료되었습니다.", Toast.LENGTH_SHORT).show()
                     }
-                    // 화면 이동
-//                    navController?.popBackStack()
+                    navController?.popBackStack()
                 },
-                enabled = selected.isNotEmpty(),
+                enabled = true,
                 modifier = Modifier.fillMaxWidth()
             )
         }
     }
-}
-
-@Preview(showSystemUi = true)
-@Composable
-fun AllergyEditScreenPreview() {
-    AllergyEditScreen()
 }

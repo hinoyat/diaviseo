@@ -4,6 +4,8 @@ import com.s206.common.exception.types.BadRequestException;
 import com.s206.common.exception.types.InternalServerErrorException;
 import com.s206.common.exception.types.NotFoundException;
 import com.s206.common.exception.types.UnauthorizedException;
+import com.s206.health.nutrition.favorite.repository.FavoriteFoodRepository;
+import com.s206.health.nutrition.food.dto.response.FoodListResponse;
 import com.s206.health.nutrition.food.entity.Food;
 import com.s206.health.nutrition.food.repository.FoodRepository;
 import com.s206.health.nutrition.meal.dto.request.MealCreateRequest;
@@ -19,10 +21,12 @@ import com.s206.health.nutrition.meal.repository.MealRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.print.Pageable;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -37,6 +41,7 @@ public class MealService {
     private final MealRepository mealRepository;
     private final FoodRepository foodRepository;
     private final MealFoodRepository mealFoodRepository;
+    private final FavoriteFoodRepository favoriteFoodRepository;
 
     @Transactional
     public MealDetailResponse createOrUpdateMeal(MealCreateRequest request, Integer userId) {
@@ -725,6 +730,36 @@ public class MealService {
         result.put("imageUrl", imageUrl);
 
         log.info("[ATTACH_IMAGE] 이미지 연결 완료: mealFoodId={}, objectName={}", mealFoodId, objectName);
+        return result;
+    }
+
+    @Transactional(readOnly = true)
+    public List<FoodListResponse> getRecentFoods(Integer userId, int limit) {
+        log.info("[RECENT_FOODS] userId={} → 최근 먹은 음식 조회 요청: limit={}", userId, limit);
+
+        // 최근 등록된 식단에서 음식 리스트 조회 (중복 제거)
+        List<Food> recentFoods = mealFoodRepository.findDistinctRecentFoodsByUserId(userId, 10);
+        if (recentFoods.isEmpty()) {
+            log.info("[RECENT_FOODS] 최근 먹은 음식이 없습니다: userId={}", userId);
+            return List.of();
+        }
+
+        List<Integer> foodIds = recentFoods.stream()
+                .map(Food::getFoodId)
+                .collect(Collectors.toList());
+
+        Set<Integer> favoriteFoodIds = favoriteFoodRepository
+                .findAllByUserIdAndFoodFoodIdIn(userId, foodIds)
+                .stream()
+                .map(favoriteFood -> favoriteFood.getFood().getFoodId())
+                .collect(Collectors.toSet());
+
+        List<FoodListResponse> result = recentFoods.stream()
+                .map(food -> FoodListResponse.toDto(food, favoriteFoodIds.contains(food.getFoodId())))
+                .collect(Collectors.toList());
+
+        log.info("[RECENT_FOODS] 조회 결과: userId={}, 음식 수={}", userId, result.size());
+
         return result;
     }
 }

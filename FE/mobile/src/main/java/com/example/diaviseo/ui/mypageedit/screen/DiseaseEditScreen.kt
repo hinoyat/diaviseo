@@ -8,90 +8,52 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.diaviseo.ui.components.CommonTopBar
-import com.example.diaviseo.ui.mypageedit.component.SelectableTag
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.Alignment
 import androidx.navigation.compose.rememberNavController
+import com.example.diaviseo.ui.components.CommonTopBar
 import com.example.diaviseo.ui.components.onboarding.MainButton
+import com.example.diaviseo.ui.mypageedit.component.SelectableTag
 import com.example.diaviseo.ui.register.components.CommonSearchTopBar
 import com.example.diaviseo.ui.theme.DiaViseoColors
+import com.example.diaviseo.viewmodel.condition.DiseaseViewModel
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 @Composable
 fun DiseaseEditScreen(
-    navController: NavHostController? = null
+    navController: NavHostController? = null,
+    viewModel: DiseaseViewModel
 ) {
     val context = LocalContext.current
-    val diseaseList = listOf(
-        "고혈압", "당뇨병", "고지혈증", "심장질환", "천식", "비염",
-        "아토피", "골다공증", "갑상선 질환", "간질환", "신장질환", "위장장애"
-    )
-
-    // 상태 관리 - 빈 리스트로 시작 (실제 앱에서는 데이터를 불러와서 초기화)
-    var selected by remember { mutableStateOf(listOf<String>()) }
-    var initialSelected by remember { mutableStateOf(selected) } // 초기 선택 상태 저장
-    var searchValue by remember { mutableStateOf(TextFieldValue("")) }
-    var isSearchMode by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
-    // 변경사항 감지
-    val hasChanges = selected != initialSelected
+    val diseaseList = viewModel.diseaseList
+    val userDiseaseSet = viewModel.userDiseaseSet
+    val initialDiseaseSet = viewModel.initialUserDiseaseSet
 
-    // 저장 확인 대화상자 상태
+    var searchValue by remember { mutableStateOf(TextFieldValue("")) }
+    var isSearchMode by remember { mutableStateOf(false) }
     var showConfirmDialog by remember { mutableStateOf(false) }
 
-    // 저장 확인 대화상자
-    if (showConfirmDialog) {
-        AlertDialog(
-            onDismissRequest = { showConfirmDialog = false },
-            title = { Text("변경사항 저장") },
-            text = { Text("변경된 내용을 저장하시겠습니까?") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        initialSelected = selected.toList()
-                        Toast.makeText(context, "저장이 완료되었습니다.", Toast.LENGTH_SHORT).show()
-                        showConfirmDialog = false
-                        navController?.popBackStack()
-                    },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = Color(0xFF1673FF) // ✅ 파란색
-                    )
-                ) {
-                    Text("저장")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        showConfirmDialog = false
-                        navController?.popBackStack()
-                    },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = Color.Gray // ✅ 회색
-                    )
-                ) {
-                    Text("저장 안 함")
-                }
-            },
-            containerColor = Color.White
-        )
+    val hasChanges = userDiseaseSet != initialDiseaseSet
+
+    LaunchedEffect(Unit) {
+        viewModel.loadDiseaseData()
     }
+
     BackHandler {
-        // 핸드폰 뒤로가기까지 포함해서 처리
         if (isSearchMode) {
             isSearchMode = false
             searchValue = TextFieldValue("")
@@ -101,6 +63,35 @@ fun DiseaseEditScreen(
             navController?.popBackStack()
         }
     }
+
+    if (showConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog = false },
+            title = { Text("변경사항 저장") },
+            text = { Text("변경된 내용을 저장하시겠습니까?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.commitChanges()
+                        Toast.makeText(context, "저장이 완료되었습니다.", Toast.LENGTH_SHORT).show()
+                        showConfirmDialog = false
+                        navController?.popBackStack()
+                    }
+                ) { Text("저장", color = DiaViseoColors.Main1) }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.revertChanges()
+                        showConfirmDialog = false
+                        navController?.popBackStack()
+                    }
+                ) { Text("저장 안 함", color = DiaViseoColors.Unimportant) }
+            },
+            containerColor = Color.White
+        )
+    }
+
     Scaffold(
         topBar = {
             Column {
@@ -111,7 +102,6 @@ fun DiseaseEditScreen(
                             isSearchMode = false
                             searchValue = TextFieldValue("")
                         } else if (hasChanges) {
-                            // 변경사항이 있으면 저장 확인 대화상자 표시
                             showConfirmDialog = true
                         } else {
                             navController?.popBackStack()
@@ -119,7 +109,6 @@ fun DiseaseEditScreen(
                     }
                 )
 
-                // 변경사항 표시 배너
                 AnimatedVisibility(
                     visible = hasChanges,
                     enter = fadeIn(),
@@ -135,13 +124,11 @@ fun DiseaseEditScreen(
                     ) {
                         Text(
                             text = "변경사항이 있습니다",
-                            style = MaterialTheme.typography.bodyMedium,
                             color = Color(0xFF0066CC)
                         )
-
                         TextButton(
                             onClick = {
-                                selected = initialSelected.toList()
+                                viewModel.revertChanges()
                                 Toast.makeText(context, "변경사항이 취소되었습니다.", Toast.LENGTH_SHORT).show()
                             },
                             colors = ButtonDefaults.textButtonColors(
@@ -156,33 +143,24 @@ fun DiseaseEditScreen(
         },
         containerColor = Color.White
     ) { innerPadding ->
-        // 단일 Column으로 모든 콘텐츠를 포함 (하단 버튼까지)
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(scrollState)
                 .padding(horizontal = 16.dp)
-                .navigationBarsPadding() // 기기 네비게이션 바 고려
+                .navigationBarsPadding()
                 .padding(bottom = 16.dp)
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
-            // 초기 선택 알림 (첫 진입 시)
-            if (selected == initialSelected && selected.isNotEmpty() && !isSearchMode) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "${selected.size}개의 기저질환이 이미 선택되어 있습니다",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = DiaViseoColors.Basic
-                    )
-                }
+            if (userDiseaseSet == initialDiseaseSet && userDiseaseSet.isNotEmpty() && !isSearchMode) {
+                Text(
+                    text = "${userDiseaseSet.size}개의 기저질환이 이미 선택되어 있습니다",
+                    fontWeight = FontWeight.SemiBold,
+                    color = DiaViseoColors.Basic,
+                    modifier = Modifier.padding(vertical = 12.dp)
+                )
             }
 
             if (isSearchMode) {
@@ -190,80 +168,69 @@ fun DiseaseEditScreen(
                     placeholder = "어떤 질환이 있으신가요?",
                     navController = navController ?: rememberNavController(),
                     keyword = searchValue.text,
-                    onKeywordChange = { searchValue = TextFieldValue(it) }
+                    onKeywordChange = {
+                        searchValue = TextFieldValue(it)
+                    }
                 )
             } else {
                 Text(
                     text = "현재 진단받은 기저질환이 있다면 선택해주세요",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(vertical = 16.dp)
+                    modifier = Modifier.padding(bottom = 16.dp)
                 )
             }
 
-            // 선택된 항목 (검색 중이든 아니든)
-            if (selected.isNotEmpty()) {
+            // 선택된 질환
+            if (userDiseaseSet.isNotEmpty()) {
                 Text(
-                    text = "선택된 기저질환 (${selected.size}개)",
-                    style = MaterialTheme.typography.titleSmall,
+                    text = "선택된 기저질환 (${userDiseaseSet.size}개)",
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
-
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.padding(bottom = 16.dp)
                 ) {
-                    selected.forEach { item ->
-                        SelectableTag(
-                            text = item,
-                            isSelected = true,
-                            onClick = { selected = selected - item }
-                        )
+                    userDiseaseSet.forEach { id ->
+                        diseaseList.find { it.diseaseId == id }?.let { disease ->
+                            SelectableTag(
+                                text = disease.diseaseName,
+                                isSelected = true,
+                                onClick = { viewModel.toggleDisease(id) }
+                            )
+                        }
                     }
                 }
-
-                Divider(modifier = Modifier.padding(vertical = 8.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
             }
 
-            // 알맞은 리스트 렌더링
+            val filteredList = if (isSearchMode) {
+                diseaseList.filter {
+                    it.diseaseName.contains(searchValue.text, ignoreCase = true)
+                }
+            } else diseaseList
+
             Text(
                 text = if (isSearchMode) {
-                    if (diseaseList.any { it.contains(searchValue.text, ignoreCase = true) })
-                        "검색 결과"
-                    else
-                        "검색 결과가 없습니다"
-                } else {
-                    "기저질환 목록"
-                },
-                style = MaterialTheme.typography.titleSmall,
+                    if (filteredList.isEmpty()) "검색 결과가 없습니다" else "검색 결과"
+                } else "기저질환 목록",
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
-
-            val filteredList = if (isSearchMode) {
-                diseaseList.filter { it.contains(searchValue.text, ignoreCase = true) }
-            } else {
-                diseaseList
-            }
 
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                filteredList.forEach { item ->
-                    val isItemSelected = item in selected
+                filteredList.forEach { disease ->
                     SelectableTag(
-                        text = item,
-                        isSelected = isItemSelected,
-                        onClick = {
-                            selected = if (isItemSelected) selected - item else selected + item
-                        }
+                        text = disease.diseaseName,
+                        isSelected = viewModel.isSelected(disease.diseaseId),
+                        onClick = { viewModel.toggleDisease(disease.diseaseId) }
                     )
                 }
             }
 
-            // 검색 결과가 없을 때 메시지
             if (isSearchMode && filteredList.isEmpty()) {
                 Column(
                     modifier = Modifier
@@ -271,11 +238,7 @@ fun DiseaseEditScreen(
                         .padding(vertical = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
-                        text = "찾는 기저질환이 목록에 없습니다",
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Medium
-                    )
+                    Text("찾는 기저질환이 목록에 없습니다")
                 }
             }
 
@@ -284,53 +247,44 @@ fun DiseaseEditScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 16.dp),
+                        .padding(bottom = 24.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Text(
                         text = "🔍 찾는 기저질환이 없나요?",
                         color = DiaViseoColors.Unimportant,
-                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.clickable { isSearchMode = true }
+                        modifier = Modifier.clickable {
+                            isSearchMode = true
+                            searchValue = TextFieldValue("")
+                        }
                     )
                 }
             }
 
-            // 하단 영역을 메인 컬럼으로 이동
             Spacer(modifier = Modifier.height(32.dp))
-
             Text(
-                text = "※ 기저질환에 따라 맞춤형 건강 정보 제공에 활용됩니다.",
+                text = "※ 입력한 기저질환 정보는 맞춤형 건강 정보 제공에 활용됩니다.",
                 style = MaterialTheme.typography.bodySmall,
                 color = DiaViseoColors.Unimportant,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
-            // 완료 버튼 - 텍스트와 동작을 변경사항 유무에 따라 다르게 설정
             MainButton(
                 text = if (hasChanges)
-                    "${selected.size}개 선택 저장하기"
+                    "${userDiseaseSet.size}개 선택 저장하기"
                 else
-                    "${selected.size}개 선택 완료",
+                    "${userDiseaseSet.size}개 선택 완료",
                 onClick = {
                     if (hasChanges) {
-                        // 변경사항이 있으면 저장 로직 실행 후 화면 이동
-                        initialSelected = selected.toList()
+                        viewModel.commitChanges()
                         Toast.makeText(context, "저장이 완료되었습니다.", Toast.LENGTH_SHORT).show()
                     }
-                    // 화면 이동
-//                    navController?.popBackStack()
+                    navController?.popBackStack()
                 },
-                enabled = selected.isNotEmpty(),
+                enabled = true,
                 modifier = Modifier.fillMaxWidth()
             )
         }
     }
-}
-
-@Preview(showSystemUi = true)
-@Composable
-fun DiseaseEditScreenPreview() {
-    DiseaseEditScreen()
 }
