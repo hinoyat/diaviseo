@@ -28,7 +28,15 @@ public class FcmService {
 
 		Message message = Message.builder()
 				.setToken(fcmToken)
-				.setNotification(Notification.builder().setBody(body).setTitle(title).build())
+				.setNotification(
+						Notification.builder()
+								.setTitle(title)
+								.setBody(body)
+								.build()
+				)
+				// Data 페이로드 (앱 로직용)
+				.putData("title", title)
+				.putData("body", body)
 				.build();
 
 		try {

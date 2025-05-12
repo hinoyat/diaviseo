@@ -44,6 +44,6 @@ public class Notification {
 	private Boolean isRead = false;
 
 	@Column(nullable = false)
-	private Boolean isDeleted = false;
+	private boolean isDeleted = false;
 
 }
