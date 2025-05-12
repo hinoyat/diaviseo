@@ -42,11 +42,11 @@ public class FoodSetController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponseDto<List<FoodSetListResponse>>> getAllFoodSetsByUser(
+    public ResponseEntity<ResponseDto<List<FoodSetDetailResponse>>> getAllFoodSetsByUser(
             @RequestHeader("X-USER-ID") Integer userId
     ) {
         log.info("Getting all food sets for userId={}", userId);
-        List<FoodSetListResponse> response = foodSetService.getAllFoodSetsByUser(userId);
+        List<FoodSetDetailResponse> response = foodSetService.getAllFoodSetsByUser(userId);
         return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "음식 세트 목록 조회 성공", response));
     }
 
