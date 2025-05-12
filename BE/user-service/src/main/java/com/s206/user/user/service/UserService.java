@@ -24,45 +24,45 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserRepository userRepository;
-    private final UserPhysicalInfoService userPhysicalInfoService;
+	private final UserRepository userRepository;
+	private final UserPhysicalInfoService userPhysicalInfoService;
 
-    @Transactional
-    public UserDetailResponse createUser(UserCreateRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ConflictException("이미 가입된 이메일입니다.");
-        }
+	@Transactional
+	public UserDetailResponse createUser(UserCreateRequest request) {
+		if (userRepository.existsByEmail(request.getEmail())) {
+			throw new ConflictException("이미 가입된 이메일입니다.");
+		}
 
-        if (userRepository.existsByPhone(request.getPhone())) {
-            throw new ConflictException("이미 등록된 전화번호입니다.");
-        }
+		if (userRepository.existsByPhone(request.getPhone())) {
+			throw new ConflictException("이미 등록된 전화번호입니다.");
+		}
 
-        User user = User.builder()
-                .name(request.getName())
-                .nickname(request.getNickname())
-                .gender(request.getGender())
-                .goal(request.getGoal())
-                .height(request.getHeight())
-                .weight(request.getWeight())
-                .birthday(request.getBirthday())
-                .phone(request.getPhone())
-                .email(request.getEmail())
-                .provider(request.getProvider())
-                .consentPersonal(request.getConsentPersonal())
-                .locationPersonal(request.getLocationPersonal())
-                .build();
+		User user = User.builder()
+				.name(request.getName())
+				.nickname(request.getNickname())
+				.gender(request.getGender())
+				.goal(request.getGoal())
+				.height(request.getHeight())
+				.weight(request.getWeight())
+				.birthday(request.getBirthday())
+				.phone(request.getPhone())
+				.email(request.getEmail())
+				.provider(request.getProvider())
+				.consentPersonal(request.getConsentPersonal())
+				.locationPersonal(request.getLocationPersonal())
+				.build();
 
-        userRepository.save(user);
+		userRepository.save(user);
 
-        // 신체 정보 갱신
-        saveIfRelevantInfoChanged(user);
+		// 신체 정보 갱신
+		saveIfRelevantInfoChanged(user);
 
-        return UserDetailResponse.toDto(user);
-    }
+		return UserDetailResponse.toDto(user);
+	}
 
 
-    public UserDetailResponse getUserByUserId(Integer userId) {
-        User user = validUser(userId);
+	public UserDetailResponse getUserByUserId(Integer userId) {
+		User user = validUser(userId);
 
 		return UserDetailResponse.toDto(user);
 	}
@@ -85,36 +85,36 @@ public class UserService {
 			user.updatePhone(request.getPhone());
 		}
 
-        if (request.getHeight() != null) {
-            if (request.getHeight().compareTo(BigDecimal.ZERO) <= 0) {
-                throw new BadRequestException("키는 0보다 커야 합니다.");
-            }
-            saveIfRelevantInfoChanged(user);
-            user.updateHeight(request.getHeight());
-        }
+		if (request.getHeight() != null) {
+			if (request.getHeight().compareTo(BigDecimal.ZERO) <= 0) {
+				throw new BadRequestException("키는 0보다 커야 합니다.");
+			}
+			saveIfRelevantInfoChanged(user);
+			user.updateHeight(request.getHeight());
+		}
 
-        if (request.getWeight() != null) {
-            if (request.getWeight().compareTo(BigDecimal.ZERO) <= 0) {
-                throw new BadRequestException("몸무게는 0보다 커야 합니다.");
-            }
-            saveIfRelevantInfoChanged(user);
-            user.updateWeight(request.getWeight());
-        }
+		if (request.getWeight() != null) {
+			if (request.getWeight().compareTo(BigDecimal.ZERO) <= 0) {
+				throw new BadRequestException("몸무게는 0보다 커야 합니다.");
+			}
+			saveIfRelevantInfoChanged(user);
+			user.updateWeight(request.getWeight());
+		}
 
-        if (request.getBirthday() != null) {
-            if (request.getBirthday().isAfter(LocalDate.now())) {
-                throw new BadRequestException("생일은 미래일 수 없습니다.");
-            }
-            saveIfRelevantInfoChanged(user);
-            user.updateBirthday(request.getBirthday());
-        }
+		if (request.getBirthday() != null) {
+			if (request.getBirthday().isAfter(LocalDate.now())) {
+				throw new BadRequestException("생일은 미래일 수 없습니다.");
+			}
+			saveIfRelevantInfoChanged(user);
+			user.updateBirthday(request.getBirthday());
+		}
 
 		if (request.getNotificationEnabled() != null) {
 			user.updateNotificationEnabled(request.getNotificationEnabled());
 		}
 
-        if (request.getGoal() != null) {
-            user.updateGoal(request.getGoal());
+		if (request.getGoal() != null) {
+			user.updateGoal(request.getGoal());
 			saveIfRelevantInfoChanged(user);
 		}
 
@@ -153,32 +153,16 @@ public class UserService {
 		return user;
 	}
 
-    public void saveIfRelevantInfoChanged(User user) {
-        userPhysicalInfoService.saveOrUpdate(user.getUserId(), UserPhysicalInfoSaveRequest.builder()
-                .height(user.getHeight())
-                .weight(user.getWeight())
-                .birthday(user.getBirthday())
-                .goal(user.getGoal())
-                .date(LocalDate.now())
-                .build());
-    }
-
-	@Transactional(readOnly = true)
-	public List<UserResponse> findNotificationEnabled() {
-		return userRepository.findNotificationEnabled();
+	public void saveIfRelevantInfoChanged(User user) {
+		userPhysicalInfoService.saveOrUpdate(user.getUserId(), UserPhysicalInfoSaveRequest.builder()
+				.height(user.getHeight())
+				.weight(user.getWeight())
+				.birthday(user.getBirthday())
+				.goal(user.getGoal())
+				.date(LocalDate.now())
+				.build());
 	}
 
-	@Transactional(readOnly = true)
-	public String getFcmTokenByUserId(Integer userId) {
-		return userRepository.findFcmTokenByUserId(userId).orElse(null);
-	}
-
-	@Transactional
-	public void saveOrUpdateFcmToken(Integer userId, String token) {
-		User user = validUser(userId);
-
-		userRepository.updateFcmToken(userId, token);
-	}
 	@Transactional(readOnly = true)
 	public List<UserResponse> findNotificationEnabled() {
 		return userRepository.findNotificationEnabled();
