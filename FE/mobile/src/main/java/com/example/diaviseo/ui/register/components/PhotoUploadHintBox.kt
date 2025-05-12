@@ -17,9 +17,13 @@ import com.example.diaviseo.ui.theme.semibold18
 
 @Composable
 fun PhotoUploadHintBox(
+    isAiMode: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
+    val mainText = if (isAiMode) "사진을 올리면" else "식단 사진을 기록해보세요"
+    val subText = if (isAiMode) "AI가 자동으로 인식해요" else ""
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -37,10 +41,11 @@ fun PhotoUploadHintBox(
                 tint = Color.Unspecified,
                 modifier = Modifier.size(120.dp)
             )
-            Text(text = "사진을 올리면", style = semibold18, color = Color.Black)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "AI가 자동으로 인식해요", style = semibold18, color = Color.Black)
-            Spacer(modifier = Modifier.height(6.dp))
+            Text(text = mainText, style = semibold18, color = Color.Black)
+            if (subText.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = subText, style = semibold18, color = Color.Black)
+            }
 
         }
     }

@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -30,14 +31,15 @@ public class MealController {
     private final MealImageService mealImageService;
 
     // 1. 식단 등록/수정 API - 날짜 기반 처리
-    @PostMapping
-    public ResponseEntity<ResponseDto<MealDetailResponse>> createOrUpdateMeal(
-            @RequestBody MealCreateRequest request,
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseDto<MealDetailResponse>> createOrUpdateMealWithImages(
+            @RequestPart("mealData") MealCreateRequest request,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
             @RequestHeader("X-USER-ID") Integer userId
     ) {
-        log.info("Creating/Updating meal by userId={} for date={}", userId, request.getMealDate());
-        MealDetailResponse response = mealService.createOrUpdateMeal(request, userId);
-        return ResponseEntity.ok(ResponseDto.success(HttpStatus.CREATED, "식단 등록/수정 성공", response));
+        log.info("Creating/Updating meal with images by userId={} for date={}", userId, request.getMealDate());
+        MealDetailResponse response = mealService.createOrUpdateMealWithImages(request, images, userId);
+        return ResponseEntity.ok(ResponseDto.success(HttpStatus.CREATED, "식단 및 이미지 등록/수정 성공", response));
     }
 
     // 2. 식단 상세 조회 API - mealId
@@ -49,12 +51,18 @@ public class MealController {
         log.info("Getting meal detail: mealId={}, userId={}", mealId, userId);
         MealDetailResponse response = mealService.getMealDetail(mealId, userId);
 
-        // foodImageUrl을 완전한 URL로 변환
+        // 이미지 URL 처리
         for (MealTimeResponse mealTimeResponse : response.getMealTimes()) {
+            // mealTimeImageUrl 처리
+            String mealTimeImageUrl = mealTimeResponse.getMealTimeImageUrl();
+            if (mealTimeImageUrl != null && !mealTimeImageUrl.isEmpty()) {
+                mealTimeResponse.setMealTimeImageUrl(mealImageService.getMealImageUrl(mealTimeImageUrl));
+            }
+
+            // foodImageUrl 처리
             for (MealFoodResponse foodResponse : mealTimeResponse.getFoods()) {
                 String imageUrl = foodResponse.getFoodImageUrl();
                 if (imageUrl != null && !imageUrl.isEmpty()) {
-                    // setter 메서드를 사용하여 값 변경
                     foodResponse.setFoodImageUrl(mealImageService.getMealImageUrl(imageUrl));
                 }
             }

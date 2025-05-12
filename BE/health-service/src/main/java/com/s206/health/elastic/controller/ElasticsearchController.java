@@ -3,6 +3,7 @@ package com.s206.health.elastic.controller;
 import com.s206.common.dto.ResponseDto;
 import com.s206.health.elastic.document.ElasticFood;
 import com.s206.health.elastic.service.ElasticsearchService;
+import com.s206.health.nutrition.food.dto.response.FoodDetailResponse;
 import com.s206.health.nutrition.food.dto.response.FoodListResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,10 +23,10 @@ public class ElasticsearchController {
 
     // 음식 이름으로 검색
     @GetMapping("/name")
-    public ResponseEntity<ResponseDto<List<FoodListResponse>>> searchByName(
+    public ResponseEntity<ResponseDto<List<FoodDetailResponse>>> searchByName(
             @RequestHeader("X-USER-ID") Integer userId,
             @RequestParam String name) {
-        List<FoodListResponse> foods = elasticsearchService.searchByName(name, userId);
+        List<FoodDetailResponse> foods = elasticsearchService.searchByName(name, userId);
         return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK,"검색 성공",foods));
     }
 

@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.diaviseo.network.RetrofitInstance
+import com.example.diaviseo.network.user.dto.req.UserUpdateRequest
 import com.example.diaviseo.network.user.dto.res.FetchProfileResponse
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -81,4 +82,26 @@ class ProfileViewModel : ViewModel() {
             }
         }
     }
+
+    fun updateUserProfile(
+        request: UserUpdateRequest,
+        onSuccess: () -> Unit = {},
+        onError: (String) -> Unit = {}
+    ) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.userApiService.updateMyProfile(request)
+                if (response.status == "OK") {
+                    _myProfile.value = response.data
+                    fetchMyProfile() // BMR 재계산
+                    onSuccess()
+                } else {
+                    onError(response.message)
+                }
+            } catch (e: Exception) {
+                onError(e.message ?: "알 수 없는 오류 발생")
+            }
+        }
+    }
+
 }

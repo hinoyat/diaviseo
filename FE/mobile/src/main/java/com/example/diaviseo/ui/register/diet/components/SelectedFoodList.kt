@@ -1,13 +1,7 @@
 package com.example.diaviseo.ui.register.diet.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,23 +9,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.example.diaviseo.network.food.dto.res.FoodItem
+import com.example.diaviseo.model.diet.FoodWithQuantity
 import com.example.diaviseo.ui.components.AddRemoveIconButton
 
 @Composable
-fun SearchSuggestionList(
-    results: List<FoodItem>,
-    selectedItems: List<Int>,
-    onToggleSelect: (FoodItem) -> Unit,
-    modifier: Modifier = Modifier,
-    onFoodClick: (FoodItem) -> Unit,
-    ) {
+fun SelectedFoodList(
+    selectedItems: List<FoodWithQuantity>,
+    onRemoveItem: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(15.dp),
         color = Color.White
     ) {
-        if (results.isEmpty()) {
+        if (selectedItems.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -39,19 +31,18 @@ fun SearchSuggestionList(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "검색 결과가 없습니다",
+                    text = "선택한 음식이 없습니다",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )
             }
         } else {
-            LazyColumn(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 4.dp)
-                    .heightIn(max = 400.dp)
             ) {
-                items(results) { item ->
+                selectedItems.forEach { item ->
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -61,12 +52,7 @@ fun SearchSuggestionList(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clickable { onFoodClick(item) }
-
-                            ) {
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = item.foodName,
                                     style = MaterialTheme.typography.bodyLarge,
@@ -75,7 +61,7 @@ fun SearchSuggestionList(
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = "1인분 (${item.baseAmount.toInt()}g)",
+                                    text = "${item.quantity}인분",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = Color.Gray,
                                     fontSize = 13.sp
@@ -92,8 +78,8 @@ fun SearchSuggestionList(
                                 Spacer(modifier = Modifier.width(10.dp))
 
                                 AddRemoveIconButton(
-                                    isSelected = selectedItems.contains(item.foodId),
-                                    onClick = { onToggleSelect(item) }
+                                    isSelected = true,
+                                    onClick = { onRemoveItem(item.foodId) }
                                 )
                             }
                         }

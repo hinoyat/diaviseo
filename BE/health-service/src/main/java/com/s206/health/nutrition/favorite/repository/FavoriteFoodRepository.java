@@ -10,5 +10,5 @@ public interface FavoriteFoodRepository extends JpaRepository<FavoriteFood, Inte
     Optional<FavoriteFood> findByUserIdAndFoodFoodId(Integer userId, Integer foodId);
     List<FavoriteFood> findAllByUserId(Integer userId);
     boolean existsByUserIdAndFoodFoodId(Integer userId, Integer foodId);
-
+    List<FavoriteFood> findAllByUserIdAndFoodFoodIdIn(Integer userId, List<Integer> foodIds);
 }

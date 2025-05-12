@@ -21,6 +21,7 @@ import com.example.diaviseo.ui.register.diet.DietRegisterMainScreen
 import com.example.diaviseo.ui.register.exercise.ExerciseRegisterMainScreen
 import com.example.diaviseo.ui.register.diet.DietAiRegisterScreen
 import com.example.diaviseo.viewmodel.ProfileViewModel
+import com.example.diaviseo.ui.register.diet.dietGraph
 
 @Composable
 fun MainScreen() {
@@ -57,6 +58,7 @@ fun MainScreen() {
         "edit_physical_info",
         "exercise_detail",
         "meal_detail",
+        "diet_confirm"
         )
     val isBottomBarVisible = currentRoute !in hideBottomBarRoutes
 
@@ -109,11 +111,7 @@ fun MainScreen() {
             composable("edit_physical_info") {
                 PhysicalInfoEditScreen(
                     navController = navController,
-                    initialHeight = 168,
-                    initialWeight = 50,
-                    onSave = { height, weight ->
-                        // TODO: ViewModel에 전달하거나 저장 처리
-                    }
+                    viewModel = profileViewModel
                 )
             }
 
@@ -135,9 +133,10 @@ fun MainScreen() {
             composable("body_register") {
                 BodyDataRegisterScreen(navController)
             }
-            composable("diet_register") {
-                DietRegisterMainScreen(navController)
-            }
+//            composable("diet_register") {
+//                DietRegisterMainScreen(navController)
+//            }
+            dietGraph(navController)
             composable("exercise_register") {
                 ExerciseRegisterMainScreen(navController)
             }

@@ -8,20 +8,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.diaviseo.mapper.toFoodItem
 import com.example.diaviseo.viewmodel.DietSearchViewModel
 import com.example.diaviseo.ui.register.components.CommonSearchTopBar
 import com.example.diaviseo.ui.register.components.CommonTabBar
-import com.example.diaviseo.ui.register.diet.components.CameraFloatingIconButton
-import com.example.diaviseo.ui.register.diet.components.SearchSuggestionList
+import com.example.diaviseo.ui.register.diet.components.*
+import com.example.diaviseo.network.RetrofitInstance
+import com.example.diaviseo.network.food.dto.res.FoodDetailResponse
+import kotlinx.coroutines.launch
 
 @Composable
 fun DietRegisterMainScreen(
     navController: NavController,
+    viewModel: DietSearchViewModel
 ) {
-    val viewModel: DietSearchViewModel = viewModel()
     var selectedTab by remember { mutableStateOf(0) }
+    var showMealSheet by remember { mutableStateOf(false) }
+    var selectedMeal by remember { mutableStateOf("점심") }
+
     val tabs = listOf("오늘 뭐먹지", "즐겨찾기")
+
+    var showFoodDetailSheet by remember { mutableStateOf(false) }
+    var selectedFoodForDetail by remember { mutableStateOf<FoodDetailResponse?>(null) }
+    val coroutineScope = rememberCoroutineScope()
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -34,48 +43,82 @@ fun DietRegisterMainScreen(
                 placeholder = "음식명으로 검색",
                 navController = navController,
                 keyword = viewModel.keyword,
-                onKeywordChange = { viewModel.onKeywordChange(it) }
+                onKeywordChange = { viewModel.onKeywordChange(it) },
+                onCancelClick = { viewModel.cancelSearch() }
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // 🔄 탭 영역
-            CommonTabBar(
-                tabTitles = tabs,
-                selectedIndex = selectedTab,
-                onTabSelected = { selectedTab = it }
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            when (selectedTab) {
-                0 -> DietSuggestionScreen()
-                1 -> FavoriteFoodsContent()
-            }
-
-            Spacer(modifier = Modifier.height(80.dp)) // 플로팅 버튼 영역 확보
-        }
-
-        // 🔍 검색 결과
-        if (viewModel.keyword.isNotBlank()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 110.dp)
-                    .zIndex(10f),
-                contentAlignment = Alignment.TopCenter
-            ) {
+            if (viewModel.isSearching) {
                 SearchSuggestionList(
                     results = viewModel.searchResults,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(end = 16.dp, bottom = 80.dp),
-                    onItemClick = { /* TODO 음식 클릭시 음식 상세 페이지로 이동 혹은 추가 로직 구현*/ }
+                    selectedItems = viewModel.selectedItems.map { it.foodId },
+                    onFoodClick = { foodItem ->
+                        coroutineScope.launch {
+                            try {
+                                val response = RetrofitInstance.foodApiService.getFoodDetail(foodItem.foodId)
+                                val detail = response.data
+                                if (detail != null) {
+                                    selectedFoodForDetail = detail
+                                    showFoodDetailSheet = true
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                    },
+                    onToggleSelect = { foodItem ->
+                        viewModel.addSelectedFood(foodItem, quantity = 1)
+                    },
+                    modifier = Modifier.fillMaxWidth()
                 )
-            }
+            } else {
+                CommonTabBar(
+                    tabTitles = tabs,
+                    selectedIndex = selectedTab,
+                    onTabSelected = { selectedTab = it }
+                )
+                Spacer(modifier = Modifier.height(6.dp))
 
+                when (selectedTab) {
+                    0 -> DietSuggestionScreen()
+                    1 -> FavoriteFoodsContent()
+                }
+
+                Spacer(modifier = Modifier.height(80.dp))
+            }
         }
 
+        DietRegisterBottomBar(
+            selectedMeal = selectedMeal,
+            selectedCount = viewModel.selectedItems.size,
+            onMealClick = { showMealSheet = true },
+            onRegisterClick = {
+                navController.navigate("diet_confirm")
+            },
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+                .zIndex(10f)
+        )
+
+        if (showFoodDetailSheet && selectedFoodForDetail != null) {
+            FoodDetailBottomSheet(
+                food = selectedFoodForDetail!!,
+                isFavorite = selectedFoodForDetail!!.isFavorite,
+                onToggleFavorite = {
+                    // TODO: 즐겨찾기 API 연결
+                },
+                onAddClick = { quantity ->
+                    viewModel.addSelectedFood(
+                        food = selectedFoodForDetail!!.toFoodItem(),
+                        quantity = quantity
+                    )
+                    showFoodDetailSheet = false
+                },
+                onDismiss = { showFoodDetailSheet = false }
+            )
+        }
 
         // ➕ 플로팅 버튼
         CameraFloatingIconButton(
@@ -84,9 +127,18 @@ fun DietRegisterMainScreen(
             },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = 16.dp, bottom = 32.dp)
-                .zIndex(5f)
+                .padding(end = 16.dp, bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 77.dp)
+                .zIndex(15f)
         )
+
+        if (showMealSheet) {
+            MealSelectBottomSheet(
+                selected = selectedMeal,
+                onSelect = { selectedMeal = it },
+                onConfirm = { showMealSheet = false },
+                onDismiss = { showMealSheet = false }
+            )
+        }
     }
 }
 
@@ -96,4 +148,3 @@ fun FavoriteFoodsContent() {
         Text(text = "즐겨찾기 탭 콘텐츠")
     }
 }
-

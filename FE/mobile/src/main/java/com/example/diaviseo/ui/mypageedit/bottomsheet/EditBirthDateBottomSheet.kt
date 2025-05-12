@@ -14,7 +14,7 @@ import com.example.diaviseo.ui.theme.DiaViseoColors
 
 @Composable
 fun EditBirthDateBottomSheet(
-    initialBirthDate: String = "2000.02.14",
+    initialBirthDate: String = "",
     onSave: (String) -> Unit = {},
     onDismiss: () -> Unit = {}
 ) {
@@ -69,5 +69,5 @@ fun EditBirthDateBottomSheet(
 @Preview(showBackground = true)
 @Composable
 fun EditBirthDateBottomSheetPreview() {
-    EditBirthDateBottomSheet()
+    EditBirthDateBottomSheet(initialBirthDate = "2000.01.01")
 }

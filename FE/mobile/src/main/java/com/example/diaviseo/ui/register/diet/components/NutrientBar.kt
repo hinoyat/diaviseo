@@ -48,7 +48,6 @@ fun NutrientBar(
 
     Column(modifier = modifier) {
 
-        // 상단 라벨 Row
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -81,10 +80,21 @@ fun NutrientBar(
                 .height(24.dp)
                 .clip(RoundedCornerShape(7.dp))
         ) {
+            if (total <= 0f) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(24.dp)
+                        .clip(RoundedCornerShape(7.dp))
+                        .background(Color(0xFFE0E0E0))
+                )
+                return
+            }
+
             percentages.forEachIndexed { index, percent ->
                 Box(
                     modifier = Modifier
-                        .weight(percent)
+                        .weight(if (percent > 0f) percent else 0.0001f)
                         .fillMaxHeight()
                         .background(colors[index]),
                     contentAlignment = Alignment.Center

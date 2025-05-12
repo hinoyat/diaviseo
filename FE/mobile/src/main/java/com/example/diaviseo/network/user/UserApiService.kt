@@ -4,11 +4,13 @@ import com.example.diaviseo.network.common.dto.ApiResponse
 import com.example.diaviseo.network.user.dto.req.PhoneAuthConfirmRequest
 import com.example.diaviseo.network.user.dto.req.PhoneAuthTryRequest
 import com.example.diaviseo.network.user.dto.req.SignUpWithDiaRequest
+import com.example.diaviseo.network.user.dto.req.UserUpdateRequest
 import com.example.diaviseo.network.user.dto.res.FetchProfileResponse
 import com.example.diaviseo.network.user.dto.res.SignUpWithDiaResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 
 interface UserApiService {
     @POST("users/verify/phone")
@@ -29,4 +31,10 @@ interface UserApiService {
     @GET("users/me")
     suspend fun fetchMyProfile(
     ): ApiResponse<FetchProfileResponse>
+
+    @PUT("users")
+    suspend fun updateMyProfile(
+        @Body request: UserUpdateRequest
+    ): ApiResponse<FetchProfileResponse>
+
 }
