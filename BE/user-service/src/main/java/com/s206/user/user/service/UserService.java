@@ -9,15 +9,16 @@ import com.s206.user.user.dto.request.UserCreateRequest;
 import com.s206.user.user.dto.request.UserUpdateRequest;
 import com.s206.user.user.dto.response.UserDetailResponse;
 import com.s206.user.user.dto.response.UserExistResponse;
+import com.s206.user.user.dto.response.UserResponse;
 import com.s206.user.user.entity.User;
 import com.s206.user.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -114,8 +115,8 @@ public class UserService {
 
         if (request.getGoal() != null) {
             user.updateGoal(request.getGoal());
-            saveIfRelevantInfoChanged(user);
-        }
+			saveIfRelevantInfoChanged(user);
+		}
 
         return UserDetailResponse.toDto(user);
     }
@@ -162,4 +163,20 @@ public class UserService {
                 .build());
     }
 
+	@Transactional(readOnly = true)
+	public List<UserResponse> findNotificationEnabled() {
+		return userRepository.findNotificationEnabled();
+	}
+
+	@Transactional(readOnly = true)
+	public String getFcmTokenByUserId(Integer userId) {
+		return userRepository.findFcmTokenByUserId(userId).orElse(null);
+	}
+
+	@Transactional
+	public void saveOrUpdateFcmToken(Integer userId, String token) {
+		User user = validUser(userId);
+
+		userRepository.updateFcmToken(userId, token);
+	}
 }
