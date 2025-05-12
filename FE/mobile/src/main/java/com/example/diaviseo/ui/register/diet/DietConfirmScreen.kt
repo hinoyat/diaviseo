@@ -181,6 +181,8 @@ fun DietConfirmScreen(
                 text = "등록하기",
                 onClick = {
                     viewModel.submitDiet(
+                        context = context,
+                        imageUri = selectedImageUri.value,
                         onSuccess = {
                             Toast.makeText(context, "식단 등록이 완료되었어요!", Toast.LENGTH_SHORT).show()
 

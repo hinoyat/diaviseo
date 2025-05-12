@@ -1,8 +1,9 @@
 package com.example.diaviseo.network.meal
 
 import com.example.diaviseo.network.common.dto.ApiResponse
-import com.example.diaviseo.network.meal.dto.req.PostDietRequest
 import com.example.diaviseo.network.meal.dto.res.DailyNutritionResponse
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.http.*
 
 interface MealApiService {
@@ -11,9 +12,11 @@ interface MealApiService {
         @Query("date") date: String
     ): ApiResponse<DailyNutritionResponse>
 
+    @Multipart
     @POST("meals")
     suspend fun postDiet(
-        @Body request: PostDietRequest
+        @Part("mealData") mealData: RequestBody,
+        @Part images: MultipartBody.Part? = null
     ): ApiResponse<Unit>
 
 }

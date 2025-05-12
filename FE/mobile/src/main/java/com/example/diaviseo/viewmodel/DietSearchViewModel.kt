@@ -1,5 +1,7 @@
 package com.example.diaviseo.viewmodel
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.diaviseo.network.RetrofitInstance
@@ -7,11 +9,18 @@ import com.example.diaviseo.network.food.dto.res.FoodItem
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.*
 import android.util.Log
+import androidx.core.net.toFile
 import com.example.diaviseo.network.food.dto.req.MealTimeRequest
 import com.example.diaviseo.network.food.dto.req.MealType
 import com.example.diaviseo.network.meal.dto.req.PostDietRequest
 import com.example.diaviseo.model.diet.FoodWithQuantity           // ✅ UI용 데이터 모델
 import com.example.diaviseo.model.diet.toRequest                  // ✅ 변환 확장 함수
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -127,17 +136,42 @@ class DietSearchViewModel : ViewModel() {
         keyword = ""
         isSearching = false
     }
-
+    // 파일 변환 함수
+    fun Uri.toFile(context: Context): File {
+        val inputStream = context.contentResolver.openInputStream(this)
+        val tempFile = File.createTempFile("upload", ".jpg", context.cacheDir)
+        inputStream?.use { input ->
+            tempFile.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+        return tempFile
+    }
     // 식단 등록 API 호출
-    fun submitDiet(onSuccess: () -> Unit, onError: (String) -> Unit) {
+    fun submitDiet(
+        context: Context,
+        imageUri: Uri?,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
         val request = toPostDietRequest() ?: run {
             onError("식사시간이 선택되지 않았습니다.")
             return
         }
-
+        val gson = com.google.gson.Gson()
+        val json = gson.toJson(request)
+        val mealDataBody = json.toRequestBody("application/json; charset=utf-8".toMediaType())
+        val imagePart = imageUri?.let {
+            val file = it.toFile(context) // 아래 확장 함수 필요
+            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+            MultipartBody.Part.createFormData("images", file.name, requestFile)
+        }
         viewModelScope.launch {
             try {
-                val response = RetrofitInstance.mealApiService.postDiet(request)
+                val response = RetrofitInstance.mealApiService.postDiet(
+                    mealData = mealDataBody,
+                    images = imagePart
+                )
                 if (response.status == "OK" || response.status == "CREATED") {
                     onSuccess()
                 } else {
