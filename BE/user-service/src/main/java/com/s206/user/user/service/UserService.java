@@ -64,26 +64,26 @@ public class UserService {
     public UserDetailResponse getUserByUserId(Integer userId) {
         User user = validUser(userId);
 
-        return UserDetailResponse.toDto(user);
-    }
+		return UserDetailResponse.toDto(user);
+	}
 
-    @Transactional
-    public UserDetailResponse updateUser(Integer userId, UserUpdateRequest request) {
-        User user = validUser(userId);
+	@Transactional
+	public UserDetailResponse updateUser(Integer userId, UserUpdateRequest request) {
+		User user = validUser(userId);
 
-        if (request.getNickname() != null) {
-            if (request.getNickname().isBlank()) {
-                throw new BadRequestException("닉네임은 비어있을 수 없습니다.");
-            }
-            user.updateNickname(request.getNickname());
-        }
+		if (request.getNickname() != null) {
+			if (request.getNickname().isBlank()) {
+				throw new BadRequestException("닉네임은 비어있을 수 없습니다.");
+			}
+			user.updateNickname(request.getNickname());
+		}
 
-        if (request.getPhone() != null) {
-            if (request.getPhone().isBlank()) {
-                throw new BadRequestException("전화번호는 비어있을 수 없습니다.");
-            }
-            user.updatePhone(request.getPhone());
-        }
+		if (request.getPhone() != null) {
+			if (request.getPhone().isBlank()) {
+				throw new BadRequestException("전화번호는 비어있을 수 없습니다.");
+			}
+			user.updatePhone(request.getPhone());
+		}
 
         if (request.getHeight() != null) {
             if (request.getHeight().compareTo(BigDecimal.ZERO) <= 0) {
@@ -109,49 +109,49 @@ public class UserService {
             user.updateBirthday(request.getBirthday());
         }
 
-        if (request.getNotificationEnabled() != null) {
-            user.updateNotificationEnabled(request.getNotificationEnabled());
-        }
+		if (request.getNotificationEnabled() != null) {
+			user.updateNotificationEnabled(request.getNotificationEnabled());
+		}
 
         if (request.getGoal() != null) {
             user.updateGoal(request.getGoal());
 			saveIfRelevantInfoChanged(user);
 		}
 
-        return UserDetailResponse.toDto(user);
-    }
+		return UserDetailResponse.toDto(user);
+	}
 
-    @Transactional
-    public void deleteUser(Integer userId) {
-        User user = validUser(userId);
-        user.delete();
-        userRepository.save(user);
-    }
+	@Transactional
+	public void deleteUser(Integer userId) {
+		User user = validUser(userId);
+		user.delete();
+		userRepository.save(user);
+	}
 
 
-    public UserExistResponse existsByEmail(String email, String provider) {
+	public UserExistResponse existsByEmail(String email, String provider) {
 
-        Optional<User> optionalUser = userRepository.findByEmailAndProvider(email, provider);
+		Optional<User> optionalUser = userRepository.findByEmailAndProvider(email, provider);
 
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            return UserExistResponse.toDto(user, true);
-        } else {
-            return UserExistResponse.toDto(false);
-        }
+		if (optionalUser.isPresent()) {
+			User user = optionalUser.get();
+			return UserExistResponse.toDto(user, true);
+		} else {
+			return UserExistResponse.toDto(false);
+		}
 
-    }
+	}
 
-    private User validUser(Integer userId) {
-        User user = userRepository.findUserByUserId(userId)
-                .orElseThrow(() -> new NotFoundException("해당 유저를 찾을 수 없습니다."));
+	private User validUser(Integer userId) {
+		User user = userRepository.findUserByUserId(userId)
+				.orElseThrow(() -> new NotFoundException("해당 유저를 찾을 수 없습니다."));
 
-        if (user.getIsDeleted()) {
-            throw new BadRequestException("이미 탈퇴한 회원입니다.");
-        }
+		if (user.getIsDeleted()) {
+			throw new BadRequestException("이미 탈퇴한 회원입니다.");
+		}
 
-        return user;
-    }
+		return user;
+	}
 
     public void saveIfRelevantInfoChanged(User user) {
         userPhysicalInfoService.saveOrUpdate(user.getUserId(), UserPhysicalInfoSaveRequest.builder()
@@ -163,6 +163,22 @@ public class UserService {
                 .build());
     }
 
+	@Transactional(readOnly = true)
+	public List<UserResponse> findNotificationEnabled() {
+		return userRepository.findNotificationEnabled();
+	}
+
+	@Transactional(readOnly = true)
+	public String getFcmTokenByUserId(Integer userId) {
+		return userRepository.findFcmTokenByUserId(userId).orElse(null);
+	}
+
+	@Transactional
+	public void saveOrUpdateFcmToken(Integer userId, String token) {
+		User user = validUser(userId);
+
+		userRepository.updateFcmToken(userId, token);
+	}
 	@Transactional(readOnly = true)
 	public List<UserResponse> findNotificationEnabled() {
 		return userRepository.findNotificationEnabled();
