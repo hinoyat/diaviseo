@@ -25,8 +25,10 @@ public class InBodyOcrService {
     public InBodyOcrService() {
         tesseract = new Tesseract();
 
-        // Windows 환경에서 명시적으로 tessdata 경로 설정
-        if (System.getProperty("os.name").toLowerCase().contains("win")) {
+        // OS별로 tessdata 경로 설정
+        String osName = System.getProperty("os.name").toLowerCase();
+
+        if (osName.contains("win")) {
             log.info("Windows 환경에서 실행 중...");
             String[] windowsPaths = {
                     "C:\\Program Files\\Tesseract-OCR\\tessdata",
@@ -40,13 +42,36 @@ public class InBodyOcrService {
                     break;
                 }
             }
-        }
+        } else if (osName.contains("linux") || osName.contains("unix")) {
+            log.info("Linux/Unix 환경에서 실행 중...");
+            String[] linuxPaths = {
+                    "/usr/share/tesseract-ocr/4.00/tessdata",
+                    "/usr/share/tesseract-ocr/5.00/tessdata",
+                    "/usr/share/tesseract-ocr/tessdata",
+                    "/usr/local/share/tessdata",
+                    "/opt/tesseract/tessdata"
+            };
 
+            for (String path : linuxPaths) {
+                if (new java.io.File(path).exists()) {
+                    tesseract.setDatapath(path);
+                    log.info("tessdata 경로 설정 완료: {}", path);
+                    break;
+                }
+            }
+        }
         try {
             tesseract.setLanguage("kor+eng");
             log.info("언어 설정 성공: kor+eng");
         } catch (Exception e) {
             log.error("언어 설정 실패: {}", e.getMessage());
+            log.info("언어 설정 실패 - 영어만 사용합니다.");
+            try {
+                tesseract.setLanguage("eng");
+                log.info("영어 언어 설정 성공");
+            } catch (Exception ex) {
+                log.error("영어 언어 설정도 실패: {}", ex.getMessage());
+            }
         }
 
         tesseract.setTessVariable("tessedit_char_whitelist",
