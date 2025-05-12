@@ -58,7 +58,8 @@ fun MainScreen() {
         "edit_physical_info",
         "exercise_detail",
         "meal_detail",
-        "diet_confirm"
+        "diet_confirm",
+        "food_set_register"
         )
     val isBottomBarVisible = currentRoute !in hideBottomBarRoutes
 

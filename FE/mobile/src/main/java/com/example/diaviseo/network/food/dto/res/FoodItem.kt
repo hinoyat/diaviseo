@@ -8,6 +8,6 @@ data class FoodItem(
     val protein: Double,
     val fat: Double,
     val sweet: Double,
-    val baseAmount: Double,
+    val baseAmount: String,
     val isFavorite: Boolean,
 )

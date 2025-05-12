@@ -15,6 +15,9 @@ import com.example.diaviseo.network.food.dto.req.MealType
 import com.example.diaviseo.network.meal.dto.req.PostDietRequest
 import com.example.diaviseo.model.diet.FoodWithQuantity           // ✅ UI용 데이터 모델
 import com.example.diaviseo.model.diet.toRequest                  // ✅ 변환 확장 함수
+import com.example.diaviseo.network.foodset.dto.req.FoodIdWithQuantity
+import com.example.diaviseo.network.foodset.dto.req.FoodSetRegisterRequest
+import com.example.diaviseo.network.foodset.dto.res.FoodSetResponse
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -147,6 +150,37 @@ class DietSearchViewModel : ViewModel() {
         }
         return tempFile
     }
+    // 음식 세트 목록 상태
+    var foodSets by mutableStateOf<List<FoodSetResponse>>(emptyList())
+        private set
+
+    // 음식 세트 목록 조회 함수
+    fun fetchFoodSets() {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.foodSetApiService.getFoodSets()
+                foodSets = response.data ?: emptyList()
+            } catch (e: Exception) {
+                Log.e("DietSearchVM", "음식 세트 조회 실패: ${e.message}")
+            }
+        }
+    }
+// 음식 세트 선택 시 현재 선택된 음식 목록으로 반영하는 함수
+    fun applyFoodSet(set: FoodSetResponse) {
+        selectedItems = set.foods.map {
+            FoodWithQuantity(
+                foodId = it.foodId,
+                foodName = it.foodName,
+                calorie = it.calorie,
+                carbohydrate = it.carbohydrate,
+                protein = it.protein,
+                fat = it.fat,
+                sweet = it.sweet,
+                quantity = it.quantity.toInt()
+            )
+        }
+    }
+
     // 식단 등록 API 호출
     fun submitDiet(
         context: Context,
@@ -203,4 +237,34 @@ class DietSearchViewModel : ViewModel() {
             }
         }
     }
+
+    // 음식 세트 등록
+    fun registerFoodSet(
+        name: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val foods = selectedItems.map {
+            FoodIdWithQuantity(
+                foodId = it.foodId,
+                quantity = it.quantity.toDouble()
+            )
+        }
+
+        val request = FoodSetRegisterRequest(name = name, foods = foods)
+
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.foodSetApiService.postFoodSet(request)
+                if (response.status == "CREATED") {
+                    onSuccess()
+                } else {
+                    onError("등록 실패: ${response.message}")
+                }
+            } catch (e: Exception) {
+                onError("네트워크 오류: ${e.message}")
+            }
+        }
+    }
+
 }

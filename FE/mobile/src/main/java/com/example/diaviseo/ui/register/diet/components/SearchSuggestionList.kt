@@ -75,11 +75,12 @@ fun SearchSuggestionList(
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = "1인분 (${item.baseAmount.toInt()}g)",
+                                    text = "1인분 (${item.baseAmount.filter { it.isDigit() }.toIntOrNull() ?: 0}g)",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = Color.Gray,
                                     fontSize = 13.sp
                                 )
+
                             }
 
                             Row(verticalAlignment = Alignment.CenterVertically) {
