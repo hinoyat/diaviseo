@@ -1,11 +1,18 @@
 package com.example.diaviseo.ui.main.components.goal.meal
 
+import android.R
 import android.graphics.Paint
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -13,10 +20,12 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.diaviseo.ui.theme.DiaViseoColors
+import com.example.diaviseo.ui.theme.semibold18
 import kotlin.math.ceil
 
 /**
@@ -64,6 +73,23 @@ fun StakedBarChart(
                 }
             }
     ) {
+        if (maxY == 0) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(DiaViseoColors.Placeholder.copy(alpha = 0.2f)), // 반투명 배경
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "조회 가능한 칼로리가 없어요! 🗓️",
+                    style = semibold18,
+                    color = DiaViseoColors.Unimportant,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+
         Canvas(modifier = Modifier.fillMaxSize()) {
             val w = size.width
             val h = size.height - with(density) { 24.dp.toPx() }
