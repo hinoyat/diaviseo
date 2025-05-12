@@ -27,7 +27,7 @@ import com.example.diaviseo.ui.components.CommonTopBar
 import com.example.diaviseo.ui.components.DiaDatePickerDialog
 import com.example.diaviseo.ui.components.LoadingOverlay
 import com.example.diaviseo.ui.detail.components.meal.MealCard
-import com.example.diaviseo.ui.main.components.goal.DonutChartWithLegend
+import com.example.diaviseo.ui.main.components.goal.meal.DonutChartWithLegend
 import com.example.diaviseo.viewmodel.GoalViewModel
 import com.example.diaviseo.viewmodel.ProfileViewModel
 import androidx.compose.ui.graphics.Brush

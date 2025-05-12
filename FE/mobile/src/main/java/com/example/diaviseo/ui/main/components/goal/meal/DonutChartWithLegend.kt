@@ -1,4 +1,4 @@
-package com.example.diaviseo.ui.main.components.goal
+package com.example.diaviseo.ui.main.components.goal.meal
 
 import android.graphics.Paint
 import androidx.compose.foundation.Canvas
@@ -158,7 +158,7 @@ fun DonutChartWithLegend(
 @Composable
 private fun LegendRow(label: String, color: Color) {
     Row(
-        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(bottom = 2.dp)
     ) {
         Box(
