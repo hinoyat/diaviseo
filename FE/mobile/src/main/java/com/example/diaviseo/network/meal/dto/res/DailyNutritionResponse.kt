@@ -5,10 +5,10 @@ import java.time.LocalDate
 
 data class DailyNutritionResponse(
     val date: String,
-    val totalCalorie: Int?,
-    val totalCarbohydrate: BigDecimal?,
-    val totalProtein: BigDecimal?,
-    val totalFat: BigDecimal?,
-    val totalSugar: BigDecimal?,
-    val totalSodium: BigDecimal?
+    val totalCalorie: Int,
+    val totalCarbohydrate: Double,
+    val totalProtein: Double,
+    val totalFat: Double,
+    val totalSugar: Double,
+    val totalSodium: Double
 )
