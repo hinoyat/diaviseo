@@ -1,6 +1,7 @@
 package com.s206.health.nutrition.meal.controller;
 
 import com.s206.common.dto.ResponseDto;
+import com.s206.health.nutrition.food.dto.response.FoodListResponse;
 import com.s206.health.nutrition.meal.dto.request.MealCreateRequest;
 import com.s206.health.nutrition.meal.dto.request.MealTimeRequest;
 import com.s206.health.nutrition.meal.dto.response.*;
@@ -185,5 +186,14 @@ public class MealController {
         log.info("Uploading food image: mealFoodId={}, userId={}", mealFoodId, userId);
         Map<String, String> response = mealService.uploadMealFoodImage(mealFoodId, file, userId);
         return ResponseEntity.ok(ResponseDto.success(HttpStatus.CREATED, "음식 이미지 업로드 성공", response));
+    }
+
+    @GetMapping("/recent-foods")
+    public ResponseEntity<ResponseDto<List<FoodListResponse>>> getRecentFoods(
+            @RequestHeader("X-USER-ID") Integer userId
+    ) {
+        log.info("Getting recent foods: userId={}, limit={}", userId, 10);
+        List<FoodListResponse> response = mealService.getRecentFoods(userId, 10);
+        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "최근 먹은 음식 조회 성공", response));
     }
 }
