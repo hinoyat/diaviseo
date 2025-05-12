@@ -1,5 +1,6 @@
 package com.s206.alert.entity;
 
+import com.s206.alert.data.request.NotificationType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -27,21 +28,20 @@ public class Notification {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long notificationId;
 	@Column(nullable = false)
-	private Long userId;
-
-	private String title;
-	private String content;
+	private Integer userId;
 
 	@Enumerated(EnumType.STRING)
-	private NotificationType type;   // Enum으로 변경됨
+	@Column(nullable = false)
+	private NotificationType notificationType;
+
+	private String title;
+	private String message;
+
 	@CreationTimestamp
-	private LocalDateTime createdAt;
+	private LocalDateTime sentAt;
 
-	@Column(nullable = true)
-	private LocalDateTime checkedAt;
-
-	@Column
-	private LocalDateTime deletedAt;
+	@Column(nullable = false)
+	private Boolean isRead = false;
 
 	@Column(nullable = false)
 	private Boolean isDeleted = false;
