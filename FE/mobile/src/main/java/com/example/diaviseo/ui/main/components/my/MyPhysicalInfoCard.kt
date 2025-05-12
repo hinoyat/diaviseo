@@ -19,9 +19,9 @@ import com.example.diaviseo.ui.theme.DiaViseoColors
 
 @Composable
 fun MyPhysicalInfoCard(
-    height: Int = 168,
-    weight: Int = 50,
-    onEditClick: () -> Unit = {}
+    height: Double,
+    weight: Double,
+    onEditClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -58,7 +58,11 @@ fun MyPhysicalInfoCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = "키", fontSize = 14.sp, color = DiaViseoColors.Unimportant)
-                Text(text = "${height}cm", fontSize = 16.sp, color = DiaViseoColors.Basic)
+                Text(
+                    text = String.format("%.1f cm", height),
+                    fontSize = 16.sp,
+                    color = DiaViseoColors.Basic
+                )
             }
 
             Divider(
@@ -73,14 +77,23 @@ fun MyPhysicalInfoCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = "몸무게", fontSize = 14.sp, color = DiaViseoColors.Unimportant)
-                Text(text = "${weight}kg", fontSize = 16.sp, color = DiaViseoColors.Basic)
+                Text(
+                    text = String.format("%.1f kg", weight),
+                    fontSize = 16.sp,
+                    color = DiaViseoColors.Basic
+                )
             }
         }
     }
 }
 
+
 @Preview(showBackground = true)
 @Composable
 fun MyPhysicalInfoCardPreview() {
-    MyPhysicalInfoCard()
+    MyPhysicalInfoCard(
+        height = 172.3,
+        weight = 63.5,
+        onEditClick = {}
+    )
 }

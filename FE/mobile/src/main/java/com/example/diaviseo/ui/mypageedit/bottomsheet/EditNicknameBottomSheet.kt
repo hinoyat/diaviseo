@@ -14,7 +14,7 @@ import com.example.diaviseo.ui.theme.DiaViseoColors
 
 @Composable
 fun EditNicknameBottomSheet(
-    initialNickname: String = "김디아",
+    initialNickname: String = "",
     onSave: (String) -> Unit = {},
     onDismiss: () -> Unit = {}
 ) {
@@ -76,5 +76,5 @@ fun EditNicknameBottomSheet(
 @Preview(showBackground = true)
 @Composable
 fun EditNicknameBottomSheetPreview() {
-    EditNicknameBottomSheet()
+    EditNicknameBottomSheet(initialNickname = "김디아")
 }

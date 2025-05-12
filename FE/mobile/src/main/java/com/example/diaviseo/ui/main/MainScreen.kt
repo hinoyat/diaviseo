@@ -107,11 +107,7 @@ fun MainScreen() {
             composable("edit_physical_info") {
                 PhysicalInfoEditScreen(
                     navController = navController,
-                    initialHeight = 168,
-                    initialWeight = 50,
-                    onSave = { height, weight ->
-                        // TODO: ViewModel에 전달하거나 저장 처리
-                    }
+                    viewModel = profileViewModel
                 )
             }
 
