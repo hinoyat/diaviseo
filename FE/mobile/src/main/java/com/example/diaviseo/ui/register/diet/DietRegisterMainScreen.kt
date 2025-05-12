@@ -32,6 +32,10 @@ fun DietRegisterMainScreen(
     var selectedFoodForDetail by remember { mutableStateOf<FoodDetailResponse?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
+    LaunchedEffect(Unit) {
+        viewModel.fetchFoodSets()
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
