@@ -28,7 +28,7 @@ import com.example.diaviseo.ui.components.DiaDatePickerDialog
 import com.example.diaviseo.ui.components.LoadingOverlay
 import com.example.diaviseo.ui.detail.components.meal.MealCard
 import com.example.diaviseo.ui.main.components.goal.meal.DonutChartWithLegend
-import com.example.diaviseo.viewmodel.GoalViewModel
+import com.example.diaviseo.viewmodel.goal.GoalViewModel
 import com.example.diaviseo.viewmodel.ProfileViewModel
 import androidx.compose.ui.graphics.Brush
 import com.example.diaviseo.network.meal.dto.res.MealFoodResponse
@@ -276,10 +276,10 @@ fun MealDetailScreen(
                 DonutChartWithLegend(
                     calories = 689,
                     calorieGoal = 1285,
-                    carbRatio = 0.3f,
-                    sugarRatio = 0.1f,
-                    proteinRatio = 0.1f,
-                    fatRatio = 0.2f
+                    carbRatio = 0.3,
+                    sugarRatio = 0.1,
+                    proteinRatio = 0.1,
+                    fatRatio = 0.2
                 )
             }
 
