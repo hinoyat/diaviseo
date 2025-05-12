@@ -1,32 +1,21 @@
 package com.s206.alert.consumer;
 
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.Message;
+import com.s206.alert.data.request.NotificationMessageDto;
+import com.s206.alert.service.NotificationService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class PushNotificationConsumer {
 
-	@RabbitListener(queues = "push-notification-queue")
-	public void receive(String messageBody) {
-		log.info("Received: {}",messageBody);
-		sendToFcm(messageBody);
-	}
+	private final NotificationService notificationService;
 
-	private void sendToFcm(String body) {
-		try {
-			Message message = Message.builder()
-					.putData("message", body)
-					.setTopic("general") // 또는 setToken(...)
-					.build();
-
-			String response = FirebaseMessaging.getInstance().send(message);
-			log.info("FCM Sent: {}",response);
-		} catch (Exception e) {
-			log.error("FCM Error: {}", e.getMessage());
-		}
+	@RabbitListener(queues = "notification-queue")
+	public void receive(NotificationMessageDto message) {
+		notificationService.process(message);
 	}
 }
