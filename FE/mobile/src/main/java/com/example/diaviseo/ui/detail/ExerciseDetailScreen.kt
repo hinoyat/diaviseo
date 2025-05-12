@@ -47,8 +47,14 @@ fun ExerciseDetailScreen(
         } ?: error("No ‘goal’ or ‘home’ in back stack")
     }
 
-    // 3) 찾은 entry 로부터 ViewModel 을 불러온다
-    val goalViewModel: GoalViewModel = viewModel(parentEntry)
+    // 분기해서 viewModel() 호출
+    val goalViewModel: GoalViewModel = if (parentEntry.destination.route == "goal") {
+        // 이미 goal에서 왔을 땐, goal 백스택 엔트리로부터 같은 ViewModel 공유
+        viewModel(parentEntry)
+    } else {
+        // home에서 왔을 땐, 이 화면(exercise_detail)의 엔트리로 새로운 ViewModel 생성
+        viewModel()
+    }
 
     val showDatePicker by goalViewModel.showDatePicker.collectAsState()
     val selectedDate by goalViewModel.selectedDate.collectAsState()
@@ -93,7 +99,6 @@ fun ExerciseDetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding) // Scaffold 안쪽 padding 처리
-                .navigationBarsPadding() // 하단 소프트바 대응
                 .verticalScroll(rememberScrollState())
         ) {
             Spacer(modifier = Modifier.height(16.dp))

@@ -68,7 +68,12 @@ fun GoalContent(
                 Banner(
                     isToday = isToday,
                     type = GoalBannerType.MEAL,
-                    onClick = { /* 상세화면 이동 예정 */ }
+                    onClick = {
+                        navController.navigate("meal_detail") {
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
                 )
             }
 
