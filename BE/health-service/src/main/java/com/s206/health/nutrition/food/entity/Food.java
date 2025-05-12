@@ -51,7 +51,7 @@ public class Food {
     private BigDecimal cholesterol;
 
     @Column(nullable = false, precision = 6, scale = 2)
-    private BigDecimal baseAmount;
+    private String baseAmount;
 
     @CreationTimestamp
     @Column(nullable = false)

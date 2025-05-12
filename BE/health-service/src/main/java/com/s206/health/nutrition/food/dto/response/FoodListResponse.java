@@ -14,7 +14,7 @@ public class FoodListResponse {
     private Integer foodId;
     private String foodName;
     private Integer calorie;
-    private BigDecimal baseAmount;
+    private String baseAmount;
     private boolean isFavorite;
 
     @JsonProperty("isFavorite")
