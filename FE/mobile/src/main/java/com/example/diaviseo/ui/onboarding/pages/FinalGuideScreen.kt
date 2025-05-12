@@ -3,7 +3,7 @@ package com.example.diaviseo.ui.onboarding.pages
 import com.example.diaviseo.util.FinalGuideMessageBuilder
 import com.example.diaviseo.util.GoalType
 import com.example.diaviseo.viewmodel.AuthViewModel
-import com.example.diaviseo.viewmodel.GoalViewModel
+import com.example.diaviseo.viewmodel.goal.GoalViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape

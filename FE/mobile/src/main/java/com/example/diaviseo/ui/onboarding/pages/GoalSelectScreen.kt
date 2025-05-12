@@ -18,7 +18,7 @@ import com.example.diaviseo.ui.components.BottomButtonSection
 import com.example.diaviseo.ui.components.onboarding.StepProgressBar
 import com.example.diaviseo.ui.theme.DiaViseoColors
 import com.example.diaviseo.viewmodel.AuthViewModel
-import com.example.diaviseo.viewmodel.GoalViewModel
+import com.example.diaviseo.viewmodel.goal.GoalViewModel
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.withStyle

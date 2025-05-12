@@ -1,18 +1,15 @@
-package com.example.diaviseo.viewmodel
+package com.example.diaviseo.viewmodel.goal
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 import java.time.LocalDate
-import android.util.Log
-
 
 class GoalViewModel : ViewModel() {
-//    private val _goal = MutableStateFlow("") // "감량", "유지", "증량"
-//    val goal: StateFlow<String> = _goal
-
     private val _selectedDate = MutableStateFlow(LocalDate.now())
     val selectedDate: StateFlow<LocalDate> = _selectedDate
 

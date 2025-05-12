@@ -9,7 +9,7 @@ import com.example.diaviseo.ui.components.DiaDatePickerDialog
 import com.example.diaviseo.ui.components.LoadingOverlay
 import java.time.LocalDate
 import com.example.diaviseo.ui.main.components.goal.*
-import com.example.diaviseo.viewmodel.GoalViewModel
+import com.example.diaviseo.viewmodel.goal.GoalViewModel
 
 @Composable
 fun GoalScreen(navController: NavHostController) {

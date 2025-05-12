@@ -20,7 +20,7 @@ import com.example.diaviseo.ui.detail.components.exercise.ExerciseSummarySection
 import com.example.diaviseo.ui.theme.DiaViseoColors
 import com.example.diaviseo.ui.theme.bold20
 //import com.example.diaviseo.viewmodel.ExerciseDetailViewModel
-import com.example.diaviseo.viewmodel.GoalViewModel
+import com.example.diaviseo.viewmodel.goal.GoalViewModel
 import com.example.diaviseo.viewmodel.ProfileViewModel
 
 @SuppressLint("UnrememberedGetBackStackEntry")
