@@ -1,4 +1,6 @@
-package com.example.diaviseo.ui.main.components.goal
+package com.example.diaviseo.ui.main.components.goal.body
+
+import com.example.diaviseo.ui.main.components.goal.meal.ChartPeriod
 
 data class WeightMultiLineEntry(
     val weight: Float,         // 체중 (kg)

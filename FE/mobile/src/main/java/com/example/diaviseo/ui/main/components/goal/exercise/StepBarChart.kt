@@ -1,4 +1,4 @@
-package com.example.diaviseo.ui.main.components.goal
+package com.example.diaviseo.ui.main.components.goal.exercise
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
@@ -18,7 +18,6 @@ import com.patrykandpatrick.vico.compose.component.marker.markerComponent
 import com.patrykandpatrick.vico.core.component.text.TextComponent // 마커 레이블용 텍스트 컴포넌트
 import com.patrykandpatrick.vico.core.component.shape.ShapeComponent // 마커 배경용 모양 컴포넌트
 import com.patrykandpatrick.vico.core.component.shape.Shapes // 미리 정의된 모양 사용
-import com.patrykandpatrick.vico.core.dimensions.MutableDimensions // 패딩 설정용
 
 
 @Composable

@@ -1,7 +1,6 @@
-package com.example.diaviseo.ui.main.components.goal
+package com.example.diaviseo.ui.main.components.goal.body
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text

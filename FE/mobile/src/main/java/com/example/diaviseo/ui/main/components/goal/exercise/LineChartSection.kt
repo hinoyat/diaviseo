@@ -1,4 +1,4 @@
-package com.example.diaviseo.ui.main.components.goal
+package com.example.diaviseo.ui.main.components.goal.exercise
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
@@ -7,13 +7,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
+import com.example.diaviseo.ui.main.components.goal.meal.ChartPeriod
+import com.example.diaviseo.ui.main.components.goal.meal.PeriodSelector
 import com.example.diaviseo.ui.theme.DiaViseoColors
 import com.example.diaviseo.ui.theme.*
 import com.patrykandpatrick.vico.compose.chart.line.lineChart
 import com.patrykandpatrick.vico.core.entry.entryOf
 import com.patrykandpatrick.vico.compose.chart.Chart
 import com.patrykandpatrick.vico.core.chart.line.LineChart
-import com.patrykandpatrick.vico.core.component.shape.shader.DynamicShaders
 //import com.patrykandpatrick.vico.compose.component.marker.rememberDefaultMarker
 import com.patrykandpatrick.vico.core.entry.ChartEntryModelProducer
 import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis

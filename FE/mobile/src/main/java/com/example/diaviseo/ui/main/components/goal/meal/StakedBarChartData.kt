@@ -1,6 +1,4 @@
-package com.example.diaviseo.ui.main.components.goal
-
-//import com.example.diaviseo.ui.main.components.ChartPeriod
+package com.example.diaviseo.ui.main.components.goal.meal
 
 object StakedBarChartData {
 

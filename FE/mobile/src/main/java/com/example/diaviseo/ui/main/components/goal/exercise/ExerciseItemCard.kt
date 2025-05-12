@@ -1,4 +1,4 @@
-package com.example.diaviseo.ui.main.components.goal
+package com.example.diaviseo.ui.main.components.goal.exercise
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

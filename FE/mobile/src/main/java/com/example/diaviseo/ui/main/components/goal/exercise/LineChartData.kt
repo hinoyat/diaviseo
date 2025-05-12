@@ -1,4 +1,6 @@
-package com.example.diaviseo.ui.main.components.goal
+package com.example.diaviseo.ui.main.components.goal.exercise
+
+import com.example.diaviseo.ui.main.components.goal.meal.ChartPeriod
 
 
 object LineChartSampleData {

@@ -1,4 +1,4 @@
-package com.example.diaviseo.ui.main.components.goal
+package com.example.diaviseo.ui.main.components.goal.body
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background

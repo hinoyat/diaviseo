@@ -1,4 +1,4 @@
-package com.example.diaviseo.ui.main.components.goal
+package com.example.diaviseo.ui.main.components.goal.exercise
 
 data class StepBarEntry(
     val dateLabel: String,

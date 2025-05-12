@@ -1,8 +1,9 @@
-package com.example.diaviseo.ui.main.components.goal
+package com.example.diaviseo.ui.main.components.goal.meal
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -129,7 +130,7 @@ fun PeriodSelector(
                     .padding(horizontal = 4.dp)
                     .shadow(
                         elevation = 4.dp,
-                        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(16.dp),
                         clip = false
                     )
                     .background(
@@ -164,7 +165,7 @@ fun LegendRow() {
 }
 
 @Composable
-fun LegendItem(label: String, color: androidx.compose.ui.graphics.Color) {
+fun LegendItem(label: String, color: Color) {
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
