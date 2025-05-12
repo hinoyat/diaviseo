@@ -1,7 +1,8 @@
-package com.s206.alert.entity;
+package com.s206.health.notification.dto.request;
 
 public enum NotificationType {
 	DIET,      // 식단
 	EXERCISE,  // 운동
-	WEIGHT     // 체중
+	WEIGHT,
+	INACTIVE
 }
