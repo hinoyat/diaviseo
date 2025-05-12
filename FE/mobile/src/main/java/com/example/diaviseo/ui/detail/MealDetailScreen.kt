@@ -347,8 +347,8 @@ enum class MealTimeType(
     val gradient: Brush,
     val iconRes: Int
 ) {
-    BREAKFAST("아침", Brush.linearGradient(listOf(Color(0xFFFFFEB4), Color.White)), R.drawable.morning),
-    LUNCH("점심", Brush.linearGradient(listOf(Color(0xFFFFDBB4), Color.White)), R.drawable.lunch),
-    DINNER("저녁", Brush.linearGradient(listOf(Color(0xFFC5B4FF), Color.White)), R.drawable.night),
-    SNACK("간식", Brush.linearGradient(listOf(Color(0xFFFFB4B4), Color.White)), R.drawable.apple)
+    BREAKFAST("아침", Brush.linearGradient(listOf(Color(0xFFFFFFFF), Color.White)), R.drawable.morning),
+    LUNCH("점심", Brush.linearGradient(listOf(Color(0xFFFFFFFF), Color.White)), R.drawable.lunch),
+    DINNER("저녁", Brush.linearGradient(listOf(Color(0xFFFFFFFF), Color.White)), R.drawable.night),
+    SNACK("간식", Brush.linearGradient(listOf(Color(0xFFFFFFFF), Color.White)), R.drawable.apple)
 }
