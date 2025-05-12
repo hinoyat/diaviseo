@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -62,6 +63,9 @@ android {
 
 // 외부 라이브러리를 이용 시 gradle 파일의 dependencies 등록
 dependencies {
+    // Import the Firebase BoM
+    implementation("com.google.firebase:firebase-messaging-ktx")
+    implementation(platform("com.google.firebase:firebase-bom:33.13.0"))
     implementation(platform("androidx.compose:compose-bom:2025.03.01"))
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
