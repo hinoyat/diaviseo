@@ -22,6 +22,8 @@ import com.example.diaviseo.ui.register.exercise.ExerciseRegisterMainScreen
 import com.example.diaviseo.ui.register.diet.DietAiRegisterScreen
 import com.example.diaviseo.viewmodel.ProfileViewModel
 import com.example.diaviseo.ui.register.diet.dietGraph
+import com.example.diaviseo.viewmodel.condition.AllergyViewModel
+import com.example.diaviseo.viewmodel.condition.DiseaseViewModel
 
 @Composable
 fun MainScreen() {
@@ -115,12 +117,20 @@ fun MainScreen() {
                 )
             }
 
-            // 알러지 질환 스크린
             composable("edit_allergy") {
-                AllergyEditScreen(navController)
+                val allergyViewModel: AllergyViewModel = viewModel()
+                AllergyEditScreen(
+                    navController = navController,
+                    viewModel = allergyViewModel
+                )
             }
+
             composable("edit_disease") {
-                DiseaseEditScreen(navController)
+                val diseaseViewModel: DiseaseViewModel = viewModel()
+                DiseaseEditScreen(
+                    navController = navController,
+                    viewModel = diseaseViewModel
+                )
             }
 
             composable("edit_exercise") {
