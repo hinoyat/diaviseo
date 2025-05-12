@@ -14,6 +14,7 @@ import java.time.LocalDate
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.diaviseo.ui.components.LoadingOverlay
 import com.example.diaviseo.ui.main.components.goal.body.BMRMBISection
 import com.example.diaviseo.ui.main.components.goal.body.WeightChartSection
 import com.example.diaviseo.ui.main.components.goal.body.WeightOverviewSection
@@ -25,6 +26,7 @@ import com.example.diaviseo.ui.main.components.goal.meal.MealChartSection
 import com.example.diaviseo.ui.theme.semibold16
 import com.example.diaviseo.viewmodel.goal.GoalViewModel
 import com.example.diaviseo.viewmodel.goal.MealViewModel
+import kotlinx.coroutines.delay
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -45,6 +47,7 @@ fun GoalContent(
     val sugarRatio by mealViewModel.sugarRatio.collectAsState()
     val proteinRatio by mealViewModel.proteinRatio.collectAsState()
     val fatRatio by mealViewModel.fatRatio.collectAsState()
+    val isLoading by mealViewModel.isLoading.collectAsState()
 
     val isToday = remember(selectedDate) {
         selectedDate == LocalDate.now()
@@ -54,8 +57,11 @@ fun GoalContent(
     LaunchedEffect(selectedDate) {
         // 순서 중요
         mealViewModel.fetchPhysicalInfo(selectedDate.toString())
+        delay(100)
         mealViewModel.fetchDailyNutrition(selectedDate.toString())
     }
+
+    LoadingOverlay(isLoading)
 
     Column(
         modifier = Modifier
