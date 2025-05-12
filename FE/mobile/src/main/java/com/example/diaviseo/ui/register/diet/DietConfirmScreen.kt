@@ -45,10 +45,13 @@ fun DietConfirmScreen(
 
     val totalCalorie = selectedFoods.sumOf { it.calorie }
     val scrollState = rememberScrollState()
-    val totalCarb = selectedFoods.sumOf { it.carbohydrate }
-    val totalProtein = selectedFoods.sumOf { it.protein }
-    val totalFat = selectedFoods.sumOf { it.fat }
-    val totalSugar = selectedFoods.sumOf { it.sweet }
+
+    val totalCarb = selectedFoods.sumOf { it.carbohydrate * it.quantity }
+    val totalProtein = selectedFoods.sumOf { it.protein * it.quantity }
+    val totalFat = selectedFoods.sumOf { it.fat * it.quantity }
+    val totalSugar = selectedFoods.sumOf { it.sweet * it.quantity }
+
+
     val selectedImageUri = remember { mutableStateOf<Uri?>(null) }
     val formatter = DateTimeFormatter.ofPattern("hh:mm a", Locale.KOREAN)
     val time = LocalTime.parse("06:30 오전", formatter)
