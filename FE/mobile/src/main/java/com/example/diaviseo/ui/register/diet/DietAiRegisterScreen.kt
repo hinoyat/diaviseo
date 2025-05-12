@@ -56,6 +56,7 @@ fun DietAiRegisterScreen(navController: NavController) {
                 onClick = {
                     // TODO: 이미지 업로드 기능 연결
                 },
+                isAiMode = true,
                 modifier = Modifier
                     .fillMaxWidth()
             )

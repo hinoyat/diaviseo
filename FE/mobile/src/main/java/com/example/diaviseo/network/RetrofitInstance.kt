@@ -15,6 +15,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import okhttp3.Interceptor
 import com.example.diaviseo.network.exercise.ExerciseApiService
 import com.example.diaviseo.network.meal.MealApiService
+import com.example.diaviseo.network.food.FoodApiService
 
 object RetrofitInstance {
     // 재발급 동기화를 위한 lock 객체
@@ -143,9 +144,10 @@ object RetrofitInstance {
     }
 
     // 식단 (등록) 관련
-    val dietApiService: DietApiService by lazy {
-        retro.create(DietApiService::class.java)
+    val dietApiService: FoodApiService by lazy {
+        retro.create(FoodApiService::class.java)
     }
+
     val exerciseApiService: ExerciseApiService by lazy {
         retro.create(ExerciseApiService::class.java)
     }
@@ -154,4 +156,7 @@ object RetrofitInstance {
         retro.create(MealApiService::class.java)
     }
 
+    val foodApiService: FoodApiService by lazy {
+        retro.create(FoodApiService::class.java)
+    }
 }
