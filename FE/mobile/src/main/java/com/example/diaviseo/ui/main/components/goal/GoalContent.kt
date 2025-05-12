@@ -40,29 +40,11 @@ fun GoalContent(
     // 평가<->디테일 식단 관리
     val mealViewModel: MealViewModel = viewModel()
     val dailyNutrition by mealViewModel.dailyNutrition.collectAsState()
-
-    // 탄단지당 비율 (먹은 칼로리, 권장 칼로리, 소수점 자리수)
-    fun calculateRatio(nutrient: Double?, calorie: Int?, scale: Int = 2, n: Int): Double {
-        if (calorie == null || calorie == 0) return 0.0
-        val numerator = BigDecimal.valueOf(nutrient ?: 0.0).multiply(BigDecimal.valueOf(n.toDouble()))
-        val denominator = BigDecimal.valueOf(calorie.toDouble())
-        return numerator.divide(denominator, scale, RoundingMode.HALF_UP).toDouble()
-    }
-
-    // 넘겨줄 total 칼로리 결정 (1285는 임시값)
-    val totalCalorie = dailyNutrition?.totalCalorie?.let {
-        if (it > 1285) {
-            dailyNutrition?.totalCalorie?.toInt()
-        } else {
-            1285
-        }
-    }
-
-    // 각 영양소 비율 계산
-    val carbRatio = calculateRatio(dailyNutrition?.totalCarbohydrate, totalCalorie, n = 4)
-    val sugarRatio = calculateRatio(dailyNutrition?.totalSugar, totalCalorie, n = 4)
-    val proteinRatio = calculateRatio(dailyNutrition?.totalProtein, totalCalorie, n = 4)
-    val fatRatio = calculateRatio(dailyNutrition?.totalFat, totalCalorie, n = 9)
+    val nowPhysicalInfo by mealViewModel.nowPhysicalInfo.collectAsState()
+    val carbRatio by mealViewModel.carbRatio.collectAsState()
+    val sugarRatio by mealViewModel.sugarRatio.collectAsState()
+    val proteinRatio by mealViewModel.proteinRatio.collectAsState()
+    val fatRatio by mealViewModel.fatRatio.collectAsState()
 
     val isToday = remember(selectedDate) {
         selectedDate == LocalDate.now()
@@ -70,6 +52,8 @@ fun GoalContent(
     val isMale = false
 
     LaunchedEffect(selectedDate) {
+        // 순서 중요
+        mealViewModel.fetchPhysicalInfo(selectedDate.toString())
         mealViewModel.fetchDailyNutrition(selectedDate.toString())
     }
 
@@ -93,7 +77,7 @@ fun GoalContent(
 
                 DonutChartWithLegend(
                     calories = dailyNutrition?.totalCalorie,
-                    calorieGoal = 1285,
+                    calorieGoal = nowPhysicalInfo?.recommendedIntake,
                     carbRatio = carbRatio,
                     sugarRatio = sugarRatio,
                     proteinRatio = proteinRatio,
