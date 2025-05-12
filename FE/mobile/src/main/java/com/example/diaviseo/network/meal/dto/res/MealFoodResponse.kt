@@ -13,7 +13,7 @@ data class MealFoodResponse(
     val sugar: Double?,
     val sodium: Double?,
     val quantity: Int?,
-    val foodImageUrl: String?,
+    val foodImageUrl: String? = null,
     val totalCalorie: Int,
     val totalCarbohydrate: Double?,
     val totalProtein: Double?,

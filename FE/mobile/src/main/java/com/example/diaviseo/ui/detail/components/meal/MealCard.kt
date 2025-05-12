@@ -15,12 +15,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.diaviseo.R
 import com.example.diaviseo.network.meal.dto.res.MealFoodResponse
 import com.example.diaviseo.network.meal.dto.res.MealNutritionResponse
@@ -39,9 +41,12 @@ fun MealCard(
     foods: List<MealFoodResponse>,
     gradient: Brush,
     mealIconRes: Int,
-    onEditClick: () -> Unit
+    onEditClick: () -> Unit,
+    imgUrl: String? = null
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+
+    val showPreview = remember { mutableStateOf(false) }
 
 //    val mealIcon = when (mealIconRes) {
 //        "BREAKFAST" -> R.drawable.morning
@@ -154,6 +159,31 @@ fun MealCard(
                     }
 
                     Spacer(modifier = Modifier.height(20.dp))
+
+                    if (!imgUrl.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Text(
+                            text = "식단 사진 📷",
+                            style = bold16,
+                            color = DiaViseoColors.Basic
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        AsyncImage(
+                            model = imgUrl,
+                            contentDescription = "식단 이미지",
+                            modifier = Modifier
+                                .width(284.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable { showPreview.value = true }
+                                .align(Alignment.CenterHorizontally),
+                        contentScale = ContentScale.Crop
+                        )
+
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
 
                     MainButton(
                         text = "수정하기",
