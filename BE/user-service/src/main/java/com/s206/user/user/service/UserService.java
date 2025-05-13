@@ -5,6 +5,7 @@ import com.s206.common.exception.types.ConflictException;
 import com.s206.common.exception.types.NotFoundException;
 import com.s206.user.physical.dto.request.UserPhysicalInfoSaveRequest;
 import com.s206.user.physical.service.UserPhysicalInfoService;
+import com.s206.user.user.dto.request.BodyCompositionRequest;
 import com.s206.user.user.dto.request.UserCreateRequest;
 import com.s206.user.user.dto.request.UserUpdateRequest;
 import com.s206.user.user.dto.response.UserDetailResponse;
@@ -178,5 +179,17 @@ public class UserService {
 		User user = validUser(userId);
 
 		userRepository.updateFcmToken(userId, token);
+	}
+
+	@Transactional
+	public void updateUserBodyInfo(BodyCompositionRequest request) {
+		User user = validUser(request.getUserId());
+		if (request.getHeight() != null) {
+			user.updateHeight(request.getHeight());
+		}
+		if (request.getWeight() != null) {
+			user.updateWeight(request.getWeight());
+		}
+		userRepository.save(user);
 	}
 }
