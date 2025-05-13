@@ -2,8 +2,6 @@ package com.example.diaviseo.ui.register.diet
 
 import android.net.Uri
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -30,6 +28,14 @@ import com.example.diaviseo.viewmodel.DietSearchViewModel
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import com.example.diaviseo.utils.isGalleryPermissionGranted
+import com.example.diaviseo.utils.rememberGalleryPermissionLauncher
+import com.example.diaviseo.utils.rememberGalleryPickerLauncher
+import com.example.diaviseo.utils.shouldShowGalleryRationale
+import android.app.Activity
+import android.Manifest
+import com.example.diaviseo.utils.getGalleryPermission
+import com.example.diaviseo.utils.openAppSettings
 
 @Composable
 fun DietConfirmScreen(
@@ -37,6 +43,9 @@ fun DietConfirmScreen(
     viewModel: DietSearchViewModel
 ) {
     val context = LocalContext.current
+    val activity = context as Activity
+    val permission = Manifest.permission.READ_MEDIA_IMAGES
+
     var showSheet by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     val selectedFoods = viewModel.selectedItems
@@ -53,14 +62,16 @@ fun DietConfirmScreen(
 
 
     val selectedImageUri = remember { mutableStateOf<Uri?>(null) }
+    val galleryLauncher = rememberGalleryPickerLauncher {
+        selectedImageUri.value = it
+    }
+    val permissionLauncher = rememberGalleryPermissionLauncher {
+        galleryLauncher.launch("image/*")
+    }
+
     val formatter = DateTimeFormatter.ofPattern("hh:mm a", Locale.KOREAN)
     val time = LocalTime.parse("06:30 오전", formatter)
 
-    val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        selectedImageUri.value = uri
-    }
 
     Scaffold(
         topBar = {
@@ -89,7 +100,25 @@ fun DietConfirmScreen(
                 )
             } ?: PhotoUploadHintBox(
                 isAiMode = false,
-                onClick = { galleryLauncher.launch("image/*") },
+                onClick = {
+                    val permission = getGalleryPermission()
+                    when {
+                        isGalleryPermissionGranted(context) -> {
+                            galleryLauncher.launch("image/*")
+                        }
+
+                        shouldShowGalleryRationale(activity) -> {
+                            Toast.makeText(context, "사진 등록을 위해 권한이 필요해요.", Toast.LENGTH_SHORT).show()
+                            permissionLauncher.launch(permission)
+                        }
+
+                        else -> {
+                            // 다시 묻지 않기 등으로 차단된 상태
+                            Toast.makeText(context, "설정에서 권한을 허용해주세요.", Toast.LENGTH_LONG).show()
+                            openAppSettings(context)
+                        }
+                    }
+                },
                 modifier = Modifier.fillMaxWidth()
             )
 
