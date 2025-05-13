@@ -10,11 +10,13 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.*
 import android.util.Log
 import androidx.core.net.toFile
+import com.example.diaviseo.mapper.toFoodItem
 import com.example.diaviseo.network.food.dto.req.MealTimeRequest
 import com.example.diaviseo.network.food.dto.req.MealType
 import com.example.diaviseo.network.meal.dto.req.PostDietRequest
 import com.example.diaviseo.model.diet.FoodWithQuantity           // ✅ UI용 데이터 모델
 import com.example.diaviseo.model.diet.toRequest                  // ✅ 변환 확장 함수
+import com.example.diaviseo.network.food.dto.res.RecentFoodItemResponse
 import com.example.diaviseo.network.foodset.dto.req.FoodIdWithQuantity
 import com.example.diaviseo.network.foodset.dto.req.FoodSetRegisterRequest
 import com.example.diaviseo.network.foodset.dto.res.FoodSetResponse
@@ -165,7 +167,8 @@ class DietSearchViewModel : ViewModel() {
             }
         }
     }
-// 음식 세트 선택 시 현재 선택된 음식 목록으로 반영하는 함수
+
+    // 음식 세트 선택 시 현재 선택된 음식 목록으로 반영하는 함수
     fun applyFoodSet(set: FoodSetResponse) {
         selectedItems = set.foods.map {
             FoodWithQuantity(
@@ -179,6 +182,84 @@ class DietSearchViewModel : ViewModel() {
                 quantity = it.quantity.toInt()
             )
         }
+    }
+    // 최근 먹은 음식들
+    var recentFoods by mutableStateOf<List<RecentFoodItemResponse>>(emptyList())
+        private set
+
+    var recentFetchedDate by mutableStateOf<String?>(null)
+        private set
+
+    // 최근 먹은 목록 불러오는 함수
+    fun fetchRecnetFoods(){
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.foodApiService.getRecentFoods()
+                recentFoods = response.data ?: emptyList()
+                recentFetchedDate = response.timestamp?.substring(0, 10) ?: ""
+            } catch (e: Exception) {
+                Log.e("DietSearchViewModel", "최근 음식 불러오기 실패", e)
+            }
+        }
+    }
+    fun addRecentFood(item: RecentFoodItemResponse, quantity: Int = 1) {
+        val updatedList = selectedItems.toMutableList()
+        val exists = updatedList.any { it.foodId.toLong() == item.foodId }
+
+        if (!exists) {
+            updatedList.add(
+                FoodWithQuantity(
+                    foodId = item.foodId.toInt(),
+                    foodName = item.foodName,
+                    calorie = item.calorie,
+                    carbohydrate = 0.0,
+                    protein = 0.0,
+                    fat = 0.0,
+                    sweet = 0.0,
+                    quantity = quantity
+                )
+            )
+            selectedItems = updatedList
+        } else {
+            removeSelectedFood(item.foodId.toInt())
+        }
+    }
+
+    var favoriteFoods by mutableStateOf<List<FoodItem>>(emptyList())
+        private set
+
+    fun fetchFavoriteFoods() {
+        viewModelScope.launch {
+            Log.d("DietVM", "⭐ 즐겨찾기 API 호출 시작됨") // 이거 추가
+
+            try {
+                val response = RetrofitInstance.foodApiService.getFavoriteFoods()
+                favoriteFoods = response.data?.map { it.toFoodItem() } ?: emptyList()
+            } catch (e: Exception) {
+                Log.e("DietSearchVM", "즐겨찾기 조회 실패: ${e.message}")
+            }
+        }
+    }
+    var isFavoriteDirty by mutableStateOf(false)
+        private set
+
+    fun markFavoriteDirty() {
+        isFavoriteDirty = true
+    }
+    fun clearFavoriteDirtyFlag() {
+        isFavoriteDirty = false
+    }
+
+    fun clearDietState() {
+        keyword = ""
+        isSearching = false
+        searchResults = emptyList()
+        selectedItems = emptyList()
+        selectedDate = LocalDate.now()
+        selectedTime = null
+        selectedMeal = "점심"
+        recentFoods = emptyList()
+        recentFetchedDate = null
     }
 
     // 식단 등록 API 호출
@@ -267,4 +348,21 @@ class DietSearchViewModel : ViewModel() {
         }
     }
 
+    // 즐겨찾기 토글 변경 api 호출 함수
+    fun toggleFavorite(foodId: Int, onResult:(Boolean)-> Unit){
+        viewModelScope.launch {
+            try{
+                val response = RetrofitInstance.foodApiService.toggleFavoriteFood(foodId)
+                val result = response.data?.isFavorite ?:false
+                if (response.status == "OK") {
+                    // ✅ 즐겨찾기 목록 다시 불러와야 함
+                    markFavoriteDirty()
+                }
+                onResult(result)
+            } catch (e:Exception){
+                Log.e("DietVM","즐겨찾기 토글 실패: ${e.message}")
+                onResult(false)
+            }
+        }
+    }
 }
