@@ -131,7 +131,13 @@ fun CaloriesGaugeSection(
                 contentAlignment = Alignment.BottomEnd
             ) {
                 TextButton(onClick = {
-//                    navController.navigate("calorieDetail")
+                    navController.navigate("home_detail") {
+                        launchSingleTop = true
+                        restoreState   = true
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                    }
                 }) {
                     Text(
                             text = "상세 보러가기 >",
