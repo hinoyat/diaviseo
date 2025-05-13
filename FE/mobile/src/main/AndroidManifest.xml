@@ -46,7 +46,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DiaViseo"
         tools:targetApi="31">
-
+        <service
+          android:name=".MyFirebaseMessagingService"
+          android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
         <!--컴포넌트에 해당하는 activity, meta-data, provider, receiver가 추가됨, name 생략 불가능-->
         <activity
             android:name=".MainActivity"

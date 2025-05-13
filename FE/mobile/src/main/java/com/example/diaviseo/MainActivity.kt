@@ -40,6 +40,8 @@ import androidx.activity.compose.setContent
 import androidx.work.*
 import com.example.diaviseo.ui.theme.DiaViseoTheme
 import com.example.diaviseo.worker.StepResetWorker
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.CoroutineScope   // 테스트용 지우지 말기
 import kotlinx.coroutines.Dispatchers   // 테스트용 지우지 말기
 import java.time.Duration
@@ -102,6 +104,20 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+        // FCM 토큰 가져오기
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w("FCM", "FCM 토큰 가져오기 실패", task.exception)
+                return@addOnCompleteListener
+            }
+
+            val token = task.result
+            Log.d("FCM", "현재 FCM 토큰: $token")
+
+            // TODO: 서버에 전송
+        }
+
 
         // 권한 체크 및 센서 리스너 시작
         checkAndRequestPermission()
