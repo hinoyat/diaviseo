@@ -107,6 +107,7 @@ fun FoodSetRegisterScreen(
                             name = setName,
                             onSuccess = {
                                 Toast.makeText(context, "세트가 등록되었어요!", Toast.LENGTH_SHORT).show()
+                                viewModel.clearDietState() // 상태 초기화
                                 navController.popBackStack()
                             },
                             onError = {
