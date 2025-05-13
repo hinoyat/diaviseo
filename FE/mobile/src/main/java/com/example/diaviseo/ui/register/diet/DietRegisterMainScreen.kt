@@ -1,7 +1,6 @@
 package com.example.diaviseo.ui.register.diet
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,6 +15,7 @@ import com.example.diaviseo.ui.register.diet.components.*
 import com.example.diaviseo.network.RetrofitInstance
 import com.example.diaviseo.network.food.dto.res.FoodDetailResponse
 import kotlinx.coroutines.launch
+import com.example.diaviseo.ui.register.diet.components.FavoriteFoodsContent
 
 @Composable
 fun DietRegisterMainScreen(
@@ -35,6 +35,14 @@ fun DietRegisterMainScreen(
     LaunchedEffect(Unit) {
         viewModel.fetchFoodSets()
     }
+    LaunchedEffect(selectedTab) {
+        if (selectedTab == 1) {
+            viewModel.fetchFavoriteFoods()
+            viewModel.clearFavoriteDirtyFlag()
+        }
+    }
+
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -72,7 +80,7 @@ fun DietRegisterMainScreen(
                         }
                     },
                     onToggleSelect = { foodItem ->
-                        viewModel.addSelectedFood(foodItem, quantity = 1)
+                        viewModel.onToggleSelect(foodItem)
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -89,7 +97,23 @@ fun DietRegisterMainScreen(
                         viewModel = viewModel,
                         navController = navController
                     )
-                    1 -> FavoriteFoodsContent()
+                    1 -> FavoriteFoodsContent(
+                        viewModel = viewModel,
+                        onFoodClick = { foodItem ->
+                            coroutineScope.launch {
+                                try {
+                                    val response = RetrofitInstance.foodApiService.getFoodDetail(foodItem.foodId)
+                                    val detail = response.data
+                                    if (detail != null) {
+                                        selectedFoodForDetail = detail
+                                        showFoodDetailSheet = true
+                                    }
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            }
+                        }
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(80.dp))
@@ -112,10 +136,25 @@ fun DietRegisterMainScreen(
         if (showFoodDetailSheet && selectedFoodForDetail != null) {
             FoodDetailBottomSheet(
                 food = selectedFoodForDetail!!,
-                isFavorite = selectedFoodForDetail!!.isFavorite,
                 onToggleFavorite = {
-                    // TODO: 즐겨찾기 API 연결
-                },
+                    val foodId = selectedFoodForDetail!!.foodId
+
+                    viewModel.toggleFavorite(foodId) {
+                        // 토글 성공 후 상세 정보 다시 불러와서 최신 상태 반영
+                        coroutineScope.launch {
+                            try {
+                                val response = RetrofitInstance.foodApiService.getFoodDetail(foodId)
+                                val updated = response.data
+                                if (updated != null) {
+                                    selectedFoodForDetail = updated
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                    }
+                }
+                ,
                 onAddClick = { quantity ->
                     viewModel.addSelectedFood(
                         food = selectedFoodForDetail!!.toFoodItem(),
@@ -123,8 +162,17 @@ fun DietRegisterMainScreen(
                     )
                     showFoodDetailSheet = false
                 },
-                onDismiss = { showFoodDetailSheet = false }
+                onDismiss = {
+                    showFoodDetailSheet = false
+
+                    // 즐겨찾기 정보가 변경된 적이 있다면
+                    if (selectedTab == 1 && viewModel.isFavoriteDirty) {
+                        viewModel.fetchFavoriteFoods()
+                        viewModel.clearFavoriteDirtyFlag()
+                    }
+                }
             )
+
         }
 
         // ➕ 플로팅 버튼
@@ -146,12 +194,5 @@ fun DietRegisterMainScreen(
                 onDismiss = { showMealSheet = false }
             )
         }
-    }
-}
-
-@Composable
-fun FavoriteFoodsContent() {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "즐겨찾기 탭 콘텐츠")
     }
 }

@@ -189,6 +189,8 @@ fun DietConfirmScreen(
                         onSuccess = {
                             Toast.makeText(context, "식단 등록이 완료되었어요!", Toast.LENGTH_SHORT).show()
 
+                            viewModel.clearDietState()
+
                             navController.navigate("diet_register") {
                                 popUpTo("diet_confirm") { inclusive = true }
                             }
