@@ -22,7 +22,8 @@ public interface BodyInfoRepository extends JpaRepository<BodyInfo, Integer> {
 	@Query("SELECT b.measurementDate AS measurementDate, " +
 			"b.weight AS weight, " +
 			"b.muscleMass AS muscleMass, " +
-			"b.bodyFat AS bodyFat " +
+			"b.bodyFat AS bodyFat, " +
+			"b.height AS height " +
 			"FROM BodyInfo b " +
 			"WHERE b.userId = :userId " +
 			"AND b.isDeleted = false " +
