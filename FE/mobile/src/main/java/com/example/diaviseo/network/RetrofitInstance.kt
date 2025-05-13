@@ -8,6 +8,7 @@ import com.example.diaviseo.BuildConfig
 import kotlinx.coroutines.runBlocking
 import com.example.diaviseo.datastore.TokenDataStore
 import com.example.diaviseo.network.auth.AuthApiService
+import com.example.diaviseo.network.body.BodyApiService
 import com.example.diaviseo.network.condition.ConditionApiService
 import com.example.diaviseo.network.user.UserApiService
 import kotlinx.coroutines.flow.first
@@ -168,5 +169,9 @@ object RetrofitInstance {
 
     val foodSetApiService: FoodSetApiService by lazy {
         retro.create(FoodSetApiService::class.java)
+    }
+
+    val bodyApiService: BodyApiService by lazy {
+        retro.create(BodyApiService::class.java)
     }
 }
