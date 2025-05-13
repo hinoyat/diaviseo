@@ -84,7 +84,7 @@ fun BottomNavigationBar(
                     icon = {
                         Icon(
                             painter = painterResource(
-                                id = if (currentRoute == "chat")
+                                id = if (currentRoute == "chat_history")
                                     R.drawable.bottom_active_chat
                                 else
                                     R.drawable.bottom_chat
@@ -95,8 +95,8 @@ fun BottomNavigationBar(
                         )
                     },
                     label = { Text("챗봇", style = medium12) },
-                    selected = currentRoute == "chat",
-                    onClick = { navTo("chat") },
+                    selected = currentRoute == "chat_history",
+                    onClick = { navTo("chat_history") },
                     colors = NavigationBarItemDefaults.colors(
                         indicatorColor = Color.Transparent,
                         selectedTextColor = Color(0xFF1673FF),
