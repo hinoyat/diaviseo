@@ -94,7 +94,10 @@ fun ChatContent(
                     inputText = input,
                     onInputChange = { input = it },
                     onSendClick = {
-                        if (input.isNotBlank()) {
+                        if (selectedTopic != null && input.isNotBlank()) {
+                            messages.removeAll { it.text == "__SHOW_INITIAL_QUESTION_BUTTONS__" }
+                            hasAskedFirstQuestion = true
+
                             messages.add(
                                 ChatMessage(
                                     text = input,
@@ -125,7 +128,8 @@ fun ChatContent(
                             }
                         }
                     },
-                    isSending = isTyping
+                    isSending = isTyping,
+                    enabled = selectedTopic != null && !showExitDialog
                 )
             }
         }
@@ -179,9 +183,14 @@ fun ChatContent(
                         if (index == 0 || isNewDay(messages[index - 1], msg)) {
                             ChatDateDivider(date = msg.timestamp.toLocalDate())
                         }
+
                         if (msg.text == "__SHOW_INITIAL_QUESTION_BUTTONS__") {
                             InitialQuestionButtons(
+                                topic = selectedTopic,
                                 onClick = { question ->
+                                    messages.removeAll { it.text == "__SHOW_INITIAL_QUESTION_BUTTONS__" }
+                                    hasAskedFirstQuestion = true
+
                                     messages.add(
                                         ChatMessage(
                                             text = question,
@@ -189,7 +198,6 @@ fun ChatContent(
                                             timestamp = LocalDateTime.now()
                                         )
                                     )
-                                    hasAskedFirstQuestion = true
                                     isTyping = true
 
                                     coroutineScope.launch {
