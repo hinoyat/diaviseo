@@ -12,7 +12,7 @@ data class DayExerciseStatsResponse(
         val exerciseName: String,
         val categoryName: String,
         val exerciseDate: String,
-        val exerciseTime: Int?,
-        val exerciseCalorie: Int?
+        val exerciseTime: Int,
+        val exerciseCalorie: Int
     )
 }
