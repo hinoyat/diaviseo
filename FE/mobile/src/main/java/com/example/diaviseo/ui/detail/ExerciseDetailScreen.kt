@@ -173,6 +173,8 @@ fun ExerciseDetailScreen(
             AddExerciseBox(
                 onClick = {
                     // TODO: 운동 등록 화면으로 이동
+                    navController.navigate("exercise_register/$selectedDate")
+                    // 몇월 며칠인지 넘기는 파라미터 필요
                 }
             )
         }
