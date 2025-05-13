@@ -14,6 +14,7 @@ import java.time.LocalDate
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.diaviseo.ui.components.LoadingOverlay
 import com.example.diaviseo.ui.main.components.goal.body.BMRMBISection
 import com.example.diaviseo.ui.main.components.goal.body.WeightChartSection
 import com.example.diaviseo.ui.main.components.goal.body.WeightOverviewSection
@@ -23,20 +24,46 @@ import com.example.diaviseo.ui.main.components.goal.exercise.StepBarChart
 import com.example.diaviseo.ui.main.components.goal.meal.DonutChartWithLegend
 import com.example.diaviseo.ui.main.components.goal.meal.MealChartSection
 import com.example.diaviseo.ui.theme.semibold16
-import com.example.diaviseo.viewmodel.GoalViewModel
+import com.example.diaviseo.viewmodel.goal.GoalViewModel
+import com.example.diaviseo.viewmodel.goal.MealViewModel
+import kotlinx.coroutines.delay
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 @Composable
 fun GoalContent(
     selectedTab: String,
     navController: NavHostController
 ) {
+    // 평가<->디테일 날짜 관리
     val goalViewModel: GoalViewModel = viewModel()
     val selectedDate by goalViewModel.selectedDate.collectAsState()
+
+    // 평가<->디테일 식단 관리
+    val mealViewModel: MealViewModel = viewModel()
+    val dailyNutrition by mealViewModel.dailyNutrition.collectAsState()
+    val nowPhysicalInfo by mealViewModel.nowPhysicalInfo.collectAsState()
+    val carbRatio by mealViewModel.carbRatio.collectAsState()
+    val sugarRatio by mealViewModel.sugarRatio.collectAsState()
+    val proteinRatio by mealViewModel.proteinRatio.collectAsState()
+    val fatRatio by mealViewModel.fatRatio.collectAsState()
+    val isLoading by mealViewModel.isLoading.collectAsState()
 
     val isToday = remember(selectedDate) {
         selectedDate == LocalDate.now()
     }
     val isMale = false
+
+    LaunchedEffect(selectedDate) {
+        // 순서 중요
+        mealViewModel.fetchPhysicalInfo(selectedDate.toString())
+        delay(100)
+        mealViewModel.fetchDailyNutrition(selectedDate.toString())
+
+        mealViewModel.fetchMealStatistic("DAY", selectedDate.toString())
+    }
+
+    LoadingOverlay(isLoading)
 
     Column(
         modifier = Modifier
@@ -57,14 +84,14 @@ fun GoalContent(
                 Spacer(modifier = Modifier.height(40.dp))
 
                 DonutChartWithLegend(
-                    calories = 689,
-                    calorieGoal = 1285,
-                    carbRatio = 0.3f,
-                    sugarRatio = 0.1f,
-                    proteinRatio = 0.1f,
-                    fatRatio = 0.2f
+                    calories = dailyNutrition?.totalCalorie,
+                    calorieGoal = nowPhysicalInfo?.recommendedIntake,
+                    carbRatio = carbRatio,
+                    sugarRatio = sugarRatio,
+                    proteinRatio = proteinRatio,
+                    fatRatio = fatRatio
                 )
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(40.dp))
 
                 AiTipBox("탄단지당 균형이 좋아요!\n지금처럼만 유지해요!")
                 Spacer(modifier = Modifier.height(24.dp))

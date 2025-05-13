@@ -40,10 +40,9 @@ fun MealSkippedCard(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .shadow(
-                elevation = 4.dp,
-                shape = RoundedCornerShape(16.dp),
-                ambientColor = Color(0x1A222222),
-                spotColor = Color(0x1A222222)
+                elevation = 10.dp,
+                spotColor = Color(0x26000000), // 15% black
+                shape = RoundedCornerShape(20.dp)
             )
             .background(brush = gradient, shape = RoundedCornerShape(16.dp))
             .padding(16.dp),

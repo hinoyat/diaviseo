@@ -28,7 +28,7 @@ import com.example.diaviseo.ui.components.DiaDatePickerDialog
 import com.example.diaviseo.ui.components.LoadingOverlay
 import com.example.diaviseo.ui.detail.components.meal.MealCard
 import com.example.diaviseo.ui.main.components.goal.meal.DonutChartWithLegend
-import com.example.diaviseo.viewmodel.GoalViewModel
+import com.example.diaviseo.viewmodel.goal.GoalViewModel
 import com.example.diaviseo.viewmodel.ProfileViewModel
 import androidx.compose.ui.graphics.Brush
 import com.example.diaviseo.network.meal.dto.res.MealFoodResponse
@@ -279,10 +279,10 @@ fun MealDetailScreen(
                 DonutChartWithLegend(
                     calories = 689,
                     calorieGoal = 1285,
-                    carbRatio = 0.3f,
-                    sugarRatio = 0.1f,
-                    proteinRatio = 0.1f,
-                    fatRatio = 0.2f
+                    carbRatio = 0.3,
+                    sugarRatio = 0.1,
+                    proteinRatio = 0.1,
+                    fatRatio = 0.2
                 )
             }
 
@@ -347,8 +347,8 @@ enum class MealTimeType(
     val gradient: Brush,
     val iconRes: Int
 ) {
-    BREAKFAST("아침", Brush.linearGradient(listOf(Color(0xFFFFFEB4), Color.White)), R.drawable.morning),
-    LUNCH("점심", Brush.linearGradient(listOf(Color(0xFFFFDBB4), Color.White)), R.drawable.lunch),
-    DINNER("저녁", Brush.linearGradient(listOf(Color(0xFFC5B4FF), Color.White)), R.drawable.night),
-    SNACK("간식", Brush.linearGradient(listOf(Color(0xFFFFB4B4), Color.White)), R.drawable.apple)
+    BREAKFAST("아침", Brush.linearGradient(listOf(Color(0xFFFFFFFF), Color.White)), R.drawable.morning),
+    LUNCH("점심", Brush.linearGradient(listOf(Color(0xFFFFFFFF), Color.White)), R.drawable.lunch),
+    DINNER("저녁", Brush.linearGradient(listOf(Color(0xFFFFFFFF), Color.White)), R.drawable.night),
+    SNACK("간식", Brush.linearGradient(listOf(Color(0xFFFFFFFF), Color.White)), R.drawable.apple)
 }

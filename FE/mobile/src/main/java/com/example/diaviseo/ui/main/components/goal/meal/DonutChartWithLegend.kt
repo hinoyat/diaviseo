@@ -1,6 +1,7 @@
 package com.example.diaviseo.ui.main.components.goal.meal
 
 import android.graphics.Paint
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -23,6 +24,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,16 +33,20 @@ import com.example.diaviseo.ui.theme.Wanted
 import com.example.diaviseo.ui.theme.bold12
 import kotlin.math.cos
 import kotlin.math.sin
+import androidx.compose.animation.core.*
+import androidx.compose.runtime.*
+import com.example.diaviseo.ui.theme.semibold16
+
 
 @Composable
 fun DonutChartWithLegend(
     modifier: Modifier = Modifier,
-    calories: Int,
-    calorieGoal: Int,
-    carbRatio: Float,     // 0.0 ~ 1.0
-    sugarRatio: Float,
-    proteinRatio: Float,
-    fatRatio: Float
+    calories: Int?,
+    calorieGoal: Int?,
+    carbRatio: Double,     // 0.0 ~ 1.0
+    sugarRatio: Double,
+    proteinRatio: Double,
+    fatRatio: Double
 ) {
     val ratios = listOf(carbRatio, sugarRatio, proteinRatio, fatRatio)
     val colors = listOf(
@@ -48,6 +54,16 @@ fun DonutChartWithLegend(
         DiaViseoColors.Sugar,
         DiaViseoColors.Protein,
         DiaViseoColors.Fat
+    )
+
+    val infiniteTransition = rememberInfiniteTransition()
+    val animatedAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        )
     )
 
     Row(modifier = modifier.fillMaxWidth()) {
@@ -85,7 +101,8 @@ fun DonutChartWithLegend(
                 // 실제 세그먼트 + 텍스트
                 var startAngle = -90f
                 ratios.forEachIndexed { index, ratio ->
-                    val sweep = 360f * ratio
+                    val sweep = (360f * ratio).toFloat()
+
                     // 세그먼트 그리기
                     drawArc(
                         color = colors[index],
@@ -95,24 +112,34 @@ fun DonutChartWithLegend(
                         style = Stroke(width = thicknessPx)
                     )
 
-                    // 텍스트 그리기 (두께 중간 지점)
-                    val midAngle = startAngle + sweep / 2f
-                    val rad = Math.toRadians(midAngle.toDouble())
-                    val textRadius = radius - thicknessPx / 10f
+                    // 텍스트 그리기 조건
+                    if (ratio * 100 >= 9) {
+                        val midAngle = startAngle + sweep / 2f
+                        val rad = Math.toRadians(midAngle.toDouble())
+                        val textRadius = radius - thicknessPx / 10f
 
-                    val x = center.x + (textRadius * cos(rad)).toFloat()
-                    val yBase = center.y + (textRadius * sin(rad)).toFloat()
-                    // fm.descent + fm.ascent 는 baseline↔center offset
-                    val y = yBase - (fm.top + fm.bottom) / 2f
+                        val x = center.x + (textRadius * cos(rad)).toFloat()
+                        val yBase = center.y + (textRadius * sin(rad)).toFloat()
+                        val y = yBase - (fm.top + fm.bottom) / 2f
 
-                    drawContext.canvas.nativeCanvas.drawText(
-                        "${(ratio * 100).toInt()}%",
-                        x,
-                        y,
-                        textPaint
-                    )
+                        drawContext.canvas.nativeCanvas.drawText(
+                            "${(ratio * 100).toInt()}%",
+                            x,
+                            y,
+                            textPaint
+                        )
+                    }
+
                     startAngle += sweep
                 }
+            }
+            if (calories == 0) {
+                Text(
+                    text = "아직 등록된\n식단이 없어요! 🍙",
+                    textAlign = TextAlign.Center,
+                    style = semibold16,
+                    color = Color.Black.copy(alpha = animatedAlpha),
+                )
             }
         }
         Spacer(modifier = Modifier.width(30.dp))
@@ -147,16 +174,16 @@ fun DonutChartWithLegend(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            LegendRow("탄수화물", DiaViseoColors.Carbohydrate)
-            LegendRow("당류", DiaViseoColors.Sugar)
-            LegendRow("단백질", DiaViseoColors.Protein)
-            LegendRow("지방", DiaViseoColors.Fat)
+            LegendRow("탄수화물", DiaViseoColors.Carbohydrate, (ratios[0]* 100).toInt())
+            LegendRow("당류", DiaViseoColors.Sugar, (ratios[1]* 100).toInt())
+            LegendRow("단백질", DiaViseoColors.Protein, (ratios[2]* 100).toInt())
+            LegendRow("지방", DiaViseoColors.Fat, (ratios[3]* 100).toInt())
         }
     }
 }
 
 @Composable
-private fun LegendRow(label: String, color: Color) {
+private fun LegendRow(label: String, color: Color, ratio:Int) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(bottom = 2.dp)
@@ -168,7 +195,7 @@ private fun LegendRow(label: String, color: Color) {
         )
         Spacer(modifier = Modifier.width(5.dp))
         Text(
-            text = label,
+            text = "$label  ($ratio %)",
             fontSize = 13.sp,
             color = DiaViseoColors.Basic
         )

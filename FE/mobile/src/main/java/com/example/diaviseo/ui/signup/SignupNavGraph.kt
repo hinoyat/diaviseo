@@ -11,7 +11,7 @@ import androidx.compose.runtime.remember
 import com.example.diaviseo.viewmodel.AuthViewModel
 import com.example.diaviseo.ui.onboarding.pages.GoalSelectScreen
 import com.example.diaviseo.ui.onboarding.pages.FinalGuideScreen
-import com.example.diaviseo.viewmodel.GoalViewModel
+import com.example.diaviseo.viewmodel.goal.GoalViewModel
 
 fun NavGraphBuilder.signupNavGraph(navController: NavHostController) {
     navigation(

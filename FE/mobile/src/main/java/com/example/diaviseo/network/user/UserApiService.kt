@@ -7,10 +7,12 @@ import com.example.diaviseo.network.user.dto.req.SignUpWithDiaRequest
 import com.example.diaviseo.network.user.dto.req.UserUpdateRequest
 import com.example.diaviseo.network.user.dto.res.FetchProfileResponse
 import com.example.diaviseo.network.user.dto.res.SignUpWithDiaResponse
+import com.example.diaviseo.network.user.dto.res.UserPhysicalInfoResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Query
 
 interface UserApiService {
     @POST("users/verify/phone")
@@ -37,4 +39,8 @@ interface UserApiService {
         @Body request: UserUpdateRequest
     ): ApiResponse<FetchProfileResponse>
 
+    @GET("users/physical-info")
+    suspend fun fetchPhysicalInfo(
+        @Query("date") date: String
+    ): ApiResponse<UserPhysicalInfoResponse>
 }
