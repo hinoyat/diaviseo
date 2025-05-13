@@ -212,10 +212,10 @@ class DietSearchViewModel : ViewModel() {
                     foodId = item.foodId.toInt(),
                     foodName = item.foodName,
                     calorie = item.calorie,
-                    carbohydrate = 0.0,
-                    protein = 0.0,
-                    fat = 0.0,
-                    sweet = 0.0,
+                    carbohydrate = item.carbohydrate,
+                    protein = item.protein,
+                    fat = item.fat,
+                    sweet = item.sweet,
                     quantity = quantity
                 )
             )
