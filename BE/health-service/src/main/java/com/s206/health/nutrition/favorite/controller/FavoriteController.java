@@ -4,6 +4,7 @@ import com.s206.common.dto.ResponseDto;
 import com.s206.health.nutrition.favorite.dto.response.FavoriteFoodResponse;
 import com.s206.health.nutrition.favorite.dto.response.FavoriteToggleResponse;
 import com.s206.health.nutrition.favorite.service.FavoriteService;
+import com.s206.health.nutrition.food.dto.response.FoodDetailResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -31,11 +32,11 @@ public class FavoriteController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponseDto<List<FavoriteFoodResponse>>> getFavorites(
+    public ResponseEntity<ResponseDto<List<FoodDetailResponse>>> getFavorites(
             @RequestHeader("X-USER-ID") Integer userId) {
 
         log.info("즐겨찾기 목록 조회 요청 - userId={}", userId);
-        List<FavoriteFoodResponse> response = favoriteService.getFavoriteFoods(userId);
+        List<FoodDetailResponse> response = favoriteService.getFavoriteFoods(userId);
         return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "즐겨찾기 목록 조회 성공", response));
     }
 }

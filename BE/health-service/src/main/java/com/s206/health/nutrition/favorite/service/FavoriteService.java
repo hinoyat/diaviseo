@@ -5,6 +5,7 @@ import com.s206.health.nutrition.favorite.dto.response.FavoriteFoodResponse;
 import com.s206.health.nutrition.favorite.dto.response.FavoriteToggleResponse;
 import com.s206.health.nutrition.favorite.entity.FavoriteFood;
 import com.s206.health.nutrition.favorite.repository.FavoriteFoodRepository;
+import com.s206.health.nutrition.food.dto.response.FoodDetailResponse;
 import com.s206.health.nutrition.food.entity.Food;
 import com.s206.health.nutrition.food.repository.FoodRepository;
 import lombok.RequiredArgsConstructor;
@@ -44,10 +45,9 @@ public class FavoriteService {
         return FavoriteToggleResponse.toDto(newFavorite, true);
     }
 
-    @Transactional(readOnly = true)
-    public List<FavoriteFoodResponse> getFavoriteFoods(Integer userId) {
+    public List<FoodDetailResponse> getFavoriteFoods(Integer userId) {
         return favoriteFoodRepository.findAllByUserId(userId).stream()
-                .map(FavoriteFoodResponse::toDto)
-                .collect(Collectors.toList());
+                .map(favoriteFood -> FoodDetailResponse.toDto(favoriteFood.getFood(), true))
+                .toList();
     }
 }
