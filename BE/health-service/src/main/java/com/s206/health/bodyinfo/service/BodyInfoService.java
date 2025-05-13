@@ -77,7 +77,7 @@ public class BodyInfoService {
 
 		try {
 			bodyInfo = bodyInfo.updatePartial(dto.getWeight(), dto.getBodyFat(),
-					dto.getMuscleMass(), dto.getMeasurementDate());
+					dto.getMuscleMass(), dto.getHeight(), dto.getMeasurementDate());
 			log.info("사용자 DTO : {}", bodyInfo);
 			bodyInfoRepository.save(bodyInfo);
 			log.info("사용자 ID: {}의 체성분 정보(ID: {}) 업데이트 완료", userId, bodyId);
@@ -243,12 +243,15 @@ public class BodyInfoService {
 					monthlyData.stream().map(BodyInfoProjection::getMuscleMass));
 			BigDecimal avgFat = averageExcludingZero(
 					monthlyData.stream().map(BodyInfoProjection::getBodyFat));
+			BigDecimal avgHeight = averageExcludingZero(
+					monthlyData.stream().map(BodyInfoProjection::getHeight));
 
 			result.add(new MonthlyAverageBodyInfoResponse(
 					month.getMonthIndex(),
 					roundToTwo(avgWeight),
 					roundToTwo(avgMuscle),
-					roundToTwo(avgFat)
+					roundToTwo(avgFat),
+					roundToTwo(avgHeight)
 			));
 		}
 
@@ -275,10 +278,13 @@ public class BodyInfoService {
 					weekData.stream().map(BodyInfoProjection::getMuscleMass));
 			BigDecimal avgFat = averageExcludingZero(
 					weekData.stream().map(BodyInfoProjection::getBodyFat));
+			BigDecimal avgHeight = averageExcludingZero(
+					weekData.stream().map(BodyInfoProjection::getHeight));
 
 			result.add(new WeeklyAverageBodyInfoResponse(
 					week.getWeekNumber(),
-					roundToTwo(avgWeight), roundToTwo(avgMuscle), roundToTwo(avgFat)
+					roundToTwo(avgWeight), roundToTwo(avgMuscle), roundToTwo(avgFat),
+					roundToTwo(avgHeight)
 			));
 		}
 
@@ -339,6 +345,10 @@ public class BodyInfoService {
 			}
 
 			public BigDecimal getBodyFat() {
+				return BigDecimal.ZERO;
+			}
+
+			public BigDecimal getHeight() {
 				return BigDecimal.ZERO;
 			}
 		};

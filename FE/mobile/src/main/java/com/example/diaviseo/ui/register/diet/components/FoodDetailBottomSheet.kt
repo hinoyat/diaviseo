@@ -18,13 +18,15 @@ import com.example.diaviseo.ui.theme.*
 @Composable
 fun FoodDetailBottomSheet(
     food: FoodDetailResponse,
-    isFavorite: Boolean,
     onToggleFavorite: () -> Unit,
     onAddClick: (quantity: Int) -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
     var quantity by remember { mutableStateOf(1) }
+
+    // 즐겨찾기 상태를 기억해서 반영
+    var favoriteState by remember { mutableStateOf(food.isFavorite) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -45,7 +47,11 @@ fun FoodDetailBottomSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = food.foodName, style = semibold20, color = Color.Black)
-                IconButton(onClick = onToggleFavorite) {
+                IconButton(onClick = {
+                    favoriteState = !favoriteState
+                    onToggleFavorite()
+                }
+                ) {
                     Icon(
                         imageVector = if (food.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                         contentDescription = "즐겨찾기",

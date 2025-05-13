@@ -39,6 +39,9 @@ public class BodyInfo {
 	@Column(nullable = false)
 	private InputType inputType;
 
+	@Column
+	private BigDecimal height;
+
 	@Column(nullable = false)
 	private BigDecimal weight;
 
@@ -66,9 +69,14 @@ public class BodyInfo {
 
 
 	public BodyInfo updatePartial(BigDecimal weight, BigDecimal bodyFat, BigDecimal muscleMass,
+			BigDecimal height,
 			LocalDate measurementDate) {
 		if (weight != null) {
 			this.weight = weight;
+		}
+
+		if (height != null) {
+			this.height = height;
 		}
 		if (bodyFat != null) {
 			this.bodyFat = bodyFat;
@@ -80,7 +88,7 @@ public class BodyInfo {
 		if (measurementDate != null) {
 			this.measurementDate = measurementDate;
 		}
-		
+
 		this.updatedAt = LocalDateTime.now();
 		return this;
 	}
