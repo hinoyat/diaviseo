@@ -21,16 +21,24 @@ import com.example.diaviseo.ui.theme.*
 
 @Composable
 fun CaloriesGaugeSection(
+    recommendedEat: Int,
+    recommendedFit: Int,
     consumedCalorie: Int,
     remainingCalorie: Int,
     burnedCalorie: Int,
     extraBurned: Int,
     navController: NavHostController
 ) {
-    val textMessage = if (remainingCalorie >= 0) {
+    val textEatMessage = if (remainingCalorie >= 0) {
         "$remainingCalorie kcal 더 먹을 수 있어요 🥄"
     } else {
         "오늘 ${-remainingCalorie} kcal 초과했어요 🥲"
+    }
+
+    val textFitMessage = if (extraBurned >= 0) {
+        "앞으로 $extraBurned  kcal 더! 💪"
+    } else {
+        "오늘 ${-extraBurned} kcal 더 운동했어요! 👍"
     }
 
     Box(
@@ -61,7 +69,7 @@ fun CaloriesGaugeSection(
                     horizontalAlignment = Alignment.End
                 ) {
                     Text(
-                        text = "앞으로 $extraBurned kcal 더! 💪",
+                        text = textFitMessage,
                         style = medium15,
                         color = Color(0xFF222222),
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -69,7 +77,7 @@ fun CaloriesGaugeSection(
 
                     GradientGaugeBar(
                         progress = burnedCalorie,
-                        max = 280,   // 유저마다 다르게
+                        max = recommendedFit,
                         gradient = Brush.horizontalGradient(
                             listOf(Color(0xFF5583FF), Color(0xFFFF84BA))
                         ),
@@ -89,7 +97,7 @@ fun CaloriesGaugeSection(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = textMessage,
+                        text = textEatMessage,
                         style = medium15,
                         color = Color(0xFF222222),
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -97,7 +105,7 @@ fun CaloriesGaugeSection(
 
                     GradientGaugeBar(
                         progress = consumedCalorie,
-                        max = 1500,
+                        max = recommendedEat,
                         gradient = Brush.horizontalGradient(
                             listOf(Color(0xFFFFE282), Color(0xFF43D9E0))
                         ),
