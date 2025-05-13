@@ -14,5 +14,5 @@ def get_chat_collection():
     """
     fitness 데이터베이스의 chat_logs 컬렉션을 반환합니다.
     """
-    db = _mongo_client["fitness"]
-    return db["chat_logs"]
+    db = _mongo_client[settings.mongo_db_name]
+    return db[settings.mongo_db_collection_name]
