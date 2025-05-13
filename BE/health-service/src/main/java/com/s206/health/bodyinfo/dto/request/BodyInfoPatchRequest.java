@@ -23,7 +23,11 @@ public class BodyInfoPatchRequest {
 	@Min(value = 0, message = "근육량은 0 이상이어야 합니다")
 	@Max(value = 1000, message = "근육량은 1000 이하여야 합니다")
 	private BigDecimal muscleMass;
-	
+
+	@Min(value = 0, message = "신장은 0 이상이어야 합니다")
+	@Max(value = 1000, message = "신장은 1000 이하여야 합니다")
+	private BigDecimal height;
+
 	@PastOrPresent(message = "측정 날짜는 현재 또는 과거 날짜만 가능합니다.")
 	private LocalDate measurementDate;
 }

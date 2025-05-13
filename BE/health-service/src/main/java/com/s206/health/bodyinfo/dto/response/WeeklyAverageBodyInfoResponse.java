@@ -14,4 +14,5 @@ public class WeeklyAverageBodyInfoResponse {
 	private BigDecimal avgWeight;
 	private BigDecimal avgMuscleMass;
 	private BigDecimal avgBodyFat;
+	private BigDecimal avgHeight;
 }

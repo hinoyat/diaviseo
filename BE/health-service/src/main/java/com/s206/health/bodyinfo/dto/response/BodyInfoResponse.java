@@ -16,6 +16,7 @@ public class BodyInfoResponse {
 
 	private Integer bodyId;
 	private Integer userId;
+	private BigDecimal height;
 	private BigDecimal weight;
 
 	private BigDecimal bodyFat;

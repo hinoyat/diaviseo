@@ -29,6 +29,9 @@ public class BodyInfoCreateRequest {
 	@PositiveOrZero(message = "근육량은 0 이상이어야 합니다.")
 	private BigDecimal muscleMass;
 
+	@PositiveOrZero(message = "신장은 0 이상이어야 합니다.")
+	private BigDecimal height;
+
 	@NotNull(message = "측정 날짜는 필수 입력값입니다.")
 	@PastOrPresent(message = "측정 날짜는 현재 또는 과거 날짜만 가능합니다.")
 	private LocalDate measurementDate;
