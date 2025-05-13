@@ -289,3 +289,6 @@ fabric.properties
 !/gradle/wrapper/gradle-wrapper.jar
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,androidstudio,kotlin,java,groovy,windows,macos,gradle
+
+# Firebase 알림 기능
+mobile/google-services.json
