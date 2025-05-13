@@ -10,6 +10,7 @@ import com.example.diaviseo.ui.components.BottomNavigationBar
 import com.example.diaviseo.ui.detail.ExerciseDetailScreen
 import com.example.diaviseo.ui.detail.MealDetailScreen
 import com.example.diaviseo.ui.main.components.FabOverlayMenu
+import com.example.diaviseo.ui.main.components.chat.ChatHistoryScreen
 import com.example.diaviseo.ui.mypageedit.screen.AllergyEditScreen
 import com.example.diaviseo.ui.mypageedit.screen.DiseaseEditScreen
 import com.example.diaviseo.ui.mypageedit.screen.FaqScreen
@@ -90,11 +91,22 @@ fun MainScreen() {
                     )
                 }
             }
-            composable("chat") {
+
+
+
+            composable("chat_history") {
                 Box(modifier = Modifier.padding(innerPadding)) {
-                    ChatScreen()
+                    ChatHistoryScreen(navController)
                 }
             }
+
+            composable("chat") {
+                Box(modifier = Modifier.padding(innerPadding)) {
+                    ChatScreen(navController)
+                }
+            }
+
+
             composable("goal") {
                 Box(modifier = Modifier.padding(innerPadding)) {
                     GoalScreen(navController)
