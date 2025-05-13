@@ -5,6 +5,7 @@ import com.s206.common.exception.types.InternalServerErrorException;
 import com.s206.common.exception.types.NotFoundException;
 import com.s206.common.exception.types.UnauthorizedException;
 import com.s206.health.nutrition.favorite.repository.FavoriteFoodRepository;
+import com.s206.health.nutrition.food.dto.response.FoodDetailResponse;
 import com.s206.health.nutrition.food.dto.response.FoodListResponse;
 import com.s206.health.nutrition.food.entity.Food;
 import com.s206.health.nutrition.food.repository.FoodRepository;
@@ -734,7 +735,7 @@ public class MealService {
     }
 
     @Transactional(readOnly = true)
-    public List<FoodListResponse> getRecentFoods(Integer userId, int limit) {
+    public List<FoodDetailResponse> getRecentFoods(Integer userId, int limit) {
         log.info("[RECENT_FOODS] userId={} → 최근 먹은 음식 조회 요청: limit={}", userId, limit);
 
         // 최근 등록된 식단에서 음식 리스트 조회 (중복 제거)
@@ -754,8 +755,8 @@ public class MealService {
                 .map(favoriteFood -> favoriteFood.getFood().getFoodId())
                 .collect(Collectors.toSet());
 
-        List<FoodListResponse> result = recentFoods.stream()
-                .map(food -> FoodListResponse.toDto(food, favoriteFoodIds.contains(food.getFoodId())))
+        List<FoodDetailResponse> result = recentFoods.stream()
+                .map(food -> FoodDetailResponse.toDto(food, favoriteFoodIds.contains(food.getFoodId())))
                 .collect(Collectors.toList());
 
         log.info("[RECENT_FOODS] 조회 결과: userId={}, 음식 수={}", userId, result.size());
