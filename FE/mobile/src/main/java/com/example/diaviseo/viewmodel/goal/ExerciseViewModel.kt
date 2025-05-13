@@ -46,4 +46,13 @@ class ExerciseViewModel(): ViewModel() {
             }
         }
     }
+
+    fun deleteExercise(exerciseId: Int){
+        viewModelScope.launch {
+            try {
+                RetrofitInstance.exerciseApiService.deleteExercise(exerciseId = exerciseId)
+            } catch (e: Exception) {
+                Log.e("ExerciseViewModel", "운동 삭제 예외 발생: ${e.message}")
+            }        }
+    }
 }

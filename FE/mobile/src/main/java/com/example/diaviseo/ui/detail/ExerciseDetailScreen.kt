@@ -6,6 +6,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -22,6 +24,9 @@ import com.example.diaviseo.ui.theme.bold20
 //import com.example.diaviseo.viewmodel.ExerciseDetailViewModel
 import com.example.diaviseo.viewmodel.goal.GoalViewModel
 import com.example.diaviseo.viewmodel.ProfileViewModel
+import com.example.diaviseo.viewmodel.goal.ExerciseViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 
 @SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
@@ -59,7 +64,6 @@ fun ExerciseDetailScreen(
     val showDatePicker by goalViewModel.showDatePicker.collectAsState()
     val selectedDate by goalViewModel.selectedDate.collectAsState()
     val isLoading by goalViewModel.isLoading.collectAsState()
-    LoadingOverlay(isVisible = goalViewModel.isLoading.collectAsState().value)
 
     // 닉네임 가져오게 viewModel : profileviewmodel
     val myProfile by viewModel.myProfile.collectAsState()
@@ -70,20 +74,41 @@ fun ExerciseDetailScreen(
     // 몇월 며칠 날짜 파싱
     val day = selectedDate.dayOfMonth.toString()
 
+    // 해당날짜 운동기록, 부모랑 같이 써야함
+    val exerciseViewModel: ExerciseViewModel = viewModel(parentEntry)
+    LaunchedEffect(selectedDate) {
+        exerciseViewModel.fetchDailyExercise(selectedDate.toString())
+    }
+
+    val totalExCalories by exerciseViewModel.totalCalories.collectAsState()
+    val totalExerciseTime by exerciseViewModel.totalExerciseTime.collectAsState()
+    val exerciseCount by exerciseViewModel.exerciseCount.collectAsState()
+    val exerciseEXList by exerciseViewModel.exerciseList.collectAsState()
+    val exerciseLoading by exerciseViewModel.isLoading.collectAsState()
+
     // 더미데이터
-    val dummyExercises = remember {
-        mutableStateListOf(
-            ExerciseRecord("걷기", 157, 20, "2025-05-06T08:30:00"),
-            ExerciseRecord("자전거 타기", 157, 20, "2025-05-06T08:30:00"),
-            ExerciseRecord("자전거 타기", 157, 20, "2025-05-06T08:30:00"),
-            ExerciseRecord("자전거 타기", 157, 20, "2025-05-06T08:30:00"),
-            ExerciseRecord("자전거 타기", 157, 20, "2025-05-06T08:30:00"),
-            ExerciseRecord("자전거 타기", 157, 20, "2025-05-06T08:30:00")
-        )
+//    val dummyExercises = remember {
+//        mutableStateListOf(
+//            ExerciseRecord("걷기", 157, 20, "2025-05-06T08:30:00"),
+//            ExerciseRecord("자전거 타기", 157, 20, "2025-05-06T08:30:00"),
+//            ExerciseRecord("자전거 타기", 157, 20, "2025-05-06T08:30:00"),
+//            ExerciseRecord("자전거 타기", 157, 20, "2025-05-06T08:30:00"),
+//            ExerciseRecord("자전거 타기", 157, 20, "2025-05-06T08:30:00"),
+//            ExerciseRecord("자전거 타기", 157, 20, "2025-05-06T08:30:00")
+//        )
+//    }
+
+    var exerciseList = remember { mutableStateListOf(*exerciseEXList.toTypedArray())}
+
+    LaunchedEffect(exerciseEXList) {
+        exerciseList.clear()
+        exerciseList.addAll(exerciseEXList)
     }
 
     var showDeleteDialog by remember { mutableStateOf(false) }
     var selectedDeleteIndex by remember { mutableStateOf(-1) }
+
+    LoadingOverlay(isVisible = isLoading || exerciseLoading)
 
     Scaffold(
         topBar = {
@@ -105,9 +130,9 @@ fun ExerciseDetailScreen(
 
             // 1. 운동 요약 섹션
             ExerciseSummarySection(
-                hasExercise = dummyExercises.isNotEmpty(),
-                totalMinutes = 34,
-                totalKcal = 259
+                hasExercise = exerciseEXList.isNotEmpty(),
+                totalMinutes = totalExerciseTime,
+                totalKcal = totalExCalories
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -123,18 +148,19 @@ fun ExerciseDetailScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             // 3. 운동 기록 목록
-            dummyExercises.forEachIndexed { index, item ->
+            exerciseList.forEachIndexed { index, item ->
                 ExerciseRecordItem(
-                    title = item.title,
-                    kcal = item.kcal,
-                    time = item.time,
+                    title = item.exerciseName,
+                    kcal = item.exerciseCalorie,
+                    time = item.exerciseTime,
                     exerciseDate = item.exerciseDate,
                     onEditClick = {
-                        // TODO: 바텀시트 호출
+                        // TODO: 바텀시트 호출 exerciseId로 수정, 삭제
                     },
                     onDeleteClick = {
                         selectedDeleteIndex = index
                         showDeleteDialog = true
+                        exerciseViewModel.deleteExercise(item.exerciseId)
                     }
                 )
             }
@@ -164,7 +190,7 @@ fun ExerciseDetailScreen(
                 title = "운동삭제 확인",
                 content = "정말 삭제하시겠습니까?",
                 onConfirm = {
-                    dummyExercises.removeAt(selectedDeleteIndex)
+                    exerciseList.removeAt(selectedDeleteIndex)
                     showDeleteDialog = false
                 },
                 onDismiss = { showDeleteDialog = false }
@@ -172,11 +198,3 @@ fun ExerciseDetailScreen(
         }
     }
 }
-
-
-data class ExerciseRecord(
-    val title: String,
-    val kcal: Int,
-    val time: Int,
-    val exerciseDate: String,
-)

@@ -8,7 +8,7 @@ data class DayExerciseStatsResponse(
     val exercises: List<ExerciseDetail>
 ) {
     data class ExerciseDetail(
-        val exerciseId: Int?,
+        val exerciseId: Int,
         val exerciseName: String,
         val categoryName: String,
         val exerciseDate: String,
