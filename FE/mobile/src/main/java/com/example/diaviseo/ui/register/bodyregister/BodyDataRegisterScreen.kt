@@ -1,7 +1,12 @@
 package com.example.diaviseo.ui.register.bodyregister
 
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,10 +20,14 @@ import androidx.navigation.NavController
 import com.example.diaviseo.R
 import com.example.diaviseo.ui.components.BottomButtonSection
 import com.example.diaviseo.ui.components.CommonTopBar
-import com.example.diaviseo.ui.theme.*
+import com.example.diaviseo.ui.register.bodyregister.components.LabeledDateInputField
 import com.example.diaviseo.ui.register.bodyregister.components.LabeledNumberInputField
 import com.example.diaviseo.ui.register.bodyregister.components.SelectableIconCard
 import com.example.diaviseo.viewmodel.register.body.BodyRegisterViewModel
+import com.example.diaviseo.ui.theme.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
 enum class BodyRegisterType {
     PHOTO, MANUAL
@@ -29,17 +38,16 @@ fun BodyDataRegisterScreen(
     navController: NavController,
     viewModel: BodyRegisterViewModel = viewModel()
 ) {
-    val context = LocalContext.current
-
-    // 체성분 등록 상태값
     val selectedOption = remember { mutableStateOf<BodyRegisterType?>(null) }
 
     val weight by viewModel.weight.collectAsState()
     val fat by viewModel.bodyFat.collectAsState()
     val muscle by viewModel.muscleMass.collectAsState()
+    val height by viewModel.height.collectAsState()
+    val year by viewModel.year.collectAsState()
+    val month by viewModel.month.collectAsState()
+    val day by viewModel.day.collectAsState()
 
-
-    // 모든 입력 필드가 채워져 있어야 등록 가능
     val isManualInputValid = viewModel.isInputValid()
     val isFormValid = when (selectedOption.value) {
         BodyRegisterType.MANUAL -> isManualInputValid
@@ -48,23 +56,49 @@ fun BodyDataRegisterScreen(
     }
 
     val bodyInputs = listOf(
-        Triple("체중", weight) { value: String -> viewModel.onWeightChange(value) },
-        Triple("체지방량", fat) { value: String -> viewModel.onBodyFatChange(value) },
-        Triple("골격근량", muscle) { value: String -> viewModel.onMuscleMassChange(value) }
+        Triple("키", height, viewModel::onHeightChange),
+        Triple("체중", weight, viewModel::onWeightChange),
+        Triple("체지방량", fat, viewModel::onBodyFatChange),
+        Triple("골격근량", muscle, viewModel::onMuscleMassChange)
     )
+
+    val imageUri = remember { mutableStateOf<Uri?>(null) }
+
+    val context = LocalContext.current
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            imageUri.value = uri
+
+            // uri -> MultipartBody.Part 변환
+            val stream = context.contentResolver.openInputStream(uri)
+            stream?.let {
+                val bytes = it.readBytes()
+                val requestBody = bytes.toRequestBody("image/*".toMediaTypeOrNull())
+                val part = MultipartBody.Part.createFormData(
+                    name = "image",
+                    filename = "body_photo.jpg",
+                    body = requestBody
+                )
+
+                // OCR API 호출
+                viewModel.sendOcrRequest(part)
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
     ) {
-        // 상단 X 버튼 있는 공통 AppBar
         CommonTopBar(
             onRightActionClick = { navController.popBackStack() }
         )
 
-//        Spacer(modifier = Modifier.height(22.dp))
-        // 타이틀 및 설명 텍스트
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth()
@@ -94,7 +128,10 @@ fun BodyDataRegisterScreen(
                 label = "사진으로 등록",
                 iconResId = R.drawable.camera,
                 isSelected = selectedOption.value == BodyRegisterType.PHOTO,
-                onClick = { selectedOption.value = BodyRegisterType.PHOTO },
+                onClick = {
+                    selectedOption.value = BodyRegisterType.PHOTO
+                    galleryLauncher.launch("image/*") // 갤러리 호출
+                          },
                 modifier = Modifier
                     .width(150.dp)
                     .height(150.dp)
@@ -110,7 +147,7 @@ fun BodyDataRegisterScreen(
                     .height(150.dp)
             )
         }
-        // 직접 입력 선택 시 입력 필드 노출
+
         if (selectedOption.value == BodyRegisterType.MANUAL) {
             Spacer(modifier = Modifier.height(32.dp))
             Column(
@@ -119,34 +156,44 @@ fun BodyDataRegisterScreen(
             ) {
                 bodyInputs.forEach { (label, value, onChange) ->
                     LabeledNumberInputField(
-                        label = label,
-                        unit = "kg",
-                        value = value,
-                        onValueChange = onChange
+                        label = label as String,
+                        unit = if (label == "키") "cm" else "kg",
+                        value = value as String,
+                        onValueChange = onChange as (String) -> Unit,
+                        modifier = Modifier.width(130.dp)
                     )
                 }
+
+
+                // 측정일자 컴포넌트
+                LabeledDateInputField(
+                    year = year,
+                    month = month,
+                    day = day,
+                    onYearChange = viewModel::onYearChange,
+                    onMonthChange = viewModel::onMonthChange,
+                    onDayChange = viewModel::onDayChange
+                )
             }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(32.dp))
 
-        // 하단 버튼
         BottomButtonSection(
             text = "등록",
             enabled = isFormValid,
             onClick = {
                 viewModel.registerBodyData(
                     onSuccess = {
-                        viewModel.resetInput() // 입력값 초기화
+                        viewModel.resetInput()
                         Toast.makeText(context, "체성분 등록 완료!", Toast.LENGTH_SHORT).show()
                     },
                     onError = { message ->
-                        Toast.makeText(context, message,Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                     }
                 )
             }
         )
     }
 }
-
 
