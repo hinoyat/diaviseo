@@ -4,7 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -12,9 +17,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
-
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,6 +32,8 @@ fun ChatInputBar(
     isSending: Boolean = false,
     modifier: Modifier = Modifier
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -36,7 +42,7 @@ fun ChatInputBar(
                 color = DiaViseoColors.Callout,
                 shape = RoundedCornerShape(24.dp)
             )
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 2.dp), // 키보드 세로 넓이
         verticalAlignment = Alignment.CenterVertically
     ) {
         OutlinedTextField(
@@ -56,6 +62,12 @@ fun ChatInputBar(
             singleLine = false,
             maxLines = 3,
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Send),
+            keyboardActions = KeyboardActions(
+                onSend = {
+                    keyboardController?.hide()
+                    onSendClick()
+                }
+            ),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,
@@ -67,16 +79,19 @@ fun ChatInputBar(
             )
         )
 
-        Text(
-            text = "전송",
-            fontSize = 14.sp,
-            color = if (isSending) DiaViseoColors.Placeholder else DiaViseoColors.Main1,
-            modifier = Modifier
-                .clickable(enabled = !isSending && inputText.isNotBlank()) {
-                    onSendClick()
-                }
-                .padding(8.dp)
-        )
+        IconButton(
+            onClick = {
+                keyboardController?.hide()
+                onSendClick()
+            },
+            enabled = !isSending && inputText.isNotBlank()
+        ) {
+            Icon(
+                imageVector = Icons.Default.Send,
+                contentDescription = "Send",
+                tint = if (isSending) DiaViseoColors.Placeholder else DiaViseoColors.Main1
+            )
+        }
     }
 }
 
