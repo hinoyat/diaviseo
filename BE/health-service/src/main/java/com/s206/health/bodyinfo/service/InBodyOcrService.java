@@ -101,6 +101,9 @@ public class InBodyOcrService {
         BigDecimal muscleMass = extractMuscleMass(ocrText);
         log.info("추출된 골격근량: {}", muscleMass);
 
+        BigDecimal height = extractHeight(ocrText);
+        log.info("추출된 키: {}", height);
+
         LocalDate measurementDate = extractMeasurementDate(ocrText);
         log.info("추출된 측정일: {}", measurementDate);
 
@@ -108,82 +111,32 @@ public class InBodyOcrService {
                 .weight(weight)
                 .bodyFat(bodyFat)
                 .muscleMass(muscleMass)
+                .height(height)
                 .measurementDate(measurementDate)
                 .build();
     }
 
     private BigDecimal extractWeight(String text) {
-        // 1. Body Composition History 섹션에서 체중 찾기 (가장 정확함)
-        Pattern pattern1 = Pattern.compile("((?:62)|(?:6[0-9]))\\.[0-9]+(?=\\s*AIS|\\s*Weight|\\s*$)");
-        Matcher matcher = pattern1.matcher(text);
-        if (matcher.find()) {
-            String weightStr = matcher.group(1);
-            log.info("체중 패턴 1에서 발견: {}", weightStr);
-            return new BigDecimal(weightStr);
-        }
-
-        // 2. Weight 라인에서 바로 다음 숫자 찾기 (62.1)
-        Pattern pattern2 = Pattern.compile("Weight\\s*([0-9]+\\.?[0-9]*)");
+        Matcher matcher;
+        // 1. Weight 라인에서 바로 다음 숫자 찾기 (선택)
+        Pattern pattern2 = Pattern.compile("Weight\\s*([0-9]?[0-9]?[0-9]+\\.?[0-9]*)");
         matcher = pattern2.matcher(text);
         if (matcher.find()) {
             String weightStr = matcher.group(1);
             BigDecimal weight = new BigDecimal(weightStr);
             if (weight.compareTo(new BigDecimal("40")) >= 0 && weight.compareTo(new BigDecimal("200")) <= 0) {
-                log.info("체중 패턴 2에서 발견: {}", weightStr);
+                log.info("체중 패턴 1에서 발견: {}", weightStr);
                 return weight;
             }
         }
 
-        // 3. ALAEASHBodyCompositionHistory 섹션에서 체중 찾기
-        Pattern pattern3 = Pattern.compile("BodyCompositionHistory[\\s\\S]*?([6-7][0-9]\\.[0-9]+)");
+        // 2. ALAEASHBodyCompositionHistory 섹션에서 체중 찾기 (선택)
+        Pattern pattern3 = Pattern.compile("BodyCompositionHistory[\\s\\S]*?([0-9][0-9]\\.[0-9]+)");
         matcher = pattern3.matcher(text);
         if (matcher.find()) {
             String weightStr = matcher.group(1);
-            log.info("체중 패턴 3에서 발견: {}", weightStr);
+            log.info("체중 패턴 2에서 발견: {}", weightStr);
             return new BigDecimal(weightStr);
-        }
-
-        // 4. 60대 숫자로 체중 찾기 (더 보편적)
-        Pattern pattern4 = Pattern.compile("([6-7][0-9]\\.[0-9]+)");
-        matcher = pattern4.matcher(text);
-        while (matcher.find()) {
-            String weightStr = matcher.group(1);
-            BigDecimal weight = new BigDecimal(weightStr);
-            // 60-80kg 범위로 제한
-            if (weight.compareTo(new BigDecimal("55")) >= 0 && weight.compareTo(new BigDecimal("85")) <= 0) {
-                log.info("체중 패턴 4에서 발견: {}", weightStr);
-                return weight;
-            }
-        }
-
-        // 5. 체중 (kg) 패턴
-        Pattern pattern5 = Pattern.compile("체중\\s*\\([kK][gG]\\)\\s*([0-9]+\\.?[0-9]*)");
-        matcher = pattern5.matcher(text);
-        if (matcher.find()) {
-            String weightStr = matcher.group(1);
-            log.info("체중 패턴 5에서 발견: {}", weightStr);
-            return new BigDecimal(weightStr);
-        }
-
-        // 6. kg 단위와 함께 있는 체중 찾기
-        Pattern pattern6 = Pattern.compile("([6-7][0-9]\\.[0-9]+)\\s*kg");
-        matcher = pattern6.matcher(text);
-        if (matcher.find()) {
-            String weightStr = matcher.group(1);
-            log.info("체중 패턴 6에서 발견: {}", weightStr);
-            return new BigDecimal(weightStr);
-        }
-
-        // 7. 일반적인 체중 범위 숫자 찾기 (최후의 방법)
-        Pattern pattern7 = Pattern.compile("([5-8][0-9]\\.[0-9]+)");
-        matcher = pattern7.matcher(text);
-        while (matcher.find()) {
-            String weightStr = matcher.group(1);
-            BigDecimal weight = new BigDecimal(weightStr);
-            if (weight.compareTo(new BigDecimal("45")) >= 0 && weight.compareTo(new BigDecimal("90")) <= 0) {
-                log.info("체중 패턴 7에서 발견: {}", weightStr);
-                return weight;
-            }
         }
 
         log.warn("체중 정보를 찾을 수 없습니다");
@@ -191,73 +144,14 @@ public class InBodyOcrService {
     }
 
     private BigDecimal extractBodyFat(String text) {
+        Matcher matcher;
         // 1. PercentBodyFat 직접 찾기 (16.3)
-        Pattern pattern1 = Pattern.compile("PercentBodyFat\\s*([1-2]?[0-9]\\.[0-9]+)");
-        Matcher matcher = pattern1.matcher(text);
+        Pattern pattern1 = Pattern.compile("PercentBodyFat\\s*([0-9]?[0-9]\\.[0-9]+)");
+        matcher = pattern1.matcher(text);
         if (matcher.find()) {
             String bodyFatStr = matcher.group(1);
             log.info("체지방률 패턴 1에서 발견: {}", bodyFatStr);
             return new BigDecimal(bodyFatStr);
-        }
-
-        // 2. 163과 같이 소수점이 빠진 경우 처리
-        Pattern pattern2 = Pattern.compile("PercentBodyFat\\s*([1-5][0-9]{1,2})");
-        matcher = pattern2.matcher(text);
-        if (matcher.find()) {
-            String bodyFatStr = matcher.group(1);
-            // 100 이상이면 소수점 추가 (163 -> 16.3)
-            if (Integer.parseInt(bodyFatStr) >= 100) {
-                bodyFatStr = bodyFatStr.substring(0, bodyFatStr.length() - 1) + "." + bodyFatStr.substring(bodyFatStr.length() - 1);
-                log.info("체지방률 패턴 2에서 발견 (소수점 복원): {}", bodyFatStr);
-                return new BigDecimal(bodyFatStr);
-            }
-        }
-
-        // 3. 체지방률(%) 직접 찾기
-        Pattern pattern3 = Pattern.compile("체지방률\\s*\\(\\%\\).*?([0-9]+\\.?[0-9]*)");
-        matcher = pattern3.matcher(text);
-        if (matcher.find()) {
-            String bodyFatStr = matcher.group(1);
-            log.info("체지방률 패턴 3에서 발견: {}", bodyFatStr);
-            return new BigDecimal(bodyFatStr);
-        }
-
-        // 4. % 기호가 있는 패턴 (범위 확인)
-        Pattern pattern4 = Pattern.compile("([0-9]+\\.?[0-9]*)\\s*%");
-        matcher = pattern4.matcher(text);
-        while (matcher.find()) {
-            String bodyFatStr = matcher.group(1);
-            BigDecimal bodyFat = new BigDecimal(bodyFatStr);
-            // 체지방률은 보통 5-50% 범위
-            if (bodyFat.compareTo(new BigDecimal("5")) >= 0 && bodyFat.compareTo(new BigDecimal("50")) <= 0) {
-                log.info("체지방률 패턴 4에서 발견: {}", bodyFatStr);
-                return bodyFat;
-            }
-        }
-
-        // 5. 히스토리 섹션에서 체지방률 찾기 (16.3)
-        Pattern pattern5 = Pattern.compile("PercentBodyFat[\\s\\S]*?([1-3][0-9]\\.[0-9]+)");
-        matcher = pattern5.matcher(text);
-        if (matcher.find()) {
-            String bodyFatStr = matcher.group(1);
-            BigDecimal bodyFat = new BigDecimal(bodyFatStr);
-            if (bodyFat.compareTo(new BigDecimal("5")) >= 0 && bodyFat.compareTo(new BigDecimal("50")) <= 0) {
-                log.info("체지방률 패턴 5에서 발견: {}", bodyFatStr);
-                return bodyFat;
-            }
-        }
-
-        // 6. 특정 범위의 숫자 찾기 (10-30 범위)
-        Pattern pattern6 = Pattern.compile("([1-3][0-9]\\.[0-9]+)");
-        matcher = pattern6.matcher(text);
-        while (matcher.find()) {
-            String bodyFatStr = matcher.group(1);
-            BigDecimal bodyFat = new BigDecimal(bodyFatStr);
-            // 10-30% 범위 체크
-            if (bodyFat.compareTo(new BigDecimal("10")) >= 0 && bodyFat.compareTo(new BigDecimal("30")) <= 0) {
-                log.info("체지방률 패턴 6에서 발견: {}", bodyFatStr);
-                return bodyFat;
-            }
         }
 
         log.warn("체지방률 정보를 찾을 수 없습니다");
@@ -265,82 +159,40 @@ public class InBodyOcrService {
     }
 
     private BigDecimal extractMuscleMass(String text) {
-        // 1. 정확한 골격근량 값 찾기 (31.99 등)
-        Pattern pattern1 = Pattern.compile("(3[0-5]\\.[0-9]+)\\([^)]*\\)");
-        Matcher matcher = pattern1.matcher(text);
-        if (matcher.find()) {
-            String muscleMassStr = matcher.group(1);
-            log.info("골격근량 패턴 1에서 발견: {}", muscleMassStr);
-            return new BigDecimal(muscleMassStr);
-        }
-
-        // 2. Skeletal Muscle Mass 직접 찾기 (31.9)
-        Pattern pattern2 = Pattern.compile("SkeletalMuscleMass[\\s\\S]*?([3-4][0-9]\\.[0-9]+)");
-        matcher = pattern2.matcher(text);
-        if (matcher.find()) {
-            String muscleMassStr = matcher.group(1);
-            log.info("골격근량 패턴 2에서 발견: {}", muscleMassStr);
-            return new BigDecimal(muscleMassStr);
-        }
-
-        // 3. 골격근량 history 섹션에서 찾기 (32.0, 31.9)
-        Pattern pattern3 = Pattern.compile("Weight.*?([3-4][0-9]\\.[0-9]+)\\s*SkeletalMuscleMass");
-        matcher = pattern3.matcher(text);
-        if (matcher.find()) {
-            String muscleMassStr = matcher.group(1);
-            log.info("골격근량 패턴 3에서 발견: {}", muscleMassStr);
-            return new BigDecimal(muscleMassStr);
-        }
-
-        // 4. 골격근량 (kg) 직접 찾기
-        Pattern pattern4 = Pattern.compile("골격근량\\s*\\([kK][gG]\\)\\s*([0-9]+\\.?[0-9]*)");
-        matcher = pattern4.matcher(text);
-        if (matcher.find()) {
-            String muscleMassStr = matcher.group(1);
-            log.info("골격근량 패턴 4에서 발견: {}", muscleMassStr);
-            return new BigDecimal(muscleMassStr);
-        }
-
-        // 5. 소수점 골격근량 값 추출 (30-40 범위)
-        Pattern pattern5 = Pattern.compile("(?:^|\\s)(3[0-5]\\.[0-9]+)(?=\\s|$)");
+        Matcher matcher;
+        // 1. 소수점 골격근량 값 추출 (30-40 범위) (선택)
+        Pattern pattern5 = Pattern.compile("(?:^|\\s)([1-5][0-9]\\.[0-9]+)(?=\\s|$)");
         matcher = pattern5.matcher(text);
         while (matcher.find()) {
             String muscleMassStr = matcher.group(1);
             BigDecimal muscleMass = new BigDecimal(muscleMassStr);
             // 골격근량은 보통 25-50 범위
-            if (muscleMass.compareTo(new BigDecimal("25")) >= 0 && muscleMass.compareTo(new BigDecimal("50")) <= 0) {
-                log.info("골격근량 패턴 5에서 발견: {}", muscleMassStr);
+            if (muscleMass.compareTo(new BigDecimal("10")) >= 0 && muscleMass.compareTo(new BigDecimal("50")) <= 0) {
+                log.info("골격근량 패턴 1에서 발견: {}", muscleMassStr);
                 return muscleMass;
             }
         }
 
-        // 6. line break 후 숫자 찾기 (32.0, 31.9 형태)
-        Pattern pattern6 = Pattern.compile("([3-4][0-9]\\.[0-9]+)\\s*([3-4][0-9]\\.[0-9]+)");
+        // 2. 붙어있는 골격근량 숫자 분리 (32.031.9 형태)
+        Pattern pattern6 = Pattern.compile("([0-9][0-9]\\.[0-9]+)([0-9][0-9]\\.[0-9]+)");
         matcher = pattern6.matcher(text);
         if (matcher.find()) {
-            String muscleMassStr = matcher.group(1); // 첫 번째 값이 보통 더 정확함
-            log.info("골격근량 패턴 6에서 발견: {}", muscleMassStr);
-            return new BigDecimal(muscleMassStr);
-        }
+            String firstValue = matcher.group(1);
+            String secondValue = matcher.group(2);
+            log.info("붙어있는 골격근량 값 발견: {} 와 {}", firstValue, secondValue);
 
-        // 7. 브라켓으로 둘러싸인 값 (31.99(27.8~34.0))
-        Pattern pattern7 = Pattern.compile("([3-4][0-9]\\.[0-9]+)\\s*\\([0-9]");
-        matcher = pattern7.matcher(text);
-        if (matcher.find()) {
-            String muscleMassStr = matcher.group(1);
-            log.info("골격근량 패턴 7에서 발견: {}", muscleMassStr);
-            return new BigDecimal(muscleMassStr);
-        }
+            // 두 번째 값이 보통 더 최신
+            BigDecimal mass2 = new BigDecimal(secondValue);
+            if (mass2.compareTo(new BigDecimal("10")) >= 0 && mass2.compareTo(new BigDecimal("50")) <= 0) {
+                log.info("골격근량 패턴 2에서 발견 (두 번째 값): {}", secondValue);
+                return mass2;
+            }
 
-        // 8. 최후의 방법: 30대 숫자 중 골격근량 범위에 맞는 값
-        Pattern pattern8 = Pattern.compile("([3][0-9]\\.[0-9]+)");
-        matcher = pattern8.matcher(text);
-        while (matcher.find()) {
-            String muscleMassStr = matcher.group(1);
-            BigDecimal muscleMass = new BigDecimal(muscleMassStr);
-            if (muscleMass.compareTo(new BigDecimal("30")) >= 0 && muscleMass.compareTo(new BigDecimal("40")) <= 0) {
-                log.info("골격근량 패턴 8에서 발견: {}", muscleMassStr);
-                return muscleMass;
+            // 첫 번째 값도 확인
+            BigDecimal mass1 = new BigDecimal(firstValue);
+            if (mass1.compareTo(new BigDecimal("10")) >= 0 && mass1.compareTo(new BigDecimal("50")) <= 0) {
+                log.info("골격근량 패턴 2에서 발견 (첫 번째 값): {}", firstValue);
+                return mass1;
             }
         }
 
@@ -348,28 +200,35 @@ public class InBodyOcrService {
         return BigDecimal.ZERO;
     }
 
+    private BigDecimal extractHeight(String text) {
+        Matcher matcher;
+        // 3. 첫 번째 줄에서 키 정보 찾기 (인바디 헤더 부분)
+        Pattern pattern3 = Pattern.compile("([1-2][0-9][0-9])cm");
+        matcher = pattern3.matcher(text);
+        if (matcher.find()) {
+            String heightStr = matcher.group(1);
+            BigDecimal height = new BigDecimal(heightStr);
+            if (height.compareTo(new BigDecimal("140")) >= 0 && height.compareTo(new BigDecimal("210")) <= 0) {
+                log.info("키 패턴 3에서 발견: {}cm", heightStr);
+                return height;
+            }
+        }
+
+        log.warn("키 정보를 찾을 수 없습니다");
+        return BigDecimal.ZERO;
+    }
+
     private LocalDate extractMeasurementDate(String text) {
-        // "2022.02.24. 15:07" 형태
-        Pattern pattern1 = Pattern.compile("([0-9]{4})\\.([0-9]{1,2})\\.([0-9]{1,2})\\s*\\.?\\s*([0-9]{1,2}):([0-9]{1,2})");
-        Matcher matcher = pattern1.matcher(text);
+        Matcher matcher;
+        // "2022.02.24" 형태
+        Pattern pattern1 = Pattern.compile("([0-9]{4})\\.([0-9]{1,2})\\.([0-9]{1,2})");
+        matcher = pattern1.matcher(text);
 
         if (matcher.find()) {
             int year = Integer.parseInt(matcher.group(1));
             int month = Integer.parseInt(matcher.group(2));
             int day = Integer.parseInt(matcher.group(3));
             log.info("측정일 패턴 1에서 발견: {}.{}.{}", year, month, day);
-            return LocalDate.of(year, month, day);
-        }
-
-        // "2022.02.24" 형태
-        Pattern pattern2 = Pattern.compile("([0-9]{4})\\.([0-9]{1,2})\\.([0-9]{1,2})");
-        matcher = pattern2.matcher(text);
-
-        if (matcher.find()) {
-            int year = Integer.parseInt(matcher.group(1));
-            int month = Integer.parseInt(matcher.group(2));
-            int day = Integer.parseInt(matcher.group(3));
-            log.info("측정일 패턴 2에서 발견: {}.{}.{}", year, month, day);
             return LocalDate.of(year, month, day);
         }
 
