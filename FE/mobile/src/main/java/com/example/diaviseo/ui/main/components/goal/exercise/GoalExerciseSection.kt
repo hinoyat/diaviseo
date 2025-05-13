@@ -34,7 +34,6 @@ fun GoalExerciseSection(
     val exerciseViewModel: ExerciseViewModel = viewModel()
     val totalExCalories by exerciseViewModel.totalCalories.collectAsState()
     val totalExerciseTime by exerciseViewModel.totalExerciseTime.collectAsState()
-    val exerciseCount by exerciseViewModel.exerciseCount.collectAsState()
     val exerciseEXList by exerciseViewModel.exerciseList.collectAsState()
 
     fun convertToExerciseItems(exerciseList: List<ExerciseDetail>): List<ExerciseItem> {
@@ -67,29 +66,6 @@ fun GoalExerciseSection(
             repeatMode = RepeatMode.Reverse
         )
     )
-
-//    val totalKcal = 259
-//    val totalMin = 34
-//    val exerciseList = listOf(
-//        ExerciseItem(
-//            name = "걷기",
-//            kcal = 157,
-//            min = 20,
-//            imageUrl = "https://img.freepik.com/free-vector/human-sprint-icon-logo-design_474888-2493.jpg"
-//        ),
-//        ExerciseItem(
-//            name = "자전거 타기",
-//            kcal = 157,
-//            min = 20,
-//            imageUrl = "https://img.freepik.com/free-vector/human-sprint-icon-logo-design_474888-2493.jpg"
-//        ),
-//        ExerciseItem(
-//            name = "자전거 타기",
-//            kcal = 157,
-//            min = 20,
-//            imageUrl = "https://img.freepik.com/free-vector/human-sprint-icon-logo-design_474888-2493.jpg"
-//        )
-//    )
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(

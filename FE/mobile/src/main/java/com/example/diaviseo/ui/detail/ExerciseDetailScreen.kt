@@ -33,9 +33,6 @@ import kotlinx.coroutines.coroutineScope
 fun ExerciseDetailScreen(
     navController: NavHostController,
     viewModel: ProfileViewModel = viewModel()
-//    viewModel: ExerciseDetailViewModel = viewModel(
-//        factory = ExerciseDetailViewModel.provideFactory(selectedDate)
-//    )
 ) {
     // 1) 먼저 이전 엔트리를 확인해본다
     val previousEntry = navController.previousBackStackEntry
@@ -82,21 +79,8 @@ fun ExerciseDetailScreen(
 
     val totalExCalories by exerciseViewModel.totalCalories.collectAsState()
     val totalExerciseTime by exerciseViewModel.totalExerciseTime.collectAsState()
-    val exerciseCount by exerciseViewModel.exerciseCount.collectAsState()
     val exerciseEXList by exerciseViewModel.exerciseList.collectAsState()
     val exerciseLoading by exerciseViewModel.isLoading.collectAsState()
-
-    // 더미데이터
-//    val dummyExercises = remember {
-//        mutableStateListOf(
-//            ExerciseRecord("걷기", 157, 20, "2025-05-06T08:30:00"),
-//            ExerciseRecord("자전거 타기", 157, 20, "2025-05-06T08:30:00"),
-//            ExerciseRecord("자전거 타기", 157, 20, "2025-05-06T08:30:00"),
-//            ExerciseRecord("자전거 타기", 157, 20, "2025-05-06T08:30:00"),
-//            ExerciseRecord("자전거 타기", 157, 20, "2025-05-06T08:30:00"),
-//            ExerciseRecord("자전거 타기", 157, 20, "2025-05-06T08:30:00")
-//        )
-//    }
 
     var exerciseList = remember { mutableStateListOf(*exerciseEXList.toTypedArray())}
 
@@ -123,7 +107,7 @@ fun ExerciseDetailScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding) // Scaffold 안쪽 padding 처리
+                .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
             Spacer(modifier = Modifier.height(16.dp))
@@ -172,9 +156,7 @@ fun ExerciseDetailScreen(
             // 4. 운동 더 추가하기 버튼
             AddExerciseBox(
                 onClick = {
-                    // TODO: 운동 등록 화면으로 이동
                     navController.navigate("exercise_register/$selectedDate")
-                    // 몇월 며칠인지 넘기는 파라미터 필요
                 }
             )
         }
