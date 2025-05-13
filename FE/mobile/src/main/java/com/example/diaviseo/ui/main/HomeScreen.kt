@@ -86,6 +86,8 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             CaloriesGaugeSection(
+                recommendedEat =recommendedEat,
+                recommendedFit = recommendedFit,
                 consumedCalorie = totalCalorie,
                 remainingCalorie = remainingCalorie,
                 burnedCalorie = totalExerciseCalorie,
