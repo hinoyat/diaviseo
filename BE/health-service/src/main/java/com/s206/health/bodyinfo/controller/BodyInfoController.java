@@ -8,10 +8,12 @@ import com.s206.health.bodyinfo.dto.response.BodyInfoResponse;
 import com.s206.health.bodyinfo.dto.response.MonthlyAverageBodyInfoResponse;
 import com.s206.health.bodyinfo.dto.response.WeeklyAverageBodyInfoResponse;
 import com.s206.health.bodyinfo.service.BodyInfoService;
+import com.s206.health.bodyinfo.service.InBodyOcrService;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpStatus;
@@ -26,13 +28,16 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/bodies")
 public class BodyInfoController {
 
 	private final BodyInfoService bodyInfoService;
+	private final InBodyOcrService inBodyOcrService;
 
 	@PostMapping
 	public ResponseEntity<ResponseDto<BodyInfoResponse>> create(
@@ -43,6 +48,27 @@ public class BodyInfoController {
 				.body(ResponseDto.success(HttpStatus.CREATED, "체성분 데이터 등록 성공", response));
 	}
 
+	@PostMapping("/ocr")
+	public ResponseEntity<ResponseDto<BodyInfoResponse>> createFromOcr(
+			@RequestHeader("X-USER-ID") Integer userId,
+			@RequestParam("image")MultipartFile imageFile) {
+
+		try {
+			// OCR로 인바디 이미지에서 정보 추출
+			BodyInfoCreateRequest extractData = inBodyOcrService.extractBodyInfoFromImage(imageFile);
+
+			// 추출된 데이터로 체성분 정보 생성
+			BodyInfoResponse response = bodyInfoService.create(userId, extractData);
+
+			return ResponseEntity.status(HttpStatus.CREATED)
+					.body(ResponseDto.success(HttpStatus.CREATED, "OCR을 통한 체성분 데이터 등록 성공", response));
+
+		} catch (Exception e) {
+			log.error("OCR 처리 중 오류 발생", e);
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.body(ResponseDto.error(HttpStatus.BAD_REQUEST, "이미지 처리 중 오류가 발생했습니다: " + e.getMessage()));
+		}
+	}
 
 	@GetMapping
 	public ResponseEntity<ResponseDto<List<BodyInfoResponse>>> findByUserId(
