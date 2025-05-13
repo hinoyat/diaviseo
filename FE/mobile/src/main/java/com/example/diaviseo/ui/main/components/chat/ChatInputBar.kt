@@ -4,11 +4,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.ImeAction
+
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -19,6 +25,7 @@ fun ChatInputBar(
     inputText: String,
     onInputChange: (String) -> Unit,
     onSendClick: () -> Unit,
+    isSending: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -32,7 +39,7 @@ fun ChatInputBar(
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        TextField(
+        OutlinedTextField(
             value = inputText,
             onValueChange = onInputChange,
             modifier = Modifier
@@ -45,6 +52,10 @@ fun ChatInputBar(
                     fontSize = 14.sp
                 )
             },
+            enabled = !isSending,
+            singleLine = false,
+            maxLines = 3,
+            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Send),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,
@@ -53,18 +64,16 @@ fun ChatInputBar(
                 cursorColor = DiaViseoColors.Main1,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent
-            ),
-            maxLines = 3,
-            singleLine = false
+            )
         )
 
         Text(
             text = "전송",
             fontSize = 14.sp,
-            color = DiaViseoColors.Main1,
+            color = if (isSending) DiaViseoColors.Placeholder else DiaViseoColors.Main1,
             modifier = Modifier
-                .clickable {
-                    if (inputText.isNotBlank()) onSendClick()
+                .clickable(enabled = !isSending && inputText.isNotBlank()) {
+                    onSendClick()
                 }
                 .padding(8.dp)
         )
@@ -74,11 +83,10 @@ fun ChatInputBar(
 @Preview(showBackground = true)
 @Composable
 fun PreviewChatInputBar() {
-    var text by remember { mutableStateOf("") }
-
     ChatInputBar(
-        inputText = text,
-        onInputChange = { text = it },
-        onSendClick = { /* 전송 로직 */ }
+        inputText = "",
+        onInputChange = {},
+        onSendClick = {},
+        isSending = false
     )
 }
