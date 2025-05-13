@@ -1,6 +1,7 @@
 package com.s206.user.user.controller;
 
 import com.s206.common.dto.ResponseDto;
+import com.s206.user.user.dto.request.BodyCompositionRequest;
 import com.s206.user.user.dto.request.FcmTokenRequest;
 import com.s206.user.user.dto.request.UserCreateRequest;
 import com.s206.user.user.dto.request.UserUpdateRequest;
@@ -103,5 +104,11 @@ public class UserController {
 		log.info("Registering FCM token for userId: {}", userId);
 		userService.saveOrUpdateFcmToken(userId, request.getToken());
 		return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "FCM 토큰 등록 성공"));
+	}
+
+	@PostMapping("/body-composition")
+	void updateBodyComposition(
+			@RequestBody BodyCompositionRequest request) {
+		userService.updateUserBodyInfo(request);
 	}
 }

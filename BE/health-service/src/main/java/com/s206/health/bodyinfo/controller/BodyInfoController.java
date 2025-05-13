@@ -9,6 +9,8 @@ import com.s206.health.bodyinfo.dto.response.MonthlyAverageBodyInfoResponse;
 import com.s206.health.bodyinfo.dto.response.WeeklyAverageBodyInfoResponse;
 import com.s206.health.bodyinfo.service.BodyInfoService;
 import com.s206.health.bodyinfo.service.InBodyOcrService;
+import com.s206.health.client.UserClient;
+import com.s206.health.client.dto.request.BodyCompositionRequest;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
@@ -38,12 +40,16 @@ public class BodyInfoController {
 
 	private final BodyInfoService bodyInfoService;
 	private final InBodyOcrService inBodyOcrService;
+	private final UserClient userClient;
 
 	@PostMapping
 	public ResponseEntity<ResponseDto<BodyInfoResponse>> create(
 			@RequestHeader("X-USER-ID") Integer userId, @Valid @RequestBody
 			BodyInfoCreateRequest request) {
 		BodyInfoResponse response = bodyInfoService.create(userId, request);
+		BodyCompositionRequest bodyCompositionRequest = new BodyCompositionRequest(userId,
+				response.getHeight(), response.getWeight());
+		userClient.updateBodyComposition(bodyCompositionRequest);
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(ResponseDto.success(HttpStatus.CREATED, "체성분 데이터 등록 성공", response));
 	}
@@ -64,7 +70,8 @@ public class BodyInfoController {
 		} catch (Exception e) {
 			log.error("OCR 처리 중 오류 발생", e);
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(ResponseDto.error(HttpStatus.BAD_REQUEST, "이미지 처리 중 오류가 발생했습니다: " + e.getMessage()));
+					.body(ResponseDto.error(HttpStatus.BAD_REQUEST,
+							"이미지 처리 중 오류가 발생했습니다: " + e.getMessage()));
 		}
 	}
 
