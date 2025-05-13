@@ -1,14 +1,16 @@
 package com.example.diaviseo.ui.main.components.chat
 
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,8 +26,8 @@ fun InitialQuestionButtons(
     onClick: (String) -> Unit
 ) {
     val buttonLabels = listOf(
-        "오늘 내 점심 평가해줘",
-        "오늘 점심 평가해줘",
+        "오늘 점심 평가받기",
+        "방금 먹은 음식 분석해줘",
         "직접 입력할게요"
     )
 
@@ -35,12 +37,12 @@ fun InitialQuestionButtons(
             .padding(horizontal = 16.dp)
             .background(DiaViseoColors.Callout, RoundedCornerShape(12.dp))
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.Start
     ) {
         Text(
             text = "아래 중 하나를 선택해보세요",
-            fontSize = 16.sp,
+            style = MaterialTheme.typography.bodyMedium,
             color = DiaViseoColors.Basic,
             modifier = Modifier.padding(bottom = 4.dp)
         )
@@ -49,23 +51,30 @@ fun InitialQuestionButtons(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .border(1.dp, DiaViseoColors.Main1, RoundedCornerShape(16.dp))
-                    .clickable { onClick(label) },
-                color = Color(0xFFF7F9FC),
-                tonalElevation = 2.dp,
-                shadowElevation = 4.dp
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable(
+                        indication = LocalIndication.current,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) { onClick(label) },
+                color = Color.White,
+                tonalElevation = 0.dp
             ) {
                 Row(
                     modifier = Modifier
                         .padding(vertical = 14.dp, horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("👉", fontSize = 18.sp, modifier = Modifier.padding(end = 8.dp))
                     Text(
                         text = label,
                         fontSize = 15.sp,
-                        color = DiaViseoColors.Basic
+                        color = DiaViseoColors.Basic,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = null,
+                        tint = DiaViseoColors.Main1
                     )
                 }
             }
