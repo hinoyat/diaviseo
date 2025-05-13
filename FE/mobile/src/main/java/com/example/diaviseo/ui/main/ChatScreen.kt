@@ -148,45 +148,27 @@ fun ChatContent(
                         FixedIntroScenario(
                             onSelectTopic = { topic ->
                                 selectedTopic = topic
-                            }
-                        )
-                    }
-                }
-
-                item {
-                    AnimatedVisibility(
-                        visible = selectedTopic != null && !hasAskedFirstQuestion,
-                        enter = fadeIn(),
-                        exit = fadeOut()
-                    ) {
-                        InitialQuestionButtons(
-                            onClick = { question ->
                                 messages.add(
                                     ChatMessage(
-                                        text = question,
-                                        isUser = true,
+                                        text = when (topic) {
+                                            ChatTopic.DIET -> "식단이🥗를 골라주셨어요! 어떤 질문으로 시작해볼까요?"
+                                            ChatTopic.EXERCISE -> "운동이💪를 골라주셨어요! 어떤 질문으로 시작해볼까요?"
+                                        },
+                                        isUser = false,
+                                        timestamp = LocalDateTime.now(),
+                                        characterImageRes = when (topic) {
+                                            ChatTopic.DIET -> R.drawable.charac_eat
+                                            ChatTopic.EXERCISE -> R.drawable.charac_exercise
+                                        }
+                                    )
+                                )
+                                messages.add(
+                                    ChatMessage(
+                                        text = "__SHOW_INITIAL_QUESTION_BUTTONS__",
+                                        isUser = false,
                                         timestamp = LocalDateTime.now()
                                     )
                                 )
-                                hasAskedFirstQuestion = true
-                                isTyping = true
-
-                                coroutineScope.launch {
-                                    delay(800)
-                                    messages.add(
-                                        ChatMessage(
-                                            text = "이건 $question 에 대한 답변입니다! 😄",
-                                            isUser = false,
-                                            timestamp = LocalDateTime.now(),
-                                            characterImageRes = when (selectedTopic) {
-                                                ChatTopic.DIET -> R.drawable.charac_eat
-                                                ChatTopic.EXERCISE -> R.drawable.charac_exercise
-                                                else -> null
-                                            }
-                                        )
-                                    )
-                                    isTyping = false
-                                }
                             }
                         )
                     }
@@ -197,7 +179,40 @@ fun ChatContent(
                         if (index == 0 || isNewDay(messages[index - 1], msg)) {
                             ChatDateDivider(date = msg.timestamp.toLocalDate())
                         }
-                        ChatMessageBubble(message = msg)
+                        if (msg.text == "__SHOW_INITIAL_QUESTION_BUTTONS__") {
+                            InitialQuestionButtons(
+                                onClick = { question ->
+                                    messages.add(
+                                        ChatMessage(
+                                            text = question,
+                                            isUser = true,
+                                            timestamp = LocalDateTime.now()
+                                        )
+                                    )
+                                    hasAskedFirstQuestion = true
+                                    isTyping = true
+
+                                    coroutineScope.launch {
+                                        delay(800)
+                                        messages.add(
+                                            ChatMessage(
+                                                text = "이건 $question 에 대한 답변입니다! 😄",
+                                                isUser = false,
+                                                timestamp = LocalDateTime.now(),
+                                                characterImageRes = when (selectedTopic) {
+                                                    ChatTopic.DIET -> R.drawable.charac_eat
+                                                    ChatTopic.EXERCISE -> R.drawable.charac_exercise
+                                                    else -> null
+                                                }
+                                            )
+                                        )
+                                        isTyping = false
+                                    }
+                                }
+                            )
+                        } else {
+                            ChatMessageBubble(message = msg)
+                        }
                     }
                 }
 
