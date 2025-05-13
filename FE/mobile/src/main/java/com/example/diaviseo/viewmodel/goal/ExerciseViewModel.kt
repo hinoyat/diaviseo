@@ -26,6 +26,14 @@ class ExerciseViewModel(): ViewModel() {
     private val _exerciseList = MutableStateFlow<List<ExerciseDetail>>(listOf())
     val exerciseList: StateFlow<List<ExerciseDetail>> = _exerciseList
 
+    fun setTotalCalories(calories: Int) {
+        _totalCalories.value += calories
+    }
+
+    fun setTotalExerciseTime(time: Int) {
+        _totalExerciseTime.value += time
+    }
+
     fun fetchDailyExercise(date: String) {
         viewModelScope.launch {
             _isLoading.value = true
