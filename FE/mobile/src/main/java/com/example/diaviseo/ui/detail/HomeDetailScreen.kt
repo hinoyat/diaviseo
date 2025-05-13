@@ -1,9 +1,7 @@
 package com.example.diaviseo.ui.detail
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
@@ -14,11 +12,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.diaviseo.ui.components.CommonTopBar
 import com.example.diaviseo.ui.components.DiaDatePickerDialog
 import com.example.diaviseo.ui.components.LoadingOverlay
+import com.example.diaviseo.ui.detail.components.home.BodyInfoCard
 import com.example.diaviseo.viewmodel.ProfileViewModel
 import com.example.diaviseo.viewmodel.goal.GoalViewModel
 import java.time.format.DateTimeFormatter
@@ -46,6 +47,20 @@ fun HomeDetailScreen(
     val formatted = selectedDate.format(formatter)
 
 
+    // Dummy data - 추후 ViewModel 연동
+    val skeletalMuscle: Double? = 32.2
+    val userHeight = 165.9
+    val userWeight = 57.9
+    val bodyFat: Double? = 25.5 * 0.01 * userWeight
+    val bmr = 1704.76500
+    val goal = "WEIGHT_LOSS"
+    val recommendedIntake = 1398
+    val recommendedExercise = 418
+    val totalCalorie = 1200
+    val tdee = 1480
+    val totalExerciseCalorie = 100
+    val predictValue = totalCalorie - tdee - totalExerciseCalorie
+
     Scaffold(
         topBar = {
             CommonTopBar(
@@ -59,13 +74,54 @@ fun HomeDetailScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding) // Scaffold 안쪽 padding 처리
+                .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
-            Text("여긴 홈 디뗑일")
+            Spacer(modifier = Modifier.height(16.dp))
+
+            BodyInfoCard(
+                skeletalMuscle = skeletalMuscle,
+                bodyFat = bodyFat,
+                onSkeletalEdit = { /* TODO */ },
+                onBodyFatEdit = { /* TODO */ }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+//            DetailInfoCard(
+//                nickname = nickname,
+//                height = height,
+//                weight = weight,
+//                bmr = bmr,
+//                onEditClick = { /* TODO */ }
+//            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+//            Divider(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .height(20.dp),
+//                color = Color(0xFFEEEEEE)
+//            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+//            GoalSummaryCard(
+//                nickname = nickname,
+//                goal = goal,
+//                recommendedIntake = recommendedIntake,
+//                recommendedExercise = recommendedExercise,
+//                totalCalorie = totalCalorie,
+//                tdee = tdee,
+//                totalExerciseCalorie = totalExerciseCalorie,
+//                predictValue = predictValue
+//            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // AiTipBox() 는 외부 컴포넌트로 처리
         }
 
-        // 날짜 선택 모달
         DiaDatePickerDialog(
             isVisible = showDatePicker,
             initialDate = selectedDate,
@@ -77,4 +133,3 @@ fun HomeDetailScreen(
         )
     }
 }
-
