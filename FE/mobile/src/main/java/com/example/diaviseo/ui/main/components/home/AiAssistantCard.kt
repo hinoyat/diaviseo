@@ -31,7 +31,7 @@ fun AiAssistantCard(navController: NavHostController) {
             )
             .background(Color.White, shape = RoundedCornerShape(12.dp))
             .clickable {
-                navController.navigate("chat")
+                navController.navigate("chat_history")
             }
             .padding(16.dp)
     ) {

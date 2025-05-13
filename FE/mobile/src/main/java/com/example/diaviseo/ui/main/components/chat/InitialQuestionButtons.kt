@@ -22,14 +22,23 @@ import com.example.diaviseo.ui.theme.DiaViseoColors
 
 @Composable
 fun InitialQuestionButtons(
+    topic: ChatTopic?,
     modifier: Modifier = Modifier,
     onClick: (String) -> Unit
 ) {
-    val buttonLabels = listOf(
-        "오늘 점심 평가받기",
-        "방금 먹은 음식 분석해줘",
-        "직접 입력할게요"
-    )
+    val buttonLabels = when (topic) {
+        ChatTopic.DIET -> listOf(
+            "오늘 점심 평가받기",
+            "방금 먹은 음식 분석해줘",
+            "직접 입력할게요"
+        )
+        ChatTopic.EXERCISE -> listOf(
+            "운동 루틴 추천해줘",
+            "오늘 운동 피드백 줘",
+            "직접 입력할게요"
+        )
+        else -> emptyList()
+    }
 
     Column(
         modifier = modifier
@@ -86,6 +95,6 @@ fun InitialQuestionButtons(
 @Composable
 fun PreviewInitialQuestionButtons() {
     MaterialTheme {
-        InitialQuestionButtons(onClick = { })
+        InitialQuestionButtons(topic = ChatTopic.DIET, onClick = { })
     }
 }
