@@ -9,6 +9,7 @@ import androidx.navigation.compose.*
 import com.example.diaviseo.ui.components.BottomNavigationBar
 import com.example.diaviseo.ui.detail.ExerciseDetailScreen
 import com.example.diaviseo.ui.detail.MealDetailScreen
+import com.example.diaviseo.ui.detail.HomeDetailScreen
 import com.example.diaviseo.ui.main.components.FabOverlayMenu
 import com.example.diaviseo.ui.mypageedit.screen.AllergyEditScreen
 import com.example.diaviseo.ui.mypageedit.screen.DiseaseEditScreen
@@ -61,7 +62,8 @@ fun MainScreen() {
         "exercise_detail",
         "meal_detail",
         "diet_confirm",
-        "food_set_register"
+        "food_set_register",
+        "home_detail"
         )
     val isBottomBarVisible = currentRoute !in hideBottomBarRoutes
 
@@ -166,6 +168,14 @@ fun MainScreen() {
             // 식단 상세화면
             composable("meal_detail") { backStackEntry ->
                 MealDetailScreen(
+                    navController = navController,
+                    viewModel = profileViewModel
+                )
+            }
+
+            // 홈 상세화면
+            composable("home_detail") { backStackEntry ->
+                HomeDetailScreen(
                     navController = navController,
                     viewModel = profileViewModel
                 )
