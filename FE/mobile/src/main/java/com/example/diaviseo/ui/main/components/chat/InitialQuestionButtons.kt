@@ -1,9 +1,12 @@
 package com.example.diaviseo.ui.main.components.chat
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,23 +32,42 @@ fun InitialQuestionButtons(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+            .padding(horizontal = 16.dp)
+            .background(DiaViseoColors.Callout, RoundedCornerShape(12.dp))
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.Start
     ) {
+        Text(
+            text = "아래 중 하나를 선택해보세요",
+            fontSize = 16.sp,
+            color = DiaViseoColors.Basic,
+            modifier = Modifier.padding(bottom = 4.dp)
+        )
+
         buttonLabels.forEach { label ->
-            Box(
+            Surface(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(DiaViseoColors.Main1)
-                    .clickable { onClick(label) }
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .border(1.dp, DiaViseoColors.Main1, RoundedCornerShape(16.dp))
+                    .clickable { onClick(label) },
+                color = Color(0xFFF7F9FC),
+                tonalElevation = 2.dp,
+                shadowElevation = 4.dp
             ) {
-                Text(
-                    text = label,
-                    fontSize = 15.sp,
-                    color = Color.White
-                )
+                Row(
+                    modifier = Modifier
+                        .padding(vertical = 14.dp, horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("👉", fontSize = 18.sp, modifier = Modifier.padding(end = 8.dp))
+                    Text(
+                        text = label,
+                        fontSize = 15.sp,
+                        color = DiaViseoColors.Basic
+                    )
+                }
             }
         }
     }
@@ -54,5 +76,7 @@ fun InitialQuestionButtons(
 @Preview(showBackground = true)
 @Composable
 fun PreviewInitialQuestionButtons() {
-    InitialQuestionButtons(onClick = { /* do nothing */ })
+    MaterialTheme {
+        InitialQuestionButtons(onClick = { })
+    }
 }
