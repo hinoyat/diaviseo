@@ -6,10 +6,15 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -24,7 +29,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-// ✅ 외부에서 navController만 받는 wrapper
 @Composable
 fun ChatScreen(navController: NavController) {
     val history = navController
@@ -35,11 +39,10 @@ fun ChatScreen(navController: NavController) {
     ChatContent(
         history = history,
         onBackClick = { navController.popBackStack() },
-        onExitClick = { navController.navigate("chatHistory") }
+        onExitClick = { navController.navigate("chat_history") }
     )
 }
 
-// ✅ UI/상태 포함한 본문
 @Composable
 fun ChatContent(
     history: ChatHistory?,
@@ -51,6 +54,9 @@ fun ChatContent(
     var showExitDialog by remember { mutableStateOf(false) }
 
     val coroutineScope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val listState = rememberLazyListState()
 
     var selectedTopic by remember { mutableStateOf<ChatTopic?>(history?.topic) }
     var hasAskedFirstQuestion by remember { mutableStateOf(history != null) }
@@ -66,6 +72,12 @@ fun ChatContent(
                     )
                 )
             }
+        }
+    }
+
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            listState.animateScrollToItem(messages.size - 1)
         }
     }
 
@@ -92,6 +104,8 @@ fun ChatContent(
                             )
                             input = ""
                             isTyping = true
+                            keyboardController?.hide()
+                            focusManager.clearFocus()
 
                             coroutineScope.launch {
                                 delay(1000)
@@ -122,6 +136,7 @@ fun ChatContent(
                 .fillMaxSize()
         ) {
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
