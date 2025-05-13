@@ -55,21 +55,17 @@ public class BodyInfoController {
 	}
 
 	@PostMapping("/ocr")
-	public ResponseEntity<ResponseDto<BodyInfoResponse>> createFromOcr(
+	public ResponseEntity<ResponseDto<BodyInfoCreateRequest>> extractFromOcr(
 			@RequestHeader("X-USER-ID") Integer userId,
 			@RequestParam("image") MultipartFile imageFile) {
 
 		try {
 			// OCR로 인바디 이미지에서 정보 추출
-			BodyInfoCreateRequest extractData = inBodyOcrService.extractBodyInfoFromImage(
-					imageFile);
+			BodyInfoCreateRequest extractedData = inBodyOcrService.extractBodyInfoFromImage(imageFile);
 
-			// 추출된 데이터로 체성분 정보 생성
-			BodyInfoResponse response = bodyInfoService.create(userId, extractData);
-
-			return ResponseEntity.status(HttpStatus.CREATED)
-					.body(ResponseDto.success(HttpStatus.CREATED, "OCR을 통한 체성분 데이터 등록 성공",
-							response));
+			// 추출된 데이터만 반환 (바로 저장하지 않음)
+			return ResponseEntity.ok()
+					.body(ResponseDto.success(HttpStatus.OK, "OCR 정보 추출 성공", extractedData));
 
 		} catch (Exception e) {
 			log.error("OCR 처리 중 오류 발생", e);
@@ -77,6 +73,17 @@ public class BodyInfoController {
 					.body(ResponseDto.error(HttpStatus.BAD_REQUEST,
 							"이미지 처리 중 오류가 발생했습니다: " + e.getMessage()));
 		}
+	}
+
+	// 필요시 OCR 결과를 확인하고 수정한 후 저장하는 새로운 엔드포인트
+	@PostMapping("/ocr/confirm")
+	public ResponseEntity<ResponseDto<BodyInfoResponse>> confirmOcrData(
+			@RequestHeader("X-USER-ID") Integer userId,
+			@Valid @RequestBody BodyInfoCreateRequest request) {
+
+		BodyInfoResponse response = bodyInfoService.create(userId, request);
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(ResponseDto.success(HttpStatus.CREATED, "OCR 데이터 확인 후 체성분 데이터 등록 성공", response));
 	}
 
 	@GetMapping

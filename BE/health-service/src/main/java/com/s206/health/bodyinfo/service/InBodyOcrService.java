@@ -161,7 +161,7 @@ public class InBodyOcrService {
     private BigDecimal extractMuscleMass(String text) {
         Matcher matcher;
         // 1. 소수점 골격근량 값 추출 (30-40 범위) (선택)
-        Pattern pattern5 = Pattern.compile("(?:^|\\s)([1-5][0-9]\\.[0-9]+)(?=\\s|$)");
+        Pattern pattern5 = Pattern.compile("(?:^|\\s)(3[0-5]\\.[0-9]+)(?=\\s|$)");
         matcher = pattern5.matcher(text);
         while (matcher.find()) {
             String muscleMassStr = matcher.group(1);
