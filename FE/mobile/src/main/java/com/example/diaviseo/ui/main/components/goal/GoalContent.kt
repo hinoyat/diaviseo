@@ -24,8 +24,11 @@ import com.example.diaviseo.ui.main.components.goal.exercise.StepBarChart
 import com.example.diaviseo.ui.main.components.goal.meal.DonutChartWithLegend
 import com.example.diaviseo.ui.main.components.goal.meal.MealChartSection
 import com.example.diaviseo.ui.theme.semibold16
+import com.example.diaviseo.viewmodel.goal.ExerciseViewModel
 import com.example.diaviseo.viewmodel.goal.GoalViewModel
 import com.example.diaviseo.viewmodel.goal.MealViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -42,12 +45,20 @@ fun GoalContent(
     // 평가<->디테일 식단 관리
     val mealViewModel: MealViewModel = viewModel()
     val dailyNutrition by mealViewModel.dailyNutrition.collectAsState()
-    val nowPhysicalInfo by mealViewModel.nowPhysicalInfo.collectAsState()
+    val nowPhysicalInfo by mealViewModel.nowPhysicalInfo.collectAsState()  // 이건 권장 소비량도 있음
     val carbRatio by mealViewModel.carbRatio.collectAsState()
     val sugarRatio by mealViewModel.sugarRatio.collectAsState()
     val proteinRatio by mealViewModel.proteinRatio.collectAsState()
     val fatRatio by mealViewModel.fatRatio.collectAsState()
     val isLoading by mealViewModel.isLoading.collectAsState()
+
+
+    // 평가<->디테일 운동 관리
+    val exerciseViewModel: ExerciseViewModel = viewModel()
+    val totalExCalories by exerciseViewModel.totalCalories.collectAsState()
+    val totalExerciseTime by exerciseViewModel.totalExerciseTime.collectAsState()
+    val exerciseCount by exerciseViewModel.exerciseCount.collectAsState()
+    val exerciseList by exerciseViewModel.exerciseList.collectAsState()
 
     val isToday = remember(selectedDate) {
         selectedDate == LocalDate.now()
@@ -55,12 +66,17 @@ fun GoalContent(
     val isMale = false
 
     LaunchedEffect(selectedDate) {
-        // 순서 중요
-        mealViewModel.fetchPhysicalInfo(selectedDate.toString())
-        delay(100)
-        mealViewModel.fetchDailyNutrition(selectedDate.toString())
+        // 비동기 작업
+        coroutineScope {
+            val job1 = async { mealViewModel.fetchPhysicalInfo(selectedDate.toString())}
+            mealViewModel.fetchMealStatistic("DAY", selectedDate.toString())
 
-        mealViewModel.fetchMealStatistic("DAY", selectedDate.toString())
+            job1.await()
+        }
+        // 순서 중요 (아래는 동기)
+        mealViewModel.fetchDailyNutrition(selectedDate.toString())
+        exerciseViewModel.fetchDailyExercise(selectedDate.toString())
+
     }
 
     LoadingOverlay(isLoading)

@@ -35,11 +35,16 @@ fun ChatTopBar(
             }
         },
         actions = {
-            IconButton(onClick = onExitClick) {
+            TextButton(onClick = onExitClick) {
                 Icon(
                     imageVector = Icons.Filled.Close,
                     contentDescription = "대화 종료",
                     tint = DiaViseoColors.Red
+                )
+                Text(
+                    text = "종료",
+                    color = DiaViseoColors.Red,
+                    fontSize = 14.sp
                 )
             }
         },

@@ -6,10 +6,15 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -24,7 +29,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-// ✅ 외부에서 navController만 받는 wrapper
 @Composable
 fun ChatScreen(navController: NavController) {
     val history = navController
@@ -35,11 +39,10 @@ fun ChatScreen(navController: NavController) {
     ChatContent(
         history = history,
         onBackClick = { navController.popBackStack() },
-        onExitClick = { navController.navigate("chatHistory") }
+        onExitClick = { navController.navigate("chat_history") }
     )
 }
 
-// ✅ UI/상태 포함한 본문
 @Composable
 fun ChatContent(
     history: ChatHistory?,
@@ -51,6 +54,9 @@ fun ChatContent(
     var showExitDialog by remember { mutableStateOf(false) }
 
     val coroutineScope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val listState = rememberLazyListState()
 
     var selectedTopic by remember { mutableStateOf<ChatTopic?>(history?.topic) }
     var hasAskedFirstQuestion by remember { mutableStateOf(history != null) }
@@ -69,6 +75,12 @@ fun ChatContent(
         }
     }
 
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            listState.animateScrollToItem(messages.size - 1)
+        }
+    }
+
     Scaffold(
         topBar = {
             ChatTopBar(
@@ -82,7 +94,10 @@ fun ChatContent(
                     inputText = input,
                     onInputChange = { input = it },
                     onSendClick = {
-                        if (input.isNotBlank()) {
+                        if (selectedTopic != null && input.isNotBlank()) {
+                            messages.removeAll { it.text == "__SHOW_INITIAL_QUESTION_BUTTONS__" }
+                            hasAskedFirstQuestion = true
+
                             messages.add(
                                 ChatMessage(
                                     text = input,
@@ -92,6 +107,8 @@ fun ChatContent(
                             )
                             input = ""
                             isTyping = true
+                            keyboardController?.hide()
+                            focusManager.clearFocus()
 
                             coroutineScope.launch {
                                 delay(1000)
@@ -111,7 +128,8 @@ fun ChatContent(
                             }
                         }
                     },
-                    isSending = isTyping
+                    isSending = isTyping,
+                    enabled = selectedTopic != null && !showExitDialog
                 )
             }
         }
@@ -122,6 +140,7 @@ fun ChatContent(
                 .fillMaxSize()
         ) {
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
@@ -133,45 +152,27 @@ fun ChatContent(
                         FixedIntroScenario(
                             onSelectTopic = { topic ->
                                 selectedTopic = topic
-                            }
-                        )
-                    }
-                }
-
-                item {
-                    AnimatedVisibility(
-                        visible = selectedTopic != null && !hasAskedFirstQuestion,
-                        enter = fadeIn(),
-                        exit = fadeOut()
-                    ) {
-                        InitialQuestionButtons(
-                            onClick = { question ->
                                 messages.add(
                                     ChatMessage(
-                                        text = question,
-                                        isUser = true,
+                                        text = when (topic) {
+                                            ChatTopic.DIET -> "식단이🥗를 골라주셨어요! 어떤 질문으로 시작해볼까요?"
+                                            ChatTopic.EXERCISE -> "운동이💪를 골라주셨어요! 어떤 질문으로 시작해볼까요?"
+                                        },
+                                        isUser = false,
+                                        timestamp = LocalDateTime.now(),
+                                        characterImageRes = when (topic) {
+                                            ChatTopic.DIET -> R.drawable.charac_eat
+                                            ChatTopic.EXERCISE -> R.drawable.charac_exercise
+                                        }
+                                    )
+                                )
+                                messages.add(
+                                    ChatMessage(
+                                        text = "__SHOW_INITIAL_QUESTION_BUTTONS__",
+                                        isUser = false,
                                         timestamp = LocalDateTime.now()
                                     )
                                 )
-                                hasAskedFirstQuestion = true
-                                isTyping = true
-
-                                coroutineScope.launch {
-                                    delay(800)
-                                    messages.add(
-                                        ChatMessage(
-                                            text = "이건 $question 에 대한 답변입니다! 😄",
-                                            isUser = false,
-                                            timestamp = LocalDateTime.now(),
-                                            characterImageRes = when (selectedTopic) {
-                                                ChatTopic.DIET -> R.drawable.charac_eat
-                                                ChatTopic.EXERCISE -> R.drawable.charac_exercise
-                                                else -> null
-                                            }
-                                        )
-                                    )
-                                    isTyping = false
-                                }
                             }
                         )
                     }
@@ -182,7 +183,44 @@ fun ChatContent(
                         if (index == 0 || isNewDay(messages[index - 1], msg)) {
                             ChatDateDivider(date = msg.timestamp.toLocalDate())
                         }
-                        ChatMessageBubble(message = msg)
+
+                        if (msg.text == "__SHOW_INITIAL_QUESTION_BUTTONS__") {
+                            InitialQuestionButtons(
+                                topic = selectedTopic,
+                                onClick = { question ->
+                                    messages.removeAll { it.text == "__SHOW_INITIAL_QUESTION_BUTTONS__" }
+                                    hasAskedFirstQuestion = true
+
+                                    messages.add(
+                                        ChatMessage(
+                                            text = question,
+                                            isUser = true,
+                                            timestamp = LocalDateTime.now()
+                                        )
+                                    )
+                                    isTyping = true
+
+                                    coroutineScope.launch {
+                                        delay(800)
+                                        messages.add(
+                                            ChatMessage(
+                                                text = "이건 $question 에 대한 답변입니다! 😄",
+                                                isUser = false,
+                                                timestamp = LocalDateTime.now(),
+                                                characterImageRes = when (selectedTopic) {
+                                                    ChatTopic.DIET -> R.drawable.charac_eat
+                                                    ChatTopic.EXERCISE -> R.drawable.charac_exercise
+                                                    else -> null
+                                                }
+                                            )
+                                        )
+                                        isTyping = false
+                                    }
+                                }
+                            )
+                        } else {
+                            ChatMessageBubble(message = msg)
+                        }
                     }
                 }
 

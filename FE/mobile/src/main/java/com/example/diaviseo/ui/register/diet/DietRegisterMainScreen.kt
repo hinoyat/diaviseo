@@ -155,7 +155,7 @@ fun DietRegisterMainScreen(
                     }
                 }
                 ,
-                onAddClick = { quantity ->
+                onAddClick = { quantity: Float ->
                     viewModel.addSelectedFood(
                         food = selectedFoodForDetail!!.toFoodItem(),
                         quantity = quantity
