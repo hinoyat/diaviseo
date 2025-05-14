@@ -59,6 +59,10 @@ fun GoalContent(
     val totalExerciseTime by exerciseViewModel.totalExerciseTime.collectAsState()
     val exerciseCount by exerciseViewModel.exerciseCount.collectAsState()
     val exerciseList by exerciseViewModel.exerciseList.collectAsState()
+    val dailyData by exerciseViewModel.dailyStats.collectAsState()
+    val weeklyData by exerciseViewModel.weeklyStats.collectAsState()
+    val monthlyData by exerciseViewModel.monthlyStats.collectAsState()
+    val exIsLoading by exerciseViewModel.isLoading.collectAsState()
 
     val isToday = remember(selectedDate) {
         selectedDate == LocalDate.now()
@@ -68,8 +72,9 @@ fun GoalContent(
     LaunchedEffect(selectedDate) {
         // 비동기 작업
         coroutineScope {
-            val job1 = async { mealViewModel.fetchPhysicalInfo(selectedDate.toString())}
+            val job1 = async {mealViewModel.fetchPhysicalInfo(selectedDate.toString())}
             mealViewModel.fetchMealStatistic("DAY", selectedDate.toString())
+            exerciseViewModel.fetchAllStats(selectedDate.toString())
 
             job1.await()
         }
@@ -79,7 +84,7 @@ fun GoalContent(
 
     }
 
-    LoadingOverlay(isLoading)
+    LoadingOverlay(isLoading || exIsLoading)
 
     Column(
         modifier = Modifier
@@ -130,7 +135,11 @@ fun GoalContent(
             "운동" -> {
                 GoalExerciseSection(isToday = isToday)
 
-                LineChartSection()
+                LineChartSection(
+                    dailyData = dailyData ?: emptyList(),
+                    weeklyData = weeklyData ?: emptyList(),
+                    monthlyData = monthlyData ?: emptyList()
+                )
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
