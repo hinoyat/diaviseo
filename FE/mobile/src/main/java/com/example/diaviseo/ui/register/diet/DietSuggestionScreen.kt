@@ -15,6 +15,7 @@ import com.example.diaviseo.ui.register.diet.components.FoodDetailBottomSheet
 import com.example.diaviseo.ui.register.diet.components.FoodSetList
 import com.example.diaviseo.ui.register.diet.components.RecentFoodList
 import com.example.diaviseo.viewmodel.DietSearchViewModel
+import com.example.diaviseo.viewmodel.ProfileViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -22,6 +23,10 @@ fun DietSuggestionScreen(
     viewModel: DietSearchViewModel = viewModel(),
     navController: NavController
 ) {
+    val profileViewModel: ProfileViewModel = viewModel()
+    val profileState by profileViewModel.myProfile.collectAsState()
+    val nickname = profileState?.name ?: "사용자"
+
     var selectedCategory by remember { mutableStateOf(0) }
     val categories = listOf("최근", "세트", "음식")
 
@@ -30,9 +35,12 @@ fun DietSuggestionScreen(
     val showFoodDetailSheet = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
+    LaunchedEffect(Unit) {
+        profileViewModel.fetchMyProfile()
+    }
     LaunchedEffect(selectedCategory) {
         when (selectedCategory) {
-            0 -> viewModel.fetchRecnetFoods()
+            0 -> viewModel.fetchRecentFoods()
             1 -> if (viewModel.foodSets.isEmpty()) {
                 viewModel.fetchFoodSets()
             }
@@ -67,7 +75,8 @@ fun DietSuggestionScreen(
                             e.printStackTrace()
                         }
                     }
-                }
+                },
+                nickname = nickname
             )
             1 -> FoodSetList(
                 foodSets = viewModel.foodSets,
