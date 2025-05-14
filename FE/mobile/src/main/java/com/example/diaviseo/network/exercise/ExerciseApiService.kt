@@ -8,8 +8,6 @@ import com.example.diaviseo.network.exercise.dto.res.DayExerciseStatsResponse
 import com.example.diaviseo.network.exercise.dto.req.HealthSyncExerciseRequest
 import com.example.diaviseo.network.exercise.dto.res.HealthSyncExerciseListResponse
 import com.example.diaviseo.network.exercise.dto.req.StepRecordRequest
-import com.example.diaviseo.network.exercise.dto.res.FavoriteExerciseResponse
-import com.example.diaviseo.network.exercise.dto.res.RecentExerciseResponse
 import com.example.diaviseo.network.exercise.dto.res.StepRecordResponse
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -56,12 +54,4 @@ interface ExerciseApiService {
         @Path("exerciseId") exerciseId: Int,
         @Body request: ExercisePutRecordRequest
     ): ApiResponse<ExerciseRecordResponse>
-
-    // 최근 운동 조회
-    @GET("exercises/latest")
-    suspend fun getRecentExercises(): ApiResponse<List<RecentExerciseResponse>>
-
-    // 즐겨찾기 운동
-    @GET("exercises/favorite")
-    suspend fun getFavoriteExercises(): ApiResponse<List<FavoriteExerciseResponse>>
 }
