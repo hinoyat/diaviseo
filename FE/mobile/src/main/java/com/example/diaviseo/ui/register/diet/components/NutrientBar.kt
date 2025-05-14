@@ -92,6 +92,8 @@ fun NutrientBar(
             }
 
             percentages.forEachIndexed { index, percent ->
+                val percentValue = percent * 100
+
                 Box(
                     modifier = Modifier
                         .weight(if (percent > 0f) percent else 0.0001f)
@@ -99,7 +101,7 @@ fun NutrientBar(
                         .background(colors[index]),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (percent > 0f) {
+                    if (percentValue > 4f) {
                         Text(
                             text = "${(percent * 100).toInt()}%",
                             color = Color.White,
