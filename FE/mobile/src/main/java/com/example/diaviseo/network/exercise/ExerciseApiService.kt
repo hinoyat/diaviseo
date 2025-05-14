@@ -2,6 +2,7 @@ package com.example.diaviseo.network.exercise
 
 import com.example.diaviseo.network.exercise.dto.req.ExerciseRecordRequest
 import com.example.diaviseo.network.common.dto.ApiResponse
+import com.example.diaviseo.network.exercise.dto.req.ExercisePutRecordRequest
 import com.example.diaviseo.network.exercise.dto.res.ExerciseRecordResponse
 import com.example.diaviseo.network.exercise.dto.res.DayExerciseStatsResponse
 import com.example.diaviseo.network.exercise.dto.req.HealthSyncExerciseRequest
@@ -12,6 +13,7 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -45,4 +47,11 @@ interface ExerciseApiService {
     suspend fun deleteExercise(
         @Path("exerciseId") exerciseId: Int
     ): ApiResponse<Unit>
+
+    // 운동 수정
+    @PUT("exercises/{exerciseId}")
+    suspend fun putExercise(
+        @Path("exerciseId") exerciseId: Int,
+        @Body request: ExercisePutRecordRequest
+    ): ApiResponse<ExerciseRecordResponse>
 }
