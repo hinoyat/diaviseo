@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,15 +40,16 @@ import com.example.diaviseo.network.meal.dto.res.MealDailyResponse
 import com.example.diaviseo.ui.detail.components.meal.MealEmptyCard
 import com.example.diaviseo.ui.detail.components.meal.MealSkippedCard
 import com.example.diaviseo.ui.theme.DiaViseoColors
+import com.example.diaviseo.viewmodel.goal.ExerciseViewModel
+import com.example.diaviseo.viewmodel.goal.MealViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 
 @SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
 fun MealDetailScreen(
     navController: NavHostController,
     viewModel: ProfileViewModel = viewModel()
-//    viewModel: ExerciseDetailViewModel = viewModel(
-//        factory = ExerciseDetailViewModel.provideFactory(selectedDate)
-//    )
 ) {
     // 1) 먼저 이전 엔트리를 확인해본다
     val previousEntry = navController.previousBackStackEntry
@@ -75,17 +77,41 @@ fun MealDetailScreen(
 
     val showDatePicker by goalViewModel.showDatePicker.collectAsState()
     val selectedDate by goalViewModel.selectedDate.collectAsState()
-    LoadingOverlay(isVisible = goalViewModel.isLoading.collectAsState().value)
+    val isLoading by goalViewModel.isLoading.collectAsState()
 
     // 닉네임 가져오게 viewModel : profileviewmodel
     val myProfile by viewModel.myProfile.collectAsState()
     val nickname by remember(myProfile) {
         mutableStateOf(myProfile?.nickname)
     }
-//    val recommendedEat by viewModel.recommendedEat
 
     // 몇월 며칠 날짜 파싱
     val day = selectedDate.dayOfMonth.toString()
+
+    // 해당날짜 식단기록, 부모랑 같이 써야함
+    val mealViewModel: MealViewModel = viewModel(parentEntry)
+    LaunchedEffect(selectedDate) {
+        // 비동기 작업
+        coroutineScope {
+            val job1 = async { mealViewModel.fetchPhysicalInfo(selectedDate.toString()) }
+            val job2 = async { mealViewModel.fetchMealDaily(selectedDate.toString()) }
+
+            job1.await()
+            job2.await()
+        }
+        mealViewModel.fetchDailyNutrition(selectedDate.toString())
+    }
+
+    val dailyNutrition by mealViewModel.dailyNutrition.collectAsState()
+    val nowPhysicalInfo by mealViewModel.nowPhysicalInfo.collectAsState()  // 이건 권장 소비량도 있음
+    val mealDaily by mealViewModel.mealDaily.collectAsState()  // 이건 권장 소비량도 있음
+    val carbRatio by mealViewModel.carbRatio.collectAsState()
+    val sugarRatio by mealViewModel.sugarRatio.collectAsState()
+    val proteinRatio by mealViewModel.proteinRatio.collectAsState()
+    val fatRatio by mealViewModel.fatRatio.collectAsState()
+    val mealLoading by mealViewModel.isLoading.collectAsState()
+
+    LoadingOverlay(isVisible = isLoading || mealLoading)
 
     val dummyMealData = MealDailyResponse(
         mealId = 1,
@@ -277,12 +303,12 @@ fun MealDetailScreen(
                 contentAlignment = Alignment.Center,
             ){
                 DonutChartWithLegend(
-                    calories = 689,
-                    calorieGoal = 1285,
-                    carbRatio = 0.3,
-                    sugarRatio = 0.1,
-                    proteinRatio = 0.1,
-                    fatRatio = 0.2
+                    calories = dailyNutrition?.totalCalorie,
+                    calorieGoal = nowPhysicalInfo?.recommendedIntake,
+                    carbRatio = carbRatio,
+                    sugarRatio = sugarRatio,
+                    proteinRatio = proteinRatio,
+                    fatRatio = fatRatio
                 )
             }
 
@@ -290,7 +316,7 @@ fun MealDetailScreen(
 
             // 시간대별 식단 카드 4개
             MealTimeType.entries.forEach { mealType ->
-                val timeData = dummyMealData.mealTimes.find { it.mealType == mealType.name }
+                val timeData = mealDaily?.mealTimes?.find { it.mealType == mealType.name }
 
                 when {
                     timeData != null && timeData.foods.isNotEmpty() -> {

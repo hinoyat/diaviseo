@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.diaviseo.network.RetrofitInstance
 import com.example.diaviseo.network.meal.dto.res.DailyNutritionResponse
+import com.example.diaviseo.network.meal.dto.res.MealDailyResponse
 import com.example.diaviseo.network.meal.dto.res.NutritionStatsEntry
 import com.example.diaviseo.network.user.dto.res.FetchProfileResponse
 import com.example.diaviseo.network.user.dto.res.UserPhysicalInfoResponse
@@ -50,6 +51,10 @@ class MealViewModel: ViewModel() {
 
     private val _totalCalorie =  MutableStateFlow(0)
     val totalCalorie: StateFlow<Int> = _totalCalorie
+
+    // 일일 식단
+    private val _mealDaily = MutableStateFlow<MealDailyResponse?>(null)
+    val mealDaily: StateFlow<MealDailyResponse?> = _mealDaily
 
     // 탄단지당 비율 (먹은 칼로리, 권장 칼로리, 소수점 자리수)
     fun calculateRatio(nutrient: Double?, calorie: Int?, scale: Int = 2, n: Int): Double {
@@ -117,7 +122,6 @@ class MealViewModel: ViewModel() {
                 val response = RetrofitInstance.mealApiService.fetchMealStatistic(periodType = periodType ,endDate = endDate)
                 if (response.status == "OK") {
                     _mealStatistic.value = response.data?.data
-                    Log.d("MealViewModel", "식단통계 잘 들어감?!?!?!?!? ${_mealStatistic.value}")
 
                     _isLoading.value = false
                 } else {
@@ -125,6 +129,25 @@ class MealViewModel: ViewModel() {
                 }
             } catch (e: Exception) {
                 Log.e("MealViewModel", "식단 통계 칼로리 예외 발생: ${e.message}")
+            }
+        }
+    }
+
+    fun fetchMealDaily(date: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = RetrofitInstance.mealApiService.fetchMealDaily(date = date)
+                if (response.status == "OK") {
+                    _mealDaily.value = response.data
+                    Log.d("MealViewModel", "일일 식단 정보 잘 들어감?!?!?!?!? ${_mealDaily.value}")
+
+                    _isLoading.value = false
+                } else {
+                    Log.e("MealViewModel", "일일 식단 정보 불러오기 실패: ${response.message}")
+                }
+            } catch (e: Exception) {
+                Log.e("MealViewModel", "일일 식단 정보 칼로리 예외 발생: ${e.message}")
             }
         }
     }
