@@ -60,18 +60,23 @@ public class InBodyOcrService {
                 }
             }
         }
+
         try {
-            tesseract.setLanguage("kor+eng");
-            log.info("언어 설정 성공: kor+eng");
+            // 빠른 처리를 위한 설정
+            tesseract.setLanguage("eng");  // 영어만 사용 (빠름)
+            log.info("언어 설정 성공: eng (고속 모드)");
+
+            // 빠른 OCR 설정
+            tesseract.setTessVariable("tessedit_ocr_engine_mode", "0");  // Legacy 엔진 (빠름)
+            tesseract.setTessVariable("tessedit_pageseg_mode", "6");      // 단일 텍스트 블록
+            tesseract.setTessVariable("classify_bln_numeric_mode", "1");   // 숫자 우선 인식
+            tesseract.setTessVariable("tessedit_create_hocr", "0");       // HOCR 생성 안함
+            tesseract.setTessVariable("tessedit_create_pdf", "0");        // PDF 생성 안함
+
+            log.info("고속 OCR 설정 완료");
         } catch (Exception e) {
             log.error("언어 설정 실패: {}", e.getMessage());
-            log.info("언어 설정 실패 - 영어만 사용합니다.");
-            try {
-                tesseract.setLanguage("eng");
-                log.info("영어 언어 설정 성공");
-            } catch (Exception ex) {
-                log.error("영어 언어 설정도 실패: {}", ex.getMessage());
-            }
+            log.info("언어 설정 실패 - 기본 설정을 사용합니다.");
         }
 
         tesseract.setTessVariable("tessedit_char_whitelist",
@@ -81,7 +86,7 @@ public class InBodyOcrService {
     public BodyInfoCreateRequest extractBodyInfoFromImage(MultipartFile imageFile)
             throws IOException, TesseractException {
 
-        log.info("인바디 이미지 OCR 처리 시작");
+        log.info("인바디 이미지 OCR 처리 시작 (고속 모드)");
 
         BufferedImage image = ImageIO.read(imageFile.getInputStream());
         String ocrText = tesseract.doOCR(image);
@@ -145,13 +150,30 @@ public class InBodyOcrService {
 
     private BigDecimal extractBodyFat(String text) {
         Matcher matcher;
-        // 1. PercentBodyFat 직접 찾기 (16.3)
+
+        // 1. PercentBodyFat 직접 찾기
         Pattern pattern1 = Pattern.compile("PercentBodyFat\\s*([0-9]?[0-9]\\.[0-9]+)");
         matcher = pattern1.matcher(text);
         if (matcher.find()) {
             String bodyFatStr = matcher.group(1);
             log.info("체지방률 패턴 1에서 발견: {}", bodyFatStr);
             return new BigDecimal(bodyFatStr);
+        }
+
+        // 2. 93처럼 잘못 인식된 경우를 9.3으로 변환하여 체크
+        Pattern pattern2 = Pattern.compile("PercentBodyFat[\\s\\w]*?([0-9]{2})");
+        matcher = pattern2.matcher(text);
+        if (matcher.find()) {
+            String bodyFatStr = matcher.group(1);
+            // 93을 9.3으로, 87을 8.7로 변환
+            if (bodyFatStr.length() == 2) {
+                String corrected = bodyFatStr.charAt(0) + "." + bodyFatStr.charAt(1);
+                BigDecimal bodyFat = new BigDecimal(corrected);
+                if (bodyFat.compareTo(new BigDecimal("3")) >= 0 && bodyFat.compareTo(new BigDecimal("40")) <= 0) {
+                    log.info("체지방률 패턴 2에서 발견 (보정됨): {} -> {}", bodyFatStr, corrected);
+                    return bodyFat;
+                }
+            }
         }
 
         log.warn("체지방률 정보를 찾을 수 없습니다");
