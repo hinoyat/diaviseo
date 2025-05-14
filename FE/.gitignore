@@ -292,3 +292,6 @@ fabric.properties
 
 # Firebase 알림 기능
 mobile/google-services.json
+
+/.idea/AndroidProjectSystem.xml
+/.idea/deploymentTargetSelector.xml
