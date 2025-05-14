@@ -37,7 +37,7 @@ fun MyHealthDataList(
                 .padding(bottom = 12.dp),
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(4.dp)
+            elevation = CardDefaults.cardElevation(2.dp)
         ) {
             Row(
                 modifier = Modifier
@@ -62,7 +62,7 @@ fun MyHealthDataList(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(4.dp)
+            elevation = CardDefaults.cardElevation(2.dp)
         ) {
             Row(
                 modifier = Modifier

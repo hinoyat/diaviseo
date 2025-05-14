@@ -12,29 +12,58 @@ import com.example.diaviseo.ui.theme.DiaViseoColors
 
 @Composable
 fun TypingIndicator(modifier: Modifier = Modifier) {
-    val dotCount = rememberInfiniteTransition(label = "dots").animateValue(
-        initialValue = 1,
-        targetValue = 3,
-        typeConverter = Int.VectorConverter,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 500, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "typingDotAnim"
-    )
+    val text = "디아비서가 입력 중입니다..."
+    val waveTransition = rememberInfiniteTransition(label = "wave")
 
-    val dots = ".".repeat(dotCount.value)
+    // 조절 가능한 파라미터들
+    val waveHeight = -3f // 파도 높이 (y축 offset)
+    val waveSpeed = 1000 // 한 사이클 지속 시간 (ms)
+    val waveDelayPerChar = 100 // 글자 간 딜레이 (ms)
+    val alphaMin = 0.4f // 최소 알파 값
+    val alphaMax = 1f   // 최대 알파 값
 
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = "디아비서가 입력 중입니다$dots",
-            fontSize = 13.sp,
-            color = DiaViseoColors.Placeholder
-        )
+        text.forEachIndexed { index, char ->
+            val offsetY by waveTransition.animateFloat(
+                initialValue = 0f,
+                targetValue = waveHeight,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(
+                        durationMillis = waveSpeed,
+                        delayMillis = index * waveDelayPerChar,
+                        easing = LinearOutSlowInEasing
+                    ),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "charOffset-$index"
+            )
+
+            val alpha by waveTransition.animateFloat(
+                initialValue = alphaMin,
+                targetValue = alphaMax,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(
+                        durationMillis = waveSpeed,
+                        delayMillis = index * waveDelayPerChar,
+                        easing = LinearOutSlowInEasing
+                    ),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "charAlpha-$index"
+            )
+
+            Text(
+                text = char.toString(),
+                fontSize = 13.sp,
+                color = DiaViseoColors.Placeholder.copy(alpha = alpha),
+                modifier = Modifier.offset(y = offsetY.dp)
+            )
+        }
     }
 }

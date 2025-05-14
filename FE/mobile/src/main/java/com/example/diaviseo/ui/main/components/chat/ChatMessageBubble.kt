@@ -7,10 +7,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,7 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.diaviseo.R
 import com.example.diaviseo.ui.theme.DiaViseoColors
-import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -52,7 +49,7 @@ fun ChatMessageBubble(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp),
         horizontalArrangement = if (message.isUser) Arrangement.End else Arrangement.Start,
-        verticalAlignment = Alignment.Bottom
+        verticalAlignment = Alignment.CenterVertically
     ) {
         if (!message.isUser && message.characterImageRes != null) {
             Image(
@@ -61,12 +58,17 @@ fun ChatMessageBubble(
                 modifier = Modifier
                     .size(40.dp)
                     .padding(end = 8.dp)
+                    .align(Alignment.CenterVertically)
             )
         }
 
-        Row(verticalAlignment = Alignment.Bottom) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             if (!message.isUser) {
-                BubbleTail(color = bubbleColor, isUser = false)
+                BubbleTail(
+                    color = bubbleColor,
+                    isUser = false,
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                )
                 Spacer(modifier = Modifier.width(4.dp))
             }
 
@@ -86,7 +88,7 @@ fun ChatMessageBubble(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
 
                 Text(
                     text = formattedTime,
@@ -97,17 +99,21 @@ fun ChatMessageBubble(
 
             if (message.isUser) {
                 Spacer(modifier = Modifier.width(4.dp))
-                BubbleTail(color = bubbleColor, isUser = true)
+                BubbleTail(
+                    color = bubbleColor,
+                    isUser = true,
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                )
             }
         }
     }
 }
 
 @Composable
-fun BubbleTail(color: Color, isUser: Boolean) {
+fun BubbleTail(color: Color, isUser: Boolean, modifier: Modifier = Modifier) {
     Canvas(
-        modifier = Modifier
-            .size(8.dp)
+        modifier = modifier
+            .size(width = 10.dp, height = 12.dp)
     ) {
         val path = Path().apply {
             if (isUser) {
@@ -128,8 +134,7 @@ fun BubbleTail(color: Color, isUser: Boolean) {
 @Composable
 fun ScrollToBottomButton(onClick: () -> Unit) {
     Box(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter
     ) {
         Box(
