@@ -1,5 +1,6 @@
 package com.example.diaviseo.ui.register.bodyregister.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
@@ -16,14 +17,17 @@ import com.example.diaviseo.ui.theme.*
 @Composable
 fun LabeledNumberInputField(
     label: String,
-    unit: String,
     value: String,
     onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+    unit: String? = null,
+    placeholder: String? = null,
+    modifier: Modifier = Modifier,
+    readOnly: Boolean = false,
+    onClick: (() -> Unit)? = null
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 25.dp)
     ) {
@@ -33,35 +37,50 @@ fun LabeledNumberInputField(
             modifier = Modifier.weight(1f)
         )
 
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier
-                .width(130.dp)
-                .height(48.dp),
-            textStyle = medium14,
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color.Black,
-                unfocusedTextColor = Color.Black,
-                disabledTextColor = Color.Gray,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                disabledContainerColor = Color.White,
-                focusedBorderColor = Color(0xFF516AF0),
-                unfocusedBorderColor = Color(0xFFCCCCCC),
-                disabledBorderColor = Color(0xFFEEEEEE),
-                cursorColor = Color(0xFF516AF0)
-            )
-            ,
-            trailingIcon = {
-                Text(
-                    text = unit,
-                    style = medium14,
-                    color = if (value.isBlank()) Color.Gray else Color.Black
+        Box(
+            modifier = modifier
+                .height(48.dp)
+                .then(
+                    if (onClick != null) Modifier.clickable { onClick() } else Modifier
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            OutlinedTextField(
+                value = value,
+                onValueChange = onValueChange,
+                readOnly = readOnly,
+                textStyle = medium14,
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxSize(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black,
+                    disabledTextColor = Color.Gray,
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
+                    disabledContainerColor = Color.White,
+                    focusedBorderColor = Color(0xFF516AF0),
+                    unfocusedBorderColor = Color(0xFFCCCCCC),
+                    disabledBorderColor = Color(0xFFEEEEEE),
+                    cursorColor = Color(0xFF516AF0)
+                ),
+                trailingIcon = {
+                    unit?.let {
+                        Text(
+                            text = it,
+                            style = medium14,
+                            color = if (value.isBlank()) Color.Gray else Color.Black
+                        )
+                    }
+                },
+                placeholder = {
+                    placeholder?.let {
+                        Text(text = it, style = medium14, color = Color.Gray)
+                    }
+                },
+
                 )
-            }
-        )
+        }
     }
 }
