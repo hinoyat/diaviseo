@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,6 +14,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -96,6 +98,19 @@ public class InBodyOcrService {
         return parseInBodyData(ocrText);
     }
 
+    @Async("ocrTaskExecutor")
+    public CompletableFuture<BodyInfoCreateRequest> extractBodyInfoFromImageAsync(MultipartFile imageFile)
+            throws IOException, TesseractException {
+
+        log.info("인바디 이미지 OCR 처리 시작 (비동기 모드)");
+
+        // 기존 동기 메서드 호출
+        BodyInfoCreateRequest result = extractBodyInfoFromImage(imageFile);
+
+        log.info("인바디 이미지 OCR 처리 완료 (비동기 모드)");
+        return CompletableFuture.completedFuture(result);
+    }
+
     private BodyInfoCreateRequest parseInBodyData(String ocrText) {
         BigDecimal weight = extractWeight(ocrText);
         log.info("추출된 체중: {}", weight);
@@ -151,18 +166,30 @@ public class InBodyOcrService {
     private BigDecimal extractBodyFat(String text) {
         Matcher matcher;
 
-        // 1. PercentBodyFat 직접 찾기
-        Pattern pattern1 = Pattern.compile("PercentBodyFat\\s*([0-9]?[0-9]\\.[0-9]+)");
+        // 1. PercentBodyFat 뒤의 정확한 체지방률 찾기 (공백 포함)
+        Pattern pattern1 = Pattern.compile("PercentBodyFat[\\s\\w]*?([0-9]\\.[0-9]+)");
         matcher = pattern1.matcher(text);
         if (matcher.find()) {
             String bodyFatStr = matcher.group(1);
-            log.info("체지방률 패턴 1에서 발견: {}", bodyFatStr);
+            BigDecimal bodyFat = new BigDecimal(bodyFatStr);
+            if (bodyFat.compareTo(new BigDecimal("3")) >= 0 && bodyFat.compareTo(new BigDecimal("40")) <= 0) {
+                log.info("체지방률 패턴 1에서 발견: {}", bodyFatStr);
+                return bodyFat;
+            }
+        }
+
+        // 2. PercentBodyFat 직접 찾기
+        Pattern pattern2 = Pattern.compile("PercentBodyFat\\s*([0-9]?[0-9]\\.[0-9]+)");
+        matcher = pattern2.matcher(text);
+        if (matcher.find()) {
+            String bodyFatStr = matcher.group(1);
+            log.info("체지방률 패턴 2에서 발견: {}", bodyFatStr);
             return new BigDecimal(bodyFatStr);
         }
 
-        // 2. 93처럼 잘못 인식된 경우를 9.3으로 변환하여 체크
-        Pattern pattern2 = Pattern.compile("PercentBodyFat[\\s\\w]*?([0-9]{2})");
-        matcher = pattern2.matcher(text);
+        // 3. 93처럼 잘못 인식된 경우를 9.3으로 변환하여 체크
+        Pattern pattern3 = Pattern.compile("PercentBodyFat[\\s\\w]*?([0-9]{2})");
+        matcher = pattern3.matcher(text);
         if (matcher.find()) {
             String bodyFatStr = matcher.group(1);
             // 93을 9.3으로, 87을 8.7로 변환
@@ -170,7 +197,7 @@ public class InBodyOcrService {
                 String corrected = bodyFatStr.charAt(0) + "." + bodyFatStr.charAt(1);
                 BigDecimal bodyFat = new BigDecimal(corrected);
                 if (bodyFat.compareTo(new BigDecimal("3")) >= 0 && bodyFat.compareTo(new BigDecimal("40")) <= 0) {
-                    log.info("체지방률 패턴 2에서 발견 (보정됨): {} -> {}", bodyFatStr, corrected);
+                    log.info("체지방률 패턴 3에서 발견 (보정됨): {} -> {}", bodyFatStr, corrected);
                     return bodyFat;
                 }
             }
@@ -258,3 +285,4 @@ public class InBodyOcrService {
         return LocalDate.now();
     }
 }
+
