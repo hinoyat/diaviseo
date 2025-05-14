@@ -1,6 +1,5 @@
-from langchain.chains.conversation.base import ConversationChain
-from langchain.chat_models import ChatOpenAI
-
+from langchain.chains import ConversationChain
+from langchain_community.chat_models import ChatOpenAI
 from app.services.memory.mongo_memory import get_memory
 from app.services.workout.prompt.prompt_templates import workout_feedback_prompt
 from app.config.settings import get_settings
