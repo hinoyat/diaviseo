@@ -55,13 +55,10 @@ fun GoalContent(
 
     // 평가<->디테일 운동 관리
     val exerciseViewModel: ExerciseViewModel = viewModel()
-    val totalExCalories by exerciseViewModel.totalCalories.collectAsState()
-    val totalExerciseTime by exerciseViewModel.totalExerciseTime.collectAsState()
-    val exerciseCount by exerciseViewModel.exerciseCount.collectAsState()
-    val exerciseList by exerciseViewModel.exerciseList.collectAsState()
     val dailyData by exerciseViewModel.dailyStats.collectAsState()
     val weeklyData by exerciseViewModel.weeklyStats.collectAsState()
     val monthlyData by exerciseViewModel.monthlyStats.collectAsState()
+    val stepData by exerciseViewModel.stepData.collectAsState()
     val exIsLoading by exerciseViewModel.isLoading.collectAsState()
 
     val isToday = remember(selectedDate) {
@@ -143,13 +140,13 @@ fun GoalContent(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
-                    text = "난 얼마나 걸었을까?",
+                    text = "이번주, 난 얼마나 걸었을까?",
                     style = semibold16,
                     color = DiaViseoColors.Basic
                 )
                 Spacer(modifier = Modifier.height(24.dp))
 
-                StepBarChart()
+                StepBarChart(stepData = stepData)
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Banner(

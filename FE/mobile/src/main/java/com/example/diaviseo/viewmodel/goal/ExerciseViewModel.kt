@@ -7,11 +7,19 @@ import com.example.diaviseo.network.RetrofitInstance
 import com.example.diaviseo.network.exercise.dto.res.DailyExerciseStatsResponse
 import com.example.diaviseo.network.exercise.dto.res.DayExerciseStatsResponse.ExerciseDetail
 import com.example.diaviseo.network.exercise.dto.res.MonthlyExerciseStatsResponse
+import com.example.diaviseo.network.exercise.dto.res.StepWeeklyResponse
+import com.example.diaviseo.network.exercise.dto.res.StepWeeklyResponse.StepDailyData
 import com.example.diaviseo.network.exercise.dto.res.WeeklyExerciseStatsResponse
 import com.example.diaviseo.network.meal.dto.res.NutritionStatsEntry
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+
+data class StepBarEntry(
+    val dateLabel: String,
+    val stepCount: Int
+)
 
 class ExerciseViewModel(): ViewModel() {
     private val _isLoading = MutableStateFlow(false)
@@ -38,6 +46,13 @@ class ExerciseViewModel(): ViewModel() {
 
     private val _monthlyStats = MutableStateFlow<List<MonthlyExerciseStatsResponse.MonthlyExercise>?>(null)
     val monthlyStats: StateFlow<List<MonthlyExerciseStatsResponse.MonthlyExercise>?> = _monthlyStats
+
+    private val _stepData = MutableStateFlow<List<StepBarEntry>>(emptyList())
+    val stepData: StateFlow<List<StepBarEntry>> = _stepData
+
+    init {
+        fetchStepWeekly()
+    }
 
     fun setTotalCalories(calories: Int) {
         _totalCalories.value += calories
@@ -94,6 +109,28 @@ class ExerciseViewModel(): ViewModel() {
                 _isLoading.value = false
             } catch (e: Exception) {
                 Log.e("ExerciseViewModel", "운동 통계 조회 예외 발생: ${e.message}")
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun fetchStepWeekly() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = RetrofitInstance.exerciseApiService.fetchStepWeekly().data
+                val transformed = response?.weeklySteps!!.map {
+                    val date = LocalDate.parse(it.date)
+                    StepBarEntry(
+                        dateLabel = "${date.monthValue}/${date.dayOfMonth}",
+                        stepCount = it.stepCount
+                    )
+                }
+                _stepData.value = transformed
+
+                _isLoading.value = false
+            } catch (e: Exception) {
+                Log.e("ExerciseViewModel", "일주일 걸음수 조회 예외 발생: ${e.message}")
                 e.printStackTrace()
             }
         }

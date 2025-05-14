@@ -1,12 +1,15 @@
 package com.example.diaviseo.ui.main.components.goal.exercise
 
+import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.diaviseo.ui.theme.DiaViseoColors
+import com.example.diaviseo.viewmodel.goal.StepBarEntry
 import com.patrykandpatrick.vico.core.entry.entryOf
 import com.patrykandpatrick.vico.compose.chart.Chart
 import com.patrykandpatrick.vico.compose.chart.column.columnChart
@@ -15,17 +18,22 @@ import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
 import com.patrykandpatrick.vico.core.entry.ChartEntryModelProducer
 import com.patrykandpatrick.vico.core.component.shape.LineComponent
 import com.patrykandpatrick.vico.compose.component.marker.markerComponent
+import com.patrykandpatrick.vico.core.component.Component
+import com.patrykandpatrick.vico.core.component.marker.MarkerComponent
 import com.patrykandpatrick.vico.core.component.text.TextComponent // 마커 레이블용 텍스트 컴포넌트
 import com.patrykandpatrick.vico.core.component.shape.ShapeComponent // 마커 배경용 모양 컴포넌트
 import com.patrykandpatrick.vico.core.component.shape.Shapes // 미리 정의된 모양 사용
+import com.patrykandpatrick.vico.core.dimensions.MutableDimensions
+import com.patrykandpatrick.vico.core.entry.ChartEntryModel
 
 
 @Composable
-fun StepBarChart(modifier: Modifier = Modifier) {
-    val data = StepBarChartData.getSampleData()
-
+fun StepBarChart(
+    modifier: Modifier = Modifier,
+    stepData: List<StepBarEntry>
+) {
     // Bar entries 준비
-    val entries = data.mapIndexed { index, entry ->
+    val entries = stepData.mapIndexed { index, entry ->
         entryOf(index.toInt(), entry.stepCount)
     }
 
@@ -34,8 +42,9 @@ fun StepBarChart(modifier: Modifier = Modifier) {
     val customColumns = remember { // remember를 사용하여 불필요한 재생성 방지
         listOf(
             LineComponent(
-                color = DiaViseoColors.Main2.toArgb(),       // 막대의 색상을 원하는 색으로 변경합니다. [2]
+                color = Color(0xFF5C9DFF).toArgb(),       // 막대의 색상을 원하는 색으로 변경합니다. [2]
                 thicknessDp = 20f,         // 막대의 두께(너비)를 원하는 크기로 변경합니다. [2]
+                shape = Shapes.roundedCornerShape(allPercent = 25)
             )
         )
     }
@@ -49,7 +58,7 @@ fun StepBarChart(modifier: Modifier = Modifier) {
                 color = DiaViseoColors.Callout.toArgb() // 배경색
             )
             // 패딩 설정 (core 컴포넌트는 보통 Float 값을 직접 받음, dp 값 변환 필요 시 toPx() 등 사용)
-//            padding = MutableDimensions(horizontal = 8f, vertical = 4f) // 예시: 8px, 4px
+            padding = MutableDimensions(horizontalDp = 4f, verticalDp = 2f)
             // 또는 dp 값을 변환: val density = LocalDensity.current.density
             // padding = MutableDimensions(horizontal = (8.dp * density).value, vertical = (4.dp * density).value)
         }.build()
@@ -95,7 +104,7 @@ fun StepBarChart(modifier: Modifier = Modifier) {
         ),
         bottomAxis = rememberBottomAxis(
             valueFormatter = { value, _ ->
-                data.getOrNull(value.toInt())?.dateLabel ?: ""
+                stepData.getOrNull(value.toInt())?.dateLabel ?: ""
             },
         ),
         marker = customTooltipMarker

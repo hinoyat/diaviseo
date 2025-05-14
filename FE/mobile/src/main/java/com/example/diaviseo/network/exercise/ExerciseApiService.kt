@@ -11,6 +11,7 @@ import com.example.diaviseo.network.exercise.dto.req.StepRecordRequest
 import com.example.diaviseo.network.exercise.dto.res.DailyExerciseStatsResponse
 import com.example.diaviseo.network.exercise.dto.res.MonthlyExerciseStatsResponse
 import com.example.diaviseo.network.exercise.dto.res.StepRecordResponse
+import com.example.diaviseo.network.exercise.dto.res.StepWeeklyResponse
 import com.example.diaviseo.network.exercise.dto.res.WeeklyExerciseStatsResponse
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -44,6 +45,11 @@ interface ExerciseApiService {
     suspend fun uploadStepRecords(
         @Body records: List<StepRecordRequest>
     ): ApiResponse<List<StepRecordResponse>>
+
+    // 일주일 걸음 수 조회
+    @GET("exercises/step-week")
+    suspend fun fetchStepWeekly(
+    ): ApiResponse<StepWeeklyResponse>
 
     // 운동 삭제
     @DELETE("exercises/{exerciseId}")
