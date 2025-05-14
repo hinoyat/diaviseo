@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.diaviseo.model.exercise.Exercise
 import com.example.diaviseo.network.RetrofitInstance
+import com.example.diaviseo.network.exercise.dto.req.ExercisePutRecordRequest
 import com.example.diaviseo.network.exercise.dto.req.ExerciseRecordRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,20 +17,28 @@ class ExerciseRecordViewModel : ViewModel(){
     private val _selectedExercise = MutableStateFlow<Exercise?>(null)
     val selectedExercise = _selectedExercise.asStateFlow()
 
+    // 수정, 선택된 운동 id
+    private val _exerciseId = MutableStateFlow(0)
+    val exerciseId = _exerciseId.asStateFlow()
+
     // 입력된 운동 시간 (분)
     private val _exerciseTime = MutableStateFlow(30)
     val exerciseTime = _exerciseTime.asStateFlow()
 
     // 시작 시간 (예: "08:30")
-    private val _startTime = MutableStateFlow<String?>(null)
+    private val _startTime = MutableStateFlow<String>("00:00")
     val startTime = _startTime.asStateFlow()
 
-    // 등록 날짜
+    // 등록 날짜 (예 "2025-03-23")
     private val _registerDate = MutableStateFlow(LocalDate.now().toString())
     val registerDate = _registerDate.asStateFlow()
 
     fun setExercise(exercise: Exercise) {
         _selectedExercise.value = exercise
+    }
+
+    fun setExerciseId(id: Int) {
+        _exerciseId.value = id
     }
 
     fun setExerciseTime(time: Int) {
@@ -42,6 +51,10 @@ class ExerciseRecordViewModel : ViewModel(){
         }
     }
 
+    fun setPutStartTime(time: String){
+        _startTime.value = time
+    }
+
     fun setRegisterDate(date: String){
         _registerDate.value = date
     }
@@ -51,14 +64,27 @@ class ExerciseRecordViewModel : ViewModel(){
         val time = _exerciseTime.value
         val startTime = _startTime.value
 
-        val formattedDate = startTime?.let {
-            val now = LocalDate.now()
+        val formattedDate = startTime.let {
             _registerDate.value + "T" + it.padStart(5, '0') // ex. 08:03 → 08:03
         }
 
-
         return ExerciseRecordRequest(
             exerciseNumber = exercise.id,
+            exerciseDate = formattedDate,
+            exerciseTime = time
+        )
+    }
+
+    private fun toPutExercise(totalKcal: Int): ExercisePutRecordRequest? {
+        val time = _exerciseTime.value
+        val startTime = _startTime.value
+
+        val formattedDate = startTime.let {
+            _registerDate.value + "T" + it.padStart(5, '0') // ex. 08:03 → 08:03
+        }
+
+        return ExercisePutRecordRequest(
+            exerciseCalorie = totalKcal,
             exerciseDate = formattedDate,
             exerciseTime = time
         )
@@ -79,6 +105,24 @@ class ExerciseRecordViewModel : ViewModel(){
                 }
             } catch (e: Exception) {
                 Log.e("ExerciseSubmit", "예외 발생", e)
+                onError(e)
+            }
+        }
+    }
+
+    fun putExercise(totalKcal: Int, exerciseId: Int, onSuccess: () -> Unit, onError: (Throwable) -> Unit) {
+        val request = toPutExercise(totalKcal) ?: return
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.exerciseApiService.putExercise(exerciseId = exerciseId, request = request)
+                Log.d("Exercise put", "서버 응답: $response")
+                if (response.status == "OK") {
+                    onSuccess()
+                } else {
+                    onError(Exception("서버 오류: ${response.message}"))
+                }
+            } catch (e: Exception) {
+                Log.e("Exercise put", "예외 발생", e)
                 onError(e)
             }
         }

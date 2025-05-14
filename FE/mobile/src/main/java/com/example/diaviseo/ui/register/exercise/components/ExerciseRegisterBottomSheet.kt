@@ -23,14 +23,19 @@ import androidx.compose.foundation.BorderStroke
 fun ExerciseRegisterBottomSheet(
     viewModel: ExerciseRecordViewModel,
     onDismiss: () -> Unit,
-    onSuccess: () -> Unit
+    onSuccess: () -> Unit,
+    parmHour: String = "",
+    parmMinute: String = "",
+    parmPeriod: String = "오전",
+    isPut: Boolean = false
 ) {
     val exercise = viewModel.selectedExercise.collectAsState().value ?: return
     val exerciseTime = viewModel.exerciseTime.collectAsState().value
+    val exerciseId = viewModel.exerciseId.collectAsState().value
 
-    var hour by remember { mutableStateOf("") }
-    var minute by remember { mutableStateOf("") }
-    var period by remember { mutableStateOf("오전") }
+    var hour by remember { mutableStateOf(parmHour) }
+    var minute by remember { mutableStateOf(parmMinute) }
+    var period by remember { mutableStateOf(parmPeriod) }
     var periodMenuExpanded by remember { mutableStateOf(false) }
 
     val totalKcal = exercise.calorie * exerciseTime
@@ -185,15 +190,30 @@ fun ExerciseRegisterBottomSheet(
                     val formattedTime = String.format("%02d:%02d", correctedHour, minute.toIntOrNull() ?: 0)
 
                     viewModel.setStartTime(correctedHour.toString(), minute)
-                    viewModel.submitExercise(
-                        onSuccess = {
-                            onDismiss()
-                            onSuccess()
-                        },
-                        onError = {
-                            Log.e("ExerciseSubmit", "에러 발생: $it")
-                        }
-                    )
+                    // 여기서 등록이냐 수정이냐 조건 분기필요
+                    if (isPut) {
+                        viewModel.putExercise(
+                            totalKcal = totalKcal,
+                            exerciseId = exerciseId,
+                            onSuccess = {
+                                onDismiss()
+                                onSuccess()
+                            },
+                            onError = {
+                                Log.e("ExerciseSubmit", "에러 발생: $it")
+                            }
+                        )
+                    } else {
+                        viewModel.submitExercise(
+                            onSuccess = {
+                                onDismiss()
+                                onSuccess()
+                            },
+                            onError = {
+                                Log.e("ExerciseSubmit", "에러 발생: $it")
+                            }
+                        )
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -204,7 +224,11 @@ fun ExerciseRegisterBottomSheet(
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("기록하기", style = regular16)
+                // 여기서 등록이냐 수정이냐 조건 분기필요
+                Text(
+                    text = if (isPut) "수정하기" else "기록하기",
+                    style = regular16
+                )
             }
 
             Spacer(modifier = Modifier.height(10.dp))
