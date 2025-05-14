@@ -136,7 +136,7 @@ fun ChatContent(
                                     isTyping = true
 
                                     coroutineScope.launch {
-                                        delay(800)
+                                        delay(5000)
                                         messages.add(
                                             ChatMessage(
                                                 text = "이건 $question 에 대한 답변입니다! 😄",
@@ -182,7 +182,7 @@ fun ChatContent(
                             focusManager.clearFocus()
 
                             coroutineScope.launch {
-                                delay(1000)
+                                delay(5000)
                                 messages.add(
                                     ChatMessage(
                                         text = "이건 예시 챗봇 응답이에요 🍱",
