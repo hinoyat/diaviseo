@@ -1,6 +1,7 @@
 package com.example.diaviseo.ui.detail
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -9,9 +10,11 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.diaviseo.model.exercise.Exercise
 import com.example.diaviseo.ui.components.CommonTopBar
 import com.example.diaviseo.ui.components.DiaDatePickerDialog
 import com.example.diaviseo.ui.components.LoadingOverlay
@@ -19,6 +22,7 @@ import com.example.diaviseo.ui.detail.components.exercise.AddExerciseBox
 import com.example.diaviseo.ui.components.DeleteDialog
 import com.example.diaviseo.ui.detail.components.exercise.ExerciseRecordItem
 import com.example.diaviseo.ui.detail.components.exercise.ExerciseSummarySection
+import com.example.diaviseo.ui.register.exercise.components.ExerciseRegisterBottomSheet
 import com.example.diaviseo.ui.theme.DiaViseoColors
 import com.example.diaviseo.ui.theme.bold20
 //import com.example.diaviseo.viewmodel.ExerciseDetailViewModel
@@ -27,7 +31,10 @@ import com.example.diaviseo.viewmodel.ProfileViewModel
 import com.example.diaviseo.viewmodel.goal.ExerciseViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import com.example.diaviseo.viewmodel.register.exercise.ExerciseRecordViewModel
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
 fun ExerciseDetailScreen(
@@ -92,6 +99,13 @@ fun ExerciseDetailScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var selectedDeleteIndex by remember { mutableStateOf(-1) }
 
+    // 바텀시트 상태
+    val selectedExercise = remember { mutableStateOf<Exercise?>(null) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val coroutineScope = rememberCoroutineScope()
+
+    val abc : ExerciseRecordViewModel = viewModel()
+
     LoadingOverlay(isVisible = isLoading || exerciseLoading)
 
     Scaffold(
@@ -145,6 +159,12 @@ fun ExerciseDetailScreen(
                         // ExerciseRegisterBottomSheet 파라미터에 수정이라는 걸 bool로 알리자
                         // 확인 누르면 코루틴 비동기로 응답올때까지 기다렸다가 바텀시트 내리기
                         // 성공하자마자 fetchDailyExercise 부르고 바텀시트 내리기
+                        // TODO: 바텀시트 호출
+                        abc.setExercise(Exercise(16, "댄스", "DANCING", "일반", 6))
+                        selectedExercise.value = Exercise(16, "댄스", "DANCING", "일반", 6)
+                        coroutineScope.launch {
+                            sheetState.show()
+                        }
                     },
                     onDeleteClick = {
                         selectedDeleteIndex = index
@@ -185,6 +205,30 @@ fun ExerciseDetailScreen(
                     showDeleteDialog = false
                 },
                 onDismiss = { showDeleteDialog = false }
+            )
+        }
+    }
+
+    // ✅ 운동 등록 바텀시트
+    selectedExercise.value?.let {
+        ModalBottomSheet(
+            onDismissRequest = {
+                coroutineScope.launch { sheetState.hide() }
+                selectedExercise.value = null
+            },
+            sheetState = sheetState,
+            containerColor = Color.White
+        ) {
+            ExerciseRegisterBottomSheet(
+                viewModel = abc,
+                onDismiss = {
+                    coroutineScope.launch { sheetState.hide() }
+                    selectedExercise.value = null
+                },
+                onSuccess = {
+                    coroutineScope.launch { sheetState.hide() }
+                    Log.d("ExerciseSubmit", "운동 등록 성공")
+                }
             )
         }
     }
