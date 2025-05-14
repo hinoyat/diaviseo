@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.diaviseo.model.exercise.Exercise
+import com.example.diaviseo.model.exercise.ExerciseData
 import com.example.diaviseo.ui.components.CommonTopBar
 import com.example.diaviseo.ui.components.DiaDatePickerDialog
 import com.example.diaviseo.ui.components.LoadingOverlay
@@ -153,15 +154,14 @@ fun ExerciseDetailScreen(
                     time = item.exerciseTime,
                     exerciseDate = item.exerciseDate,
                     onEditClick = {
-                        // TODO: 바텀시트 호출 exerciseId로 수정, 삭제
-                        // exerciseId로 운동 상세 조회해서 무슨 Exercise인지 알아오기 ExerciseRegisterBottomSheet에
-                        // 여기서 생성한 registviewmodel 넘기기
-                        // ExerciseRegisterBottomSheet 파라미터에 수정이라는 걸 bool로 알리자
-                        // 확인 누르면 코루틴 비동기로 응답올때까지 기다렸다가 바텀시트 내리기
-                        // 성공하자마자 fetchDailyExercise 부르고 바텀시트 내리기
+                        // abc라고 해둔 거기에 selectedExercise 넣고 time도 넣고 시작 시간도 넣고 등록 날짜도 넣고
+                        val matchedExercise = ExerciseData.exerciseList.find { it.name == item.exerciseName }
+                        matchedExercise?.let {
+                            abc.setExercise(it)
+                            selectedExercise.value = it
+                        }
+//                        abc.setExercise(Exercise(16, "댄스", "DANCING", "일반", 6))
                         // TODO: 바텀시트 호출
-                        abc.setExercise(Exercise(16, "댄스", "DANCING", "일반", 6))
-                        selectedExercise.value = Exercise(16, "댄스", "DANCING", "일반", 6)
                         coroutineScope.launch {
                             sheetState.show()
                         }
@@ -219,6 +219,7 @@ fun ExerciseDetailScreen(
             sheetState = sheetState,
             containerColor = Color.White
         ) {
+            // ExerciseRegisterBottomSheet 파라미터에 수정이라는 걸 bool로 알리자
             ExerciseRegisterBottomSheet(
                 viewModel = abc,
                 onDismiss = {
@@ -226,6 +227,8 @@ fun ExerciseDetailScreen(
                     selectedExercise.value = null
                 },
                 onSuccess = {
+                    // 확인 누르면 코루틴 비동기로 응답올때까지 기다렸다가 바텀시트 내리기
+                    // 성공하자마자 fetchDailyExercise 부르고 바텀시트 내리기
                     coroutineScope.launch { sheetState.hide() }
                     Log.d("ExerciseSubmit", "운동 등록 성공")
                 }
