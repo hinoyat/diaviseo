@@ -1,20 +1,19 @@
 package com.example.diaviseo.ui.main.components.chat
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
-
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,17 +25,23 @@ fun ChatInputBar(
     onInputChange: (String) -> Unit,
     onSendClick: () -> Unit,
     isSending: Boolean = false,
+    enabled: Boolean = true,
     modifier: Modifier = Modifier
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    // 비활성화 시 흐려진 배경색 적용
+    val backgroundColor = if (enabled) DiaViseoColors.Callout else DiaViseoColors.Callout.copy(alpha = 0.4f)
+
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp)
             .background(
-                color = DiaViseoColors.Callout,
+                color = backgroundColor,
                 shape = RoundedCornerShape(24.dp)
             )
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         OutlinedTextField(
@@ -52,14 +57,22 @@ fun ChatInputBar(
                     fontSize = 14.sp
                 )
             },
-            enabled = !isSending,
+            enabled = enabled,
             singleLine = false,
             maxLines = 3,
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Send),
+            keyboardActions = KeyboardActions(
+                onSend = {
+                    keyboardController?.hide()
+                    onSendClick()
+                }
+            ),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,
-                disabledContainerColor = Color.Transparent,
+                disabledContainerColor = Color(0xFFF3F4F6).copy(alpha = 0.6f),
+                disabledTextColor = Color.Gray.copy(alpha = 0.6f),
+                disabledIndicatorColor = Color.Transparent,
                 errorContainerColor = Color.Transparent,
                 cursorColor = DiaViseoColors.Main1,
                 focusedIndicatorColor = Color.Transparent,
@@ -67,26 +80,42 @@ fun ChatInputBar(
             )
         )
 
-        Text(
-            text = "전송",
-            fontSize = 14.sp,
-            color = if (isSending) DiaViseoColors.Placeholder else DiaViseoColors.Main1,
-            modifier = Modifier
-                .clickable(enabled = !isSending && inputText.isNotBlank()) {
-                    onSendClick()
-                }
-                .padding(8.dp)
-        )
+        IconButton(
+            onClick = {
+                keyboardController?.hide()
+                onSendClick()
+            },
+            enabled = enabled && !isSending && inputText.isNotBlank()
+        ) {
+            Icon(
+                imageVector = Icons.Default.Send,
+                contentDescription = "Send",
+                tint = if (enabled && !isSending) DiaViseoColors.Main1 else DiaViseoColors.Placeholder
+            )
+        }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewChatInputBar() {
+fun PreviewChatInputBarEnabled() {
     ChatInputBar(
-        inputText = "",
+        inputText = "헬로 챗봇",
         onInputChange = {},
         onSendClick = {},
-        isSending = false
+        isSending = false,
+        enabled = true
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewChatInputBarDisabled() {
+    ChatInputBar(
+        inputText = "비활성화 상태",
+        onInputChange = {},
+        onSendClick = {},
+        isSending = false,
+        enabled = false
     )
 }

@@ -24,6 +24,10 @@ class ExerciseRecordViewModel : ViewModel(){
     private val _startTime = MutableStateFlow<String?>(null)
     val startTime = _startTime.asStateFlow()
 
+    // 등록 날짜
+    private val _registerDate = MutableStateFlow(LocalDate.now().toString())
+    val registerDate = _registerDate.asStateFlow()
+
     fun setExercise(exercise: Exercise) {
         _selectedExercise.value = exercise
     }
@@ -37,6 +41,11 @@ class ExerciseRecordViewModel : ViewModel(){
             _startTime.value = "${hour.padStart(2, '0')}:${minute.padStart(2, '0')}"
         }
     }
+
+    fun setRegisterDate(date: String){
+        _registerDate.value = date
+    }
+
     private fun toExerciseRecordRequest(): ExerciseRecordRequest? {
         val exercise = _selectedExercise.value ?: return null
         val time = _exerciseTime.value
@@ -44,7 +53,7 @@ class ExerciseRecordViewModel : ViewModel(){
 
         val formattedDate = startTime?.let {
             val now = LocalDate.now()
-            "$now" + "T" + it.padStart(5, '0') // ex. 08:03 → 08:03
+            _registerDate.value + "T" + it.padStart(5, '0') // ex. 08:03 → 08:03
         }
 
 
