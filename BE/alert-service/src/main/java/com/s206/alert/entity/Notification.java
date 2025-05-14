@@ -46,4 +46,8 @@ public class Notification {
 	@Column(nullable = false)
 	private boolean isDeleted = false;
 
+
+	public void updateReadState() {
+		this.isRead = true;
+	}
 }
