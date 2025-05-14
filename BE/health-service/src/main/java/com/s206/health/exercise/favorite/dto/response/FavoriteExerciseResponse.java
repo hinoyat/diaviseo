@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class FavoriteExerciseResponse {
     private Integer exerciseTypeId;
+    private Integer exerciseNumber;
     private String exerciseName;
     private Integer calorie;
     private String categoryName;
@@ -22,6 +23,7 @@ public class FavoriteExerciseResponse {
     public static FavoriteExerciseResponse toDto(FavoriteExercise favorite, String categoryName) {
         return FavoriteExerciseResponse.builder()
                 .exerciseTypeId(favorite.getExerciseType().getExerciseTypeId())
+                .exerciseNumber(favorite.getExerciseType().getExerciseNumber())
                 .exerciseName(favorite.getExerciseType().getExerciseName())
                 .calorie(favorite.getExerciseType().getExerciseCalorie())
                 .categoryName(categoryName)

@@ -93,11 +93,11 @@ public class ExerciseController {
     }
 
     // 특정 운동 상세 조회
-    @GetMapping("types/{exerciseTypeId}")
+    @GetMapping("types/{exerciseNumber}")
     public ResponseEntity<ResponseDto<ExerciseTypeDetailResponse>> getExerciseTypeDetail(
             @RequestHeader("X-USER-ID") Integer userId,
-            @PathVariable Integer exerciseTypeId) {
-        ExerciseTypeDetailResponse response = exerciseService.getExerciseTypeDetail(exerciseTypeId, userId);
+            @PathVariable Integer exerciseNumber) {
+        ExerciseTypeDetailResponse response = exerciseService.getExerciseTypeDetail(exerciseNumber, userId);
         return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "운동 상세 조회 성공", response));
     }
 

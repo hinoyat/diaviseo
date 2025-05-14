@@ -27,10 +27,14 @@ public class FavoriteExerciseService {
     private final ExerciseTypeRepository exerciseTypeRepository;
 
     @Transactional
-    public FavoriteToggleResponse toggleFavorite(Integer userId, Integer exerciseTypeId) {
+    public FavoriteToggleResponse toggleFavorite(Integer userId, Integer exerciseNumber) {
+        // exerciseNumber로 운동 타입 존재 확인
+        ExerciseType exerciseType = exerciseTypeRepository.findByExerciseNumberAndIsDeletedFalse(exerciseNumber)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 운동입니다."));
+
         // 즐겨찾기 존재 여부 확인
         FavoriteExercise favorite = favoriteExerciseRepository
-                .findByUserIdAndExerciseTypeExerciseTypeId(userId, exerciseTypeId)
+                .findByUserIdAndExerciseTypeExerciseTypeId(userId, exerciseType.getExerciseTypeId())
                 .orElse(null);
 
         // 이미 즐겨찾기에 있으면 해제
@@ -38,10 +42,6 @@ public class FavoriteExerciseService {
             favoriteExerciseRepository.delete(favorite);
             return FavoriteToggleResponse.toDto(favorite, false);
         }
-
-        // 운동 타입 존재 확인
-        ExerciseType exerciseType = exerciseTypeRepository.findById(exerciseTypeId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 운동입니다."));
 
         // 새로운 즐겨찾기 추가
         FavoriteExercise newFavorite = favoriteExerciseRepository.save(FavoriteExercise.builder()

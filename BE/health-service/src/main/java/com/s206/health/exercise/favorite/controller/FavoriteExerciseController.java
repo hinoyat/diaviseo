@@ -21,12 +21,12 @@ public class FavoriteExerciseController {
     private final FavoriteExerciseService favoriteExerciseService;
 
     // 운동 즐겨찾기 토글 (등록 / 해제)
-    @PostMapping("/{exerciseTypeId}")
+    @PostMapping("/{exerciseNumber}")
     public ResponseEntity<ResponseDto<FavoriteToggleResponse>> toggleFavorite(
             @RequestHeader("X-USER-ID") Integer userId,
-            @PathVariable Integer exerciseTypeId) {
+            @PathVariable Integer exerciseNumber) {
 
-        FavoriteToggleResponse response = favoriteExerciseService.toggleFavorite(userId, exerciseTypeId);
+        FavoriteToggleResponse response = favoriteExerciseService.toggleFavorite(userId, exerciseNumber);
 
         return ResponseEntity.ok(
                 ResponseDto.success(HttpStatus.OK, "즐겨찾기 변경 완료", response)
