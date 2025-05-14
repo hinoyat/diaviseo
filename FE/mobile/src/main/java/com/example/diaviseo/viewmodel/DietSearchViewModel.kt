@@ -91,7 +91,7 @@ class DietSearchViewModel : ViewModel() {
     }
 
     // 음식 추가 (기존 항목이 있으면 수량 갱신)
-    fun addSelectedFood(food: FoodItem, quantity: Int) {
+    fun addSelectedFood(food: FoodItem, quantity: Float) {
         val updatedList = selectedItems.toMutableList()
         val index = updatedList.indexOfFirst { it.foodId == food.foodId }
 
@@ -126,7 +126,7 @@ class DietSearchViewModel : ViewModel() {
         if (exists) {
             removeSelectedFood(food.foodId)
         } else {
-            addSelectedFood(food, quantity = 1)
+            addSelectedFood(food, quantity = 1f)
         }
     }
     // 검색어 변경 및 검색 실행
@@ -179,7 +179,7 @@ class DietSearchViewModel : ViewModel() {
                 protein = it.protein,
                 fat = it.fat,
                 sweet = it.sweet,
-                quantity = it.quantity.toInt()
+                quantity = it.quantity.toFloat()
             )
         }
     }
@@ -191,7 +191,7 @@ class DietSearchViewModel : ViewModel() {
         private set
 
     // 최근 먹은 목록 불러오는 함수
-    fun fetchRecnetFoods(){
+    fun fetchRecentFoods(){
         viewModelScope.launch {
             try {
                 val response = RetrofitInstance.foodApiService.getRecentFoods()
@@ -202,7 +202,9 @@ class DietSearchViewModel : ViewModel() {
             }
         }
     }
-    fun addRecentFood(item: RecentFoodItemResponse, quantity: Int = 1) {
+
+    // 최근 음식 선택 → 선택 항목에 추가하거나 제거
+    fun addRecentFood(item: RecentFoodItemResponse, quantity: Float = 1f) {
         val updatedList = selectedItems.toMutableList()
         val exists = updatedList.any { it.foodId.toLong() == item.foodId }
 
@@ -225,9 +227,11 @@ class DietSearchViewModel : ViewModel() {
         }
     }
 
+    // 즐겨찾기 음식 목록 상태
     var favoriteFoods by mutableStateOf<List<FoodItem>>(emptyList())
         private set
 
+    // 즐겨찾기 음식 조회
     fun fetchFavoriteFoods() {
         viewModelScope.launch {
             Log.d("DietVM", "⭐ 즐겨찾기 API 호출 시작됨") // 이거 추가
@@ -240,16 +244,22 @@ class DietSearchViewModel : ViewModel() {
             }
         }
     }
+
+    // 즐겨찾기 상태 변경 플래그 (데이터 새로고침 필요 여부)
     var isFavoriteDirty by mutableStateOf(false)
         private set
 
+    // 즐겨찾기 상태 dirty 표시
     fun markFavoriteDirty() {
         isFavoriteDirty = true
     }
+
+    // 즐겨찾기 상태 초기화
     fun clearFavoriteDirtyFlag() {
         isFavoriteDirty = false
     }
 
+    // 식단 상태 초기화 (탭 전환 등 시 호출)
     fun clearDietState() {
         keyword = ""
         isSearching = false
@@ -262,7 +272,18 @@ class DietSearchViewModel : ViewModel() {
         recentFetchedDate = null
     }
 
-    // 식단 등록 API 호출
+    // 선택된 음식의 수량만 업데이트
+    fun updateSelectedFoodQuantity(foodId: Int, quantity: Float) {
+        selectedItems = selectedItems.map { item ->
+            if (item.foodId == foodId) {
+                item.copy(quantity = quantity)
+            } else {
+                item
+            }
+        }
+    }
+
+    // 식단 등록 API 호출 (Multipart 요청: mealData + image)
     fun submitDiet(
         context: Context,
         imageUri: Uri?,
@@ -276,6 +297,8 @@ class DietSearchViewModel : ViewModel() {
         val gson = com.google.gson.Gson()
         val json = gson.toJson(request)
         val mealDataBody = json.toRequestBody("application/json; charset=utf-8".toMediaType())
+
+        // 이미지가 있을 경우 Multipart 파트로 생성
         val imagePart = imageUri?.let {
             val file = it.toFile(context) // 아래 확장 함수 필요
             val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
