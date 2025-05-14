@@ -34,8 +34,11 @@ import com.example.diaviseo.utils.rememberGalleryPickerLauncher
 import com.example.diaviseo.utils.shouldShowGalleryRationale
 import android.app.Activity
 import android.Manifest
+import com.example.diaviseo.network.RetrofitInstance
+import com.example.diaviseo.network.food.dto.res.FoodDetailResponse
 import com.example.diaviseo.utils.getGalleryPermission
 import com.example.diaviseo.utils.openAppSettings
+import kotlinx.coroutines.launch
 
 @Composable
 fun DietConfirmScreen(
@@ -45,6 +48,10 @@ fun DietConfirmScreen(
     val context = LocalContext.current
     val activity = context as Activity
     val permission = Manifest.permission.READ_MEDIA_IMAGES
+
+    val selectedFoodDetail = remember { mutableStateOf<FoodDetailResponse?>(null) }
+    val showFoodDetailSheet = remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     var showSheet by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
@@ -71,6 +78,7 @@ fun DietConfirmScreen(
 
     val formatter = DateTimeFormatter.ofPattern("hh:mm a", Locale.KOREAN)
     val time = LocalTime.parse("06:30 오전", formatter)
+    val selectedQuantity = remember { mutableStateOf(1.0f) }
 
 
     Scaffold(
@@ -199,8 +207,54 @@ fun DietConfirmScreen(
             SelectedFoodList(
                 selectedItems = viewModel.selectedItems,
                 onRemoveItem = { foodId -> viewModel.removeSelectedFood(foodId) },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp)
+                onItemClick = { foodItem ->
+                    coroutineScope.launch {
+                        try {
+                            val response = RetrofitInstance.foodApiService.getFoodDetail(foodItem.foodId)
+                            val detail = response.data
+                            if (detail != null) {
+                                // quantity는 기존 선택값 유지
+                                selectedFoodDetail.value = detail
+                                selectedQuantity.value = foodItem.quantity
+                                showFoodDetailSheet.value = true
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 22.dp)
             )
+            if (showFoodDetailSheet.value && selectedFoodDetail.value != null) {
+                val foodId = selectedFoodDetail.value!!.foodId
+                val updatedQuantity = viewModel.selectedItems.find { it.foodId == foodId }?.quantity ?: 1f
+                FoodDetailBottomSheet(
+                    food = selectedFoodDetail.value!!,
+                    initialQuantity = selectedQuantity.value,
+                    onToggleFavorite = {
+                        val foodId = selectedFoodDetail.value!!.foodId
+                        viewModel.toggleFavorite(foodId) {
+                            coroutineScope.launch {
+                                val updated = RetrofitInstance.foodApiService.getFoodDetail(foodId).data
+                                if (updated != null) {
+                                    selectedFoodDetail.value = updated
+                                    selectedQuantity.value = updatedQuantity
+                                }
+                            }
+                        }
+                    },
+                    onAddClick = { newQuantity ->
+                        viewModel.updateSelectedFoodQuantity(
+                            foodId = selectedFoodDetail.value!!.foodId,
+                            quantity = newQuantity
+                        )
+                        showFoodDetailSheet.value = false
+                    },
+                    onDismiss = { showFoodDetailSheet.value = false }
+                )
+            }
 
             Spacer(modifier = Modifier.height(20.dp))
 
