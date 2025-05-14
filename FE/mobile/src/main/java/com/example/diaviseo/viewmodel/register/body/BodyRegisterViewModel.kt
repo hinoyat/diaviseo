@@ -104,6 +104,10 @@ class BodyRegisterViewModel : ViewModel() {
         day.value = ""
     }
 
+    // OCR 로딩중 상태
+    private val _isOcrLoading = MutableStateFlow(false)
+    val isOcrLoading: StateFlow<Boolean> = _isOcrLoading
+
     // 등록 API 호출
     fun registerBodyData(
         onSuccess: () -> Unit,
@@ -135,6 +139,7 @@ class BodyRegisterViewModel : ViewModel() {
     // 인바디 OCR
     fun sendOcrRequest(imagePart: MultipartBody.Part) {
         viewModelScope.launch {
+            _isOcrLoading.value = true
             try {
                 val response = RetrofitInstance.bodyApiService.uploadBodyOcrImage(imagePart)
                 if (response.status == "OK" || response.status == "CREATED") {
@@ -160,6 +165,8 @@ class BodyRegisterViewModel : ViewModel() {
             } catch (e: Exception) {
 
                 Log.e("OCR", "OCR 실패: ${e.message}", e)
+            } finally {
+                _isOcrLoading.value = false
             }
         }
     }

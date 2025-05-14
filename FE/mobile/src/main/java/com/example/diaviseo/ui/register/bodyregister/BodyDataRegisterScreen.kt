@@ -4,6 +4,12 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -88,6 +94,7 @@ fun BodyDataRegisterScreen(
             }
         }
     }
+    val isOcrLoading by viewModel.isOcrLoading.collectAsState()
 
     Column(
         modifier = Modifier
@@ -148,34 +155,45 @@ fun BodyDataRegisterScreen(
             )
         }
 
-        if (selectedOption.value == BodyRegisterType.MANUAL) {
+        if (selectedOption.value != null) {
             Spacer(modifier = Modifier.height(32.dp))
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                bodyInputs.forEach { (label, value, onChange) ->
-                    LabeledNumberInputField(
-                        label = label as String,
-                        unit = if (label == "키") "cm" else "kg",
-                        value = value as String,
-                        onValueChange = onChange as (String) -> Unit,
-                        modifier = Modifier.width(130.dp)
+
+            if (isOcrLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    WaveTextSimple("업로드한 사진에서 정보를 추출하고 있어요!")
+                }
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    bodyInputs.forEach { (label, value, onChange) ->
+                        LabeledNumberInputField(
+                            label = label,
+                            unit = if (label == "키") "cm" else "kg",
+                            value = value,
+                            onValueChange = onChange,
+                            modifier = Modifier.width(130.dp)
+                        )
+                    }
+
+                    LabeledDateInputField(
+                        year = year,
+                        month = month,
+                        day = day,
+                        onYearChange = viewModel::onYearChange,
+                        onMonthChange = viewModel::onMonthChange,
+                        onDayChange = viewModel::onDayChange
                     )
                 }
-
-
-                // 측정일자 컴포넌트
-                LabeledDateInputField(
-                    year = year,
-                    month = month,
-                    day = day,
-                    onYearChange = viewModel::onYearChange,
-                    onMonthChange = viewModel::onMonthChange,
-                    onDayChange = viewModel::onDayChange
-                )
             }
         }
+
 
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -197,3 +215,58 @@ fun BodyDataRegisterScreen(
     }
 }
 
+
+@Composable
+fun WaveTextSimple(
+    text: String,
+    waveHeight: Float = -4f,
+    waveSpeed: Int = 1000,
+    waveDelayPerChar: Int = 100,
+    alphaMin: Float = 0.4f,
+    alphaMax: Float = 1f,
+) {
+    val transition = rememberInfiniteTransition(label = "wave")
+
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        text.forEachIndexed { index, char ->
+            val offsetY by transition.animateFloat(
+                initialValue = 0f,
+                targetValue = waveHeight,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(
+                        durationMillis = waveSpeed,
+                        delayMillis = index * waveDelayPerChar,
+                        easing = LinearOutSlowInEasing
+                    ),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "offset-$index"
+            )
+
+            val alpha by transition.animateFloat(
+                initialValue = alphaMin,
+                targetValue = alphaMax,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(
+                        durationMillis = waveSpeed,
+                        delayMillis = index * waveDelayPerChar,
+                        easing = LinearOutSlowInEasing
+                    ),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "alpha-$index"
+            )
+
+            Text(
+                text = char.toString(),
+                style = regular16,
+                color = DiaViseoColors.Placeholder.copy(alpha = alpha),
+                modifier = Modifier.offset(y = offsetY.dp)
+            )
+        }
+    }
+}
