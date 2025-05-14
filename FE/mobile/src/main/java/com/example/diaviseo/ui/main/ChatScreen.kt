@@ -103,8 +103,8 @@ fun ChatContent(
                                     isUser = false,
                                     timestamp = LocalDateTime.now(),
                                     characterImageRes = when (topic) {
-                                        ChatTopic.DIET -> R.drawable.charac_eat
-                                        ChatTopic.EXERCISE -> R.drawable.charac_exercise
+                                        ChatTopic.DIET -> R.drawable.chat_char_diet
+                                        ChatTopic.EXERCISE -> R.drawable.chat_char_exercise
                                     }
                                 )
                             )
@@ -143,8 +143,8 @@ fun ChatContent(
                                                 isUser = false,
                                                 timestamp = LocalDateTime.now(),
                                                 characterImageRes = when (selectedTopic) {
-                                                    ChatTopic.DIET -> R.drawable.charac_eat
-                                                    ChatTopic.EXERCISE -> R.drawable.charac_exercise
+                                                    ChatTopic.DIET -> R.drawable.chat_char_diet
+                                                    ChatTopic.EXERCISE -> R.drawable.chat_char_exercise
                                                     else -> null
                                                 }
                                             )
@@ -189,8 +189,8 @@ fun ChatContent(
                                         isUser = false,
                                         timestamp = LocalDateTime.now(),
                                         characterImageRes = when (selectedTopic) {
-                                            ChatTopic.DIET -> R.drawable.charac_eat
-                                            ChatTopic.EXERCISE -> R.drawable.charac_exercise
+                                            ChatTopic.DIET -> R.drawable.chat_char_diet
+                                            ChatTopic.EXERCISE -> R.drawable.chat_char_exercise
                                             else -> null
                                         }
                                     )
