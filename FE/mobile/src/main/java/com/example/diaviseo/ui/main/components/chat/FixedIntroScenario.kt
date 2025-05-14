@@ -1,16 +1,13 @@
 package com.example.diaviseo.ui.main.components.chat
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,13 +45,11 @@ fun FixedIntroScenario(
             verticalAlignment = Alignment.CenterVertically
         ) {
             CharacterCard(
-                label = "식단이",
-                imageRes = R.drawable.charac_eat,
+                imageRes = R.drawable.chat_char_exercise,
                 onClick = { onSelectTopic(ChatTopic.DIET) }
             )
             CharacterCard(
-                label = "운동이",
-                imageRes = R.drawable.charac_exercise,
+                imageRes = R.drawable.chat_char_diet,
                 onClick = { onSelectTopic(ChatTopic.EXERCISE) }
             )
         }
@@ -63,37 +58,21 @@ fun FixedIntroScenario(
 
 @Composable
 fun CharacterCard(
-    label: String,
     imageRes: Int,
     onClick: () -> Unit
 ) {
-    Column(
+    Image(
+        painter = painterResource(id = imageRes),
+        contentDescription = null,
         modifier = Modifier
-            .width(120.dp)
+            .size(170.dp)
             .clickable { onClick() }
-            .background(
-                color = DiaViseoColors.Callout,
-                shape = RoundedCornerShape(16.dp)
-            )
-            .padding(vertical = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            painter = painterResource(id = imageRes),
-            contentDescription = label,
-            modifier = Modifier.size(80.dp)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = label,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            color = DiaViseoColors.Basic
-        )
-    }
+    )
 }
+
+
 @Preview(showBackground = true)
 @Composable
 fun PreviewCharacterCard() {
-    CharacterCard(label = "식단이", imageRes = R.drawable.charac_eat, onClick = {})
+    CharacterCard(imageRes = R.drawable.chat_char_diet, onClick = {})
 }
