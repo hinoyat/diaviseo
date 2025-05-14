@@ -26,6 +26,7 @@ import com.example.diaviseo.viewmodel.ProfileViewModel
 import com.example.diaviseo.ui.register.diet.dietGraph
 import com.example.diaviseo.viewmodel.condition.AllergyViewModel
 import com.example.diaviseo.viewmodel.condition.DiseaseViewModel
+import java.time.LocalDate
 
 @Composable
 fun MainScreen() {
@@ -53,6 +54,7 @@ fun MainScreen() {
         "body_register",
         "diet_register",
         "exercise_register",
+        "exercise_register/{date}",
         "diet_ai_register",
         "edit_allergy",
         "edit_disease",
@@ -164,9 +166,18 @@ fun MainScreen() {
 //                DietRegisterMainScreen(navController)
 //            }
             dietGraph(navController)
+// 1. 기본 라우트 (오늘 날짜 사용)
             composable("exercise_register") {
-                ExerciseRegisterMainScreen(navController)
+                val today = LocalDate.now().toString()
+                ExerciseRegisterMainScreen(date = today, navController = navController)
             }
+
+// 2. 날짜 파라미터를 받는 라우트
+            composable("exercise_register/{date}") { backStackEntry ->
+                val date = backStackEntry.arguments?.getString("date") ?: LocalDate.now().toString()
+                ExerciseRegisterMainScreen(date = date, navController = navController)
+            }
+
             composable("diet_ai_register") {
                 DietAiRegisterScreen(navController)
             }

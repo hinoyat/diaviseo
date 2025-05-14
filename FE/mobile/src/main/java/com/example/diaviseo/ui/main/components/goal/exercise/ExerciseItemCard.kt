@@ -31,13 +31,13 @@ fun ExerciseItemCard(item: ExerciseItem) {
                     .background(color = Color(0xFFD3DBFF), shape = CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                AsyncImage(
-                    model = item.imageUrl,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(26.dp)
-                        .padding(4.dp)
-                )
+//                AsyncImage(
+//                    model = item.imageUrl,
+//                    contentDescription = null,
+//                    modifier = Modifier
+//                        .size(26.dp)
+//                        .padding(4.dp)
+//                )
             }
 
             Spacer(modifier = Modifier.width(12.dp))

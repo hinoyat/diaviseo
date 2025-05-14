@@ -27,10 +27,14 @@ import androidx.compose.ui.platform.LocalContext
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExerciseRegisterMainScreen(
+    date: String,
     navController: NavController
 ) {
     val searchViewModel: ExerciseSearchViewModel = viewModel()
     val recordViewModel: ExerciseRecordViewModel = viewModel()
+
+    // recordViewModel에 날짜 넣기
+    recordViewModel.setRegisterDate(date)
 
     val keyword by searchViewModel.keyword.collectAsState()
     val searchResults by searchViewModel.filteredExercises.collectAsState()
