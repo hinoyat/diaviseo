@@ -25,7 +25,7 @@ fun DietSuggestionScreen(
 ) {
     val profileViewModel: ProfileViewModel = viewModel()
     val profileState by profileViewModel.myProfile.collectAsState()
-    val nickname = profileState?.name ?: "사용자"
+    val nickname = profileState?.nickname ?: "사용자"
 
     var selectedCategory by remember { mutableStateOf(0) }
     val categories = listOf("최근", "세트", "음식")
