@@ -23,6 +23,9 @@ import com.example.diaviseo.viewmodel.register.exercise.ExerciseRecordViewModel
 import kotlinx.coroutines.launch
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
+import com.example.diaviseo.ui.register.exercise.components.EmptyExerciseType
+import com.example.diaviseo.ui.register.exercise.components.ExerciseEmptyStateView
+import com.example.diaviseo.ui.register.exercise.components.ExerciseListSection
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,6 +59,11 @@ fun ExerciseRegisterMainScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        recordViewModel.fetchRecentExercises()
+        recordViewModel.fetchFavoriteExercises()
+    }
 
     Column(
         modifier = Modifier
@@ -119,11 +127,25 @@ fun ExerciseRegisterMainScreen(
                 onTabSelected = { selectedTab = it }
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+//            Spacer(modifier = Modifier.height(8.dp))
 
             when (selectedTab) {
-                0 -> ExerciseRecommendationContent()
-                1 -> RecentExerciseContent()
+                0 -> ExerciseRecommendationContent(
+                    viewModel = recordViewModel,
+                    onRegisterClick = { exercise ->
+                        recordViewModel.setExercise(exercise)
+                        selectedExercise.value = exercise
+                        coroutineScope.launch { sheetState.show() }
+                    }
+                )
+                1 -> RecentExerciseContent(
+                    viewModel = recordViewModel,
+                    onRegisterClick = { exercise ->
+                        recordViewModel.setExercise(exercise)
+                        selectedExercise.value = exercise
+                        coroutineScope.launch { sheetState.show() }
+                    }
+                )
             }
         }
     }
@@ -155,15 +177,39 @@ fun ExerciseRegisterMainScreen(
 }
 
 @Composable
-fun ExerciseRecommendationContent() {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "나의 최근 운동 탭 콘텐츠")
+fun ExerciseRecommendationContent(
+    viewModel: ExerciseRecordViewModel,
+    onRegisterClick:(Exercise) -> Unit
+) {
+    val exercises by viewModel.recentExercises.collectAsState()
+
+    if (exercises.isEmpty()) {
+        ExerciseEmptyStateView(type = EmptyExerciseType.RECENT)
+    } else {
+        ExerciseListSection(
+            title = "최근 운동",
+            exercises = exercises,
+            onRegisterClick = onRegisterClick
+        )
     }
+
 }
 
 @Composable
-fun RecentExerciseContent() {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "즐겨찾기 탭 콘텐츠")
+fun RecentExerciseContent(
+    viewModel: ExerciseRecordViewModel,
+    onRegisterClick:(Exercise) -> Unit
+) {
+    val exercises by viewModel.favoriteExercises.collectAsState()
+
+    if (exercises.isEmpty()) {
+        ExerciseEmptyStateView(type = EmptyExerciseType.FAVORITE)
+    } else {
+        ExerciseListSection(
+            title = "즐겨찾기",
+            exercises = exercises,
+            onRegisterClick = onRegisterClick
+        )
     }
+
 }
