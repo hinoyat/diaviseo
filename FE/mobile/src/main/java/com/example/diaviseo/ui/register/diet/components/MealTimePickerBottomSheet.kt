@@ -1,6 +1,5 @@
 package com.example.diaviseo.ui.register.diet.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -53,7 +52,7 @@ fun MealTimePickerBottomSheet(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // ✅ 오전 / 오후 선택 버튼
+            // 오전 / 오후 선택 버튼
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -73,7 +72,7 @@ fun MealTimePickerBottomSheet(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // ✅ 시 / 분 입력 필드
+            // 시 / 분 입력 필드
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -87,7 +86,12 @@ fun MealTimePickerBottomSheet(
                             if (number == null || number in 1..12) hour = it
                         }
                     },
-                    label = { Text("시") },
+                    label = {
+                        Text(
+                            "시",
+                            color = DiaViseoColors.Main1
+                        )
+                            },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.weight(1f),
                     singleLine = true,
@@ -105,7 +109,11 @@ fun MealTimePickerBottomSheet(
                             if (number == null || number in 0..59) minute = it
                         }
                     },
-                    label = { Text("분") },
+                    label = {
+                        Text(
+                            "분",
+                            color = DiaViseoColors.Main1
+                        ) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.weight(1f),
                     singleLine = true,
@@ -118,7 +126,7 @@ fun MealTimePickerBottomSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // ✅ 확인 버튼
+            // 확인 버튼
             MainButton(
                 text = "확인",
                 onClick = {

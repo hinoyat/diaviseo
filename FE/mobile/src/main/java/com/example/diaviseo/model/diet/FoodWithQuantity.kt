@@ -10,7 +10,7 @@ data class FoodWithQuantity(
     val protein: Double,
     val fat: Double,
     val sweet: Double,
-    val quantity: Int
+    val quantity: Float
 )
 
 fun FoodWithQuantity.toRequest(): FoodWithQuantityRequest {

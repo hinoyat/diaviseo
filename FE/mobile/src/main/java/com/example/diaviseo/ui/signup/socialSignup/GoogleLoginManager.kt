@@ -9,6 +9,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import kotlinx.coroutines.*
 import androidx.credentials.exceptions.GetCredentialException
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 
 object GoogleLoginManager {
     fun performLogin(
@@ -18,14 +19,22 @@ object GoogleLoginManager {
     ) {
         val credentialManager = CredentialManager.create(activity)
 
-        val googleIdOption = GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(false)
-            .setServerClientId(BuildConfig.GOOGLE_SERVER_CLIENT_ID)
-//            .setAutoSelectEnabled(true)   // 자동로그인
+//        val googleIdOption = GetGoogleIdOption.Builder()
+//            .setFilterByAuthorizedAccounts(false)
+//            .setServerClientId(BuildConfig.GOOGLE_SERVER_CLIENT_ID)
+////            .setAutoSelectEnabled(true)   // 자동로그인
+//            .build()
+//
+//        val request = GetCredentialRequest.Builder()
+//            .addCredentialOption(googleIdOption)
+//            .build()
+
+        // Google Sign-In 옵션 사용
+        val googleSignInOption = GetSignInWithGoogleOption.Builder(BuildConfig.GOOGLE_SERVER_CLIENT_ID)
             .build()
 
         val request = GetCredentialRequest.Builder()
-            .addCredentialOption(googleIdOption)
+            .addCredentialOption(googleSignInOption)
             .build()
 
         val scope = CoroutineScope(Dispatchers.Main)

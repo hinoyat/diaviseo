@@ -8,10 +8,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.diaviseo.mapper.toFoodDetailResponse
+import com.example.diaviseo.network.food.dto.res.FoodDetailResponse
 import com.example.diaviseo.ui.components.BottomButtonSection
 import com.example.diaviseo.ui.components.CommonTopBar
 import com.example.diaviseo.ui.register.diet.components.SelectedFoodList
 import com.example.diaviseo.ui.register.components.CommonSearchTopBar
+import com.example.diaviseo.ui.register.diet.components.FoodDetailBottomSheet
 import com.example.diaviseo.ui.register.diet.components.SearchSuggestionList
 import com.example.diaviseo.ui.theme.DiaViseoColors
 import com.example.diaviseo.ui.theme.regular14
@@ -25,6 +28,9 @@ fun FoodSetRegisterScreen(
     var setName by remember { mutableStateOf("") }
     val selectedItems = viewModel.selectedItems
     val context = LocalContext.current
+    val selectedFoodDetail = remember { mutableStateOf<FoodDetailResponse?>(null) }
+    val selectedQuantity = remember { mutableStateOf(1.0f) }
+    val showFoodDetailSheet = remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -86,7 +92,12 @@ fun FoodSetRegisterScreen(
 
                     SelectedFoodList(
                         selectedItems = selectedItems,
-                        onRemoveItem = { viewModel.removeSelectedFood(it) }
+                        onRemoveItem = { viewModel.removeSelectedFood(it) },
+                        onItemClick = { foodItem ->
+                            selectedFoodDetail.value = foodItem.toFoodDetailResponse()
+                            selectedQuantity.value = foodItem.quantity
+                            showFoodDetailSheet.value = true
+                        }
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -116,6 +127,23 @@ fun FoodSetRegisterScreen(
                         )
                     }
                 )
+                if (showFoodDetailSheet.value && selectedFoodDetail.value != null) {
+                    FoodDetailBottomSheet(
+                        food = selectedFoodDetail.value!!,
+                        initialQuantity = selectedQuantity.value,
+                        onToggleFavorite = {},
+                        onAddClick = { newQuantity ->
+                            viewModel.updateSelectedFoodQuantity(
+                                foodId = selectedFoodDetail.value!!.foodId,
+                                quantity = newQuantity
+                            )
+                            showFoodDetailSheet.value = false
+                        },
+                        onDismiss = {
+                            showFoodDetailSheet.value = false
+                        }
+                    )
+                }
 
             }
         }

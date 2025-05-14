@@ -5,3 +5,9 @@ data class ExerciseRecordRequest(
     val exerciseDate: String?,    // 운동 시작 시간 (예: "2025-05-10T08:30:00"), null 가능
     val exerciseTime: Int         // 운동 시간 (단위: 분)
 )
+
+data class ExercisePutRecordRequest(
+    val exerciseDate: String,
+    val exerciseTime: Int,
+    val exerciseCalorie: Int
+)
