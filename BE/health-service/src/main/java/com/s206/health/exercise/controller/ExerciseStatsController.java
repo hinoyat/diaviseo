@@ -27,27 +27,30 @@ public class ExerciseStatsController {
         return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK,"오늘의 운동 조회 성공",response));
     }
 
-    // 일별 운동 조회 (최근 7일)
+    // 일별 운동 조회 (선택된 날짜 기준 7일)
     @GetMapping("/daily")
     public ResponseEntity<ResponseDto<DailyExerciseStatsResponse>> getDailyStats(
-            @RequestHeader("X-User-ID") Integer userId) {
-        DailyExerciseStatsResponse response = exerciseStatsService.getDailyStats(userId);
+            @RequestHeader("X-User-ID") Integer userId,
+            @RequestParam(required = false) String date) {
+        DailyExerciseStatsResponse response = exerciseStatsService.getDailyStats(userId, date);
         return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK,"일별 운동 조회 성공",response));
     }
 
-    // 주별 운동 조회 (최근 7주)
+    // 주별 운동 조회 (선택된 날짜 기준 7주)
     @GetMapping("/weekly")
     public ResponseEntity<ResponseDto<WeeklyExerciseStatsResponse>> getWeeklyStats(
-            @RequestHeader("X-USER-ID") Integer userId) {
-        WeeklyExerciseStatsResponse response = exerciseStatsService.getWeeklyStats(userId);
+            @RequestHeader("X-USER-ID") Integer userId,
+            @RequestParam(required = false) String date) {
+        WeeklyExerciseStatsResponse response = exerciseStatsService.getWeeklyStats(userId, date);
         return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK,"주별 운동 조회 성공",response));
     }
 
-    // 월별 운동 조회 (최근 7개월)
+    // 월별 운동 조회 (선택된 날짜 기준 7개월)
     @GetMapping("/monthly")
     public ResponseEntity<ResponseDto<MonthlyExerciseStatsResponse>> getMonthlyStats(
-            @RequestHeader("X-USER-ID") Integer userId) {
-        MonthlyExerciseStatsResponse response = exerciseStatsService.getMonthlyStats(userId);
+            @RequestHeader("X-USER-ID") Integer userId,
+            @RequestParam(required = false) String date) {
+        MonthlyExerciseStatsResponse response = exerciseStatsService.getMonthlyStats(userId, date);
         return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK,"월별 운동 조회 성공",response));
     }
 }

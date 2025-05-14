@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class ExerciseUpdateRequest {
-    private Integer exerciseNumber;
     private LocalDateTime exerciseDate;
     private Integer exerciseTime;
     private Integer exerciseCalorie;

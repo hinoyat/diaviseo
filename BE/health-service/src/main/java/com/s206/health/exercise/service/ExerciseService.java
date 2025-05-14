@@ -154,11 +154,11 @@ public class ExerciseService {
             throw new BadRequestException("삭제된 운동 기록입니다.");
         }
 
-        // 2. 운동 종류 존재 여부 확인
-        ExerciseType exerciseType = exerciseTypeRepository.findByExerciseNumberAndIsDeletedFalse(request.getExerciseNumber())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 운동 종류 입니다."));
+        // 2. 기존 운동 종류 정보 조회 (exerciseTypeId는 변경하지 않음)
+        ExerciseType exerciseType = exerciseTypeRepository.findById(exercise.getExerciseTypeId())
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 운동 종류입니다."));
 
-        // 3. 칼로리
+        // 3. 칼로리 계산
         Integer totalCalorie;
         if (request.getExerciseCalorie() != null) {
             totalCalorie = request.getExerciseCalorie();
@@ -169,7 +169,7 @@ public class ExerciseService {
         Exercise updatedExercise = Exercise.builder()
                 .exerciseId(exercise.getExerciseId())
                 .userId(exercise.getUserId())  // 기존 userId 유지
-                .exerciseTypeId(exerciseType.getExerciseTypeId())
+                .exerciseTypeId(exercise.getExerciseTypeId())  // 기존 exerciseTypeId 유지 (변경하지 않음)
                 .exerciseDate(request.getExerciseDate())
                 .exerciseTime(request.getExerciseTime())
                 .exerciseCalorie(totalCalorie)
