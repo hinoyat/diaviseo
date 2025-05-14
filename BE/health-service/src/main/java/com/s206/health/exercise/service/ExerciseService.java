@@ -265,9 +265,9 @@ public class ExerciseService {
 
     // 특정 운동 상세 조회
     @Transactional(readOnly = true)
-    public ExerciseTypeDetailResponse getExerciseTypeDetail(Integer exerciseTypeId, Integer userId) {
+    public ExerciseTypeDetailResponse getExerciseTypeDetail(Integer exerciseNumber, Integer userId) {
         // 1. 운동 타입 정보 조회
-        ExerciseType exerciseType = exerciseTypeRepository.findById(exerciseTypeId)
+        ExerciseType exerciseType = exerciseTypeRepository.findByExerciseNumberAndIsDeletedFalse(exerciseNumber)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 운동 입니다."));
 
         // 2. 운동 카테고리 정보 조회
@@ -276,7 +276,7 @@ public class ExerciseService {
 
         // 3. 즐겨찾기 여부 확인
         boolean isFavorite = favoriteExerciseRepository
-                .findByUserIdAndExerciseTypeExerciseTypeId(userId, exerciseTypeId)
+                .findByUserIdAndExerciseTypeExerciseTypeId(userId, exerciseType.getExerciseTypeId())
                 .isPresent();
 
         // 4. 응답 DTO
