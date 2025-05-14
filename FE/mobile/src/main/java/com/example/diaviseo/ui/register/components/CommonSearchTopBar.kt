@@ -15,6 +15,7 @@ import androidx.navigation.NavController
 import com.example.diaviseo.ui.theme.medium14
 import com.example.diaviseo.ui.theme.regular14
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalFocusManager
 
 
 @Composable
@@ -26,6 +27,7 @@ fun CommonSearchTopBar(
     onFocusChanged: ((Boolean) -> Unit)? = null, // 검색창 클릭시 검색 결과창 띄우기 위함 (null도 허용)
     onCancelClick: (() -> Unit)? = null  // 취소 로직 위임
 ) {
+    val focusManager = LocalFocusManager.current
 
 
     Row(
@@ -80,6 +82,7 @@ fun CommonSearchTopBar(
             style = medium14,
             color = Color.Black,
             modifier = Modifier.clickable {
+                focusManager.clearFocus() // 키보드 닫기
                 onCancelClick?.invoke() ?: navController.popBackStack() // null일 땐 기본 뒤로가기
             }
         )

@@ -1,5 +1,6 @@
 package com.example.diaviseo.ui.register.diet.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -16,7 +17,8 @@ import com.example.diaviseo.ui.components.AddRemoveIconButton
 fun SelectedFoodList(
     selectedItems: List<FoodWithQuantity>,
     onRemoveItem: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onItemClick: (FoodWithQuantity) -> Unit,
 ) {
     Surface(
         modifier = modifier,
@@ -46,6 +48,7 @@ fun SelectedFoodList(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .clickable{ onItemClick(item) }
                             .padding(vertical = 12.dp)
                     ) {
                         Row(
@@ -61,11 +64,15 @@ fun SelectedFoodList(
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = "${item.quantity}인분",
+                                    text = if (item.quantity % 1f == 0f)
+                                        "${item.quantity.toInt()}인분"
+                                    else
+                                        "${String.format("%.1f", item.quantity)} 인분",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = Color.Gray,
                                     fontSize = 13.sp
                                 )
+
                             }
 
                             Row(verticalAlignment = Alignment.CenterVertically) {

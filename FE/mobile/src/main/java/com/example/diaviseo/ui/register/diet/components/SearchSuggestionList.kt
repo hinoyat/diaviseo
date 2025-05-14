@@ -55,7 +55,7 @@ fun SearchSuggestionList(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 12.dp)
+                            .padding(vertical = 8.dp)
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),

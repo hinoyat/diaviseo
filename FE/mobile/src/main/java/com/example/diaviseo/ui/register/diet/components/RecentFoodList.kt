@@ -3,101 +3,58 @@ package com.example.diaviseo.ui.register.diet.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.shape.RoundedCornerShape
+import com.example.diaviseo.mapper.toFoodItem
+import com.example.diaviseo.network.food.dto.res.FoodItem
 import com.example.diaviseo.network.food.dto.res.RecentFoodItemResponse
-import com.example.diaviseo.ui.components.AddRemoveIconButton
+import com.example.diaviseo.ui.theme.*
+import com.example.diaviseo.ui.theme.DiaViseoColors
 
 @Composable
 fun RecentFoodList(
     foods: List<RecentFoodItemResponse>,
     selectedItems: List<Int>,
     fetchedDate: String?,
-    onToggleSelect: (RecentFoodItemResponse) -> Unit
+    onToggleSelect: (FoodItem) -> Unit,
+    onFoodClick: (FoodItem) -> Unit,
+    nickname: String
 ) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(15.dp),
-        color = Color.White
-    ) {
-        if (foods.isEmpty()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                EmptyStateView(tabType = EmptyTabType.RECENT_FOOD)
-            }
+    val mappedFoods = foods.map { it.toFoodItem() }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        if (mappedFoods.isEmpty()) {
+            EmptyStateView(tabType = EmptyTabType.RECENT_FOOD)
         } else {
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 1.dp, vertical = 12.dp)
-            ) {
-                fetchedDate?.let {
-                    Text(
-                        text = "${it.replace("-", ".")} 기준",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
+            fetchedDate?.let {
+                Spacer(modifier = Modifier.height(6.dp))
 
-                foods.forEachIndexed { index, item ->
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = item.foodName,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = Color.Black,
-                                    fontSize = 16.sp
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = "1인분 (${item.baseAmount.filter { it.isDigit() }.toIntOrNull() ?: 0}g)",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = Color.Gray,
-                                    fontSize = 13.sp
-                                )
-                            }
+                Text(
+                    text = "$nickname 님이 최근 드신 음식 목록",
+                    style = bold17,
+                    color = Color.Black,
+                    modifier = Modifier.padding(start = 3.dp, bottom = 4.dp)
+                )
+                Spacer(modifier = Modifier.height(5.dp))
 
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = "${item.calorie}kcal",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = Color.Black,
-                                    fontSize = 14.sp
-                                )
-                                Spacer(modifier = Modifier.width(10.dp))
-
-                                AddRemoveIconButton(
-                                    isSelected = selectedItems.contains(item.foodId.toInt()),
-                                    onClick = { onToggleSelect(item) }
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Divider(
-                            modifier = Modifier.fillMaxWidth(),
-                            color = Color(0xFFF0F0F0),
-                            thickness = 1.dp
-                        )
-                    }
-                }
+                Text(
+                    text = "${it.replace("-", ".")} 기준",
+                    style = regular14,
+                    color = DiaViseoColors.Placeholder,
+                    modifier = Modifier
+                        .padding(start = 3.dp, bottom = 8.dp)
+                )
             }
+            Spacer(modifier = Modifier.height(5.dp))
+
+            SearchSuggestionList(
+                results = mappedFoods,
+                selectedItems = selectedItems,
+                onToggleSelect = onToggleSelect,
+                onFoodClick = onFoodClick,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
