@@ -1,5 +1,6 @@
 package com.example.diaviseo.ui.onboarding.pages
 
+import android.app.Activity
 import com.example.diaviseo.util.FinalGuideMessageBuilder
 import com.example.diaviseo.util.GoalType
 import com.example.diaviseo.viewmodel.AuthViewModel
@@ -31,6 +32,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
 import android.util.Log
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.diaviseo.healthconnect.HealthConnectManager
 import com.example.diaviseo.healthconnect.HealthConnectPermissionHandler
@@ -39,6 +41,7 @@ import com.example.diaviseo.healthconnect.processor.ExerciseSessionRecordProcess
 import com.example.diaviseo.viewmodel.register.exercise.ExerciseSyncViewModel
 import com.example.diaviseo.datastore.HealthConnectDataStore
 import com.example.diaviseo.healthconnect.worker.scheduleDailyHealthSync
+import com.example.diaviseo.utils.FCMInitializer
 import java.time.ZonedDateTime
 
 @Composable
@@ -123,9 +126,41 @@ fun FinalGuideScreen(
             )
         }
     }
+    val context = LocalContext.current
+
+    // 현재 Activity 참조
+    val activity = context as Activity
+
+    // navigation trigger 플래그
+    val shouldNavigate = remember { mutableStateOf(false) }
+
+    // 알림 권한 요청 런처 (Android 13 이상에서만 의미 있음)
+    val fcmPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = {
+            Log.d("NAVIGATION", "Permission result: $it")
+            // 권한 여부와 상관없이 토큰 발급 → 서버 전송 → 메인 화면으로 이동 (Android 13 이하에서는 권한 x)
+            FCMInitializer.fetchAndSendToken(
+                onComplete = {
+                    Log.d("NAVIGATION", "토큰 전송 완료 → navigate")
+                    navController.navigate("main") {
+                        popUpTo("signup") { inclusive = true }
+                    }
+                }
+            )
+        }
+    )
+
+    LaunchedEffect(shouldNavigate.value) {
+        Log.d("NAVIGATION", "LaunchedEffect triggered: ${shouldNavigate.value}")
+        if (shouldNavigate.value) {
+            navController.navigate("main") {
+                popUpTo("signup") { inclusive = true }
+            }
+        }
+    }
 
     val particle = if (goalDisplayText == "체중 유지") "를" else "을"
-    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -352,11 +387,23 @@ fun FinalGuideScreen(
                 text = "디아 비서 시작하기",
                 enabled = true,
                 onClick = {
-                    navController.navigate("main") {
-                        popUpTo("signupGraph") { inclusive = true }
-                    }
+                    FCMInitializer.requestNotificationPermissionIfNeeded(
+                        activity = activity,
+                        launcher = fcmPermissionLauncher,
+                        onPermissionCheckComplete = {
+                            FCMInitializer.fetchAndSendToken(
+                                onComplete = {
+                                    Log.d("NAVIGATION", "✅ 토큰 전송 완료 → main 이동")
+                                    navController.navigate("main") {
+                                        popUpTo("signup") { inclusive = true }
+                                    }
+                                }
+                            )
+                        }
+                    )
                 }
             )
+
         }
     }
 }
