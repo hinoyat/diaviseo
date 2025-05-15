@@ -26,7 +26,7 @@ public class MealFoodResponse {
     private BigDecimal sugar;
     private BigDecimal sodium;
 
-    private Integer quantity;
+    private Float quantity;
     private String foodImageUrl;
 
     // 해당 음식의 수량을 고려한 총 영양소 정보
@@ -39,10 +39,10 @@ public class MealFoodResponse {
 
     public static MealFoodResponse toDto(MealFood mealFood) {
         Food food = mealFood.getFood();
-        Integer quantity = mealFood.getQuantity();
+        Float quantity = mealFood.getQuantity();
 
         // 수량을 고려한 총 영양소 계산
-        Integer totalCalorie = food.getCalorie() * quantity;
+        Integer totalCalorie = (int) (food.getCalorie() * quantity);
         BigDecimal totalCarb = food.getCarbohydrate().multiply(BigDecimal.valueOf(quantity));
         BigDecimal totalProtein = food.getProtein().multiply(BigDecimal.valueOf(quantity));
         BigDecimal totalFat = food.getFat().multiply(BigDecimal.valueOf(quantity));

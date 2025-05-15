@@ -11,7 +11,7 @@ public class MealFoodRequest {
 
     private Integer foodId;
 
-    private Integer quantity;
+    private Float quantity;
 
     private String foodImageUrl;
 }
