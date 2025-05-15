@@ -118,13 +118,12 @@ public class MealStatisticsService {
             BigDecimal totalFat = BigDecimal.ZERO;
             BigDecimal totalSugar = BigDecimal.ZERO;
 
-            // TODO: 코드 가독성 개선하기 -> DTO
             for (Object[] row : weekData) {
                 totalCalorie += ((Number) row[1]).intValue();
-                totalCarbs = totalCarbs.add((BigDecimal) row[2]);
-                totalProtein = totalProtein.add((BigDecimal) row[3]);
-                totalFat = totalFat.add((BigDecimal) row[4]);
-                totalSugar = totalSugar.add((BigDecimal) row[5]);
+                totalCarbs = totalCarbs.add(toBigDecimal(row[2]));
+                totalProtein = totalProtein.add(toBigDecimal(row[3]));
+                totalFat = totalFat.add(toBigDecimal(row[4]));
+                totalSugar = totalSugar.add(toBigDecimal(row[5]));
             }
 
             int daysWithData = weekData.size();
@@ -217,10 +216,10 @@ public class MealStatisticsService {
 
             for (Object[] row : monthData) {
                 totalCalorie += ((Number) row[1]).intValue();
-                totalCarbs = totalCarbs.add((BigDecimal) row[2]);
-                totalProtein = totalProtein.add((BigDecimal) row[3]);
-                totalFat = totalFat.add((BigDecimal) row[4]);
-                totalSugar = totalSugar.add((BigDecimal) row[5]);
+                totalCarbs = totalCarbs.add(toBigDecimal(row[2]));
+                totalProtein = totalProtein.add(toBigDecimal(row[3]));
+                totalFat = totalFat.add(toBigDecimal(row[4]));
+                totalSugar = totalSugar.add(toBigDecimal(row[5]));
             }
 
             int daysWithData = monthData.size();
@@ -268,10 +267,10 @@ public class MealStatisticsService {
 
             // 영양소 값 추출
             int calorie = ((Number) data[1]).intValue();
-            BigDecimal carbs = (BigDecimal) data[2];
-            BigDecimal protein = (BigDecimal) data[3];
-            BigDecimal fat = (BigDecimal) data[4];
-            BigDecimal sugar = (BigDecimal) data[5];
+            BigDecimal carbs = toBigDecimal(data[2]);
+            BigDecimal protein = toBigDecimal(data[3]);
+            BigDecimal fat = toBigDecimal(data[4]);
+            BigDecimal sugar = toBigDecimal(data[5]);
 
             entries.add(NutritionStatsEntry.builder()
                     .label(label)
@@ -325,12 +324,12 @@ public class MealStatisticsService {
 
             int calorie = 0, carbs = 0, protein = 0, fat = 0, sugar = 0;
             if (data != null) {
-                // 평균 값 추출
+                // 평균 값 추출 - 안전한 변환 사용
                 calorie = ((Number) data[1]).intValue();
-                carbs = ((BigDecimal) data[2]).intValue();
-                protein = ((BigDecimal) data[3]).intValue();
-                fat = ((BigDecimal) data[4]).intValue();
-                sugar = ((BigDecimal) data[5]).intValue();
+                carbs = toBigDecimal(data[2]).intValue();
+                protein = toBigDecimal(data[3]).intValue();
+                fat = toBigDecimal(data[4]).intValue();
+                sugar = toBigDecimal(data[5]).intValue();
             }
 
             entries.add(NutritionStatsEntry.builder()
@@ -371,12 +370,12 @@ public class MealStatisticsService {
 
             int calorie = 0, carbs = 0, protein = 0, fat = 0, sugar = 0;
             if (data != null) {
-                // 평균 값 추출
+                // 평균 값 추출 - 안전한 변환 사용
                 calorie = ((Number) data[2]).intValue();
-                carbs = ((BigDecimal) data[3]).intValue();
-                protein = ((BigDecimal) data[4]).intValue();
-                fat = ((BigDecimal) data[5]).intValue();
-                sugar = ((BigDecimal) data[6]).intValue();
+                carbs = toBigDecimal(data[3]).intValue();
+                protein = toBigDecimal(data[4]).intValue();
+                fat = toBigDecimal(data[5]).intValue();
+                sugar = toBigDecimal(data[6]).intValue();
             }
 
             entries.add(NutritionStatsEntry.builder()
@@ -390,6 +389,28 @@ public class MealStatisticsService {
         }
 
         return entries;
+    }
+
+    // 안전한 BigDecimal 변환 메서드 추가
+    private BigDecimal toBigDecimal(Object value) {
+        if (value == null) {
+            return BigDecimal.ZERO;
+        }
+
+        if (value instanceof BigDecimal) {
+            return (BigDecimal) value;
+        }
+
+        if (value instanceof Number) {
+            return BigDecimal.valueOf(((Number) value).doubleValue());
+        }
+
+        try {
+            return new BigDecimal(value.toString());
+        } catch (Exception e) {
+            log.warn("BigDecimal 변환 실패: {}", value);
+            return BigDecimal.ZERO;
+        }
     }
 
     private int calculateMySqlYearWeek(LocalDate date) {

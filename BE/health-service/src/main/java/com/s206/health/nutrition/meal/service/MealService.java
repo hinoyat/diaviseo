@@ -424,9 +424,9 @@ public class MealService {
 
         for (MealFood mealFood : mealTime.getMealFoods()) {
             Food food = mealFood.getFood();
-            int quantity = mealFood.getQuantity();
+            Float quantity = mealFood.getQuantity();
 
-            totalCalorie += food.getCalorie() * quantity;
+            totalCalorie += (int) (food.getCalorie() * quantity);
             totalCarb = totalCarb.add(food.getCarbohydrate().multiply(BigDecimal.valueOf(quantity)));
             totalProtein = totalProtein.add(food.getProtein().multiply(BigDecimal.valueOf(quantity)));
             totalFat = totalFat.add(food.getFat().multiply(BigDecimal.valueOf(quantity)));
