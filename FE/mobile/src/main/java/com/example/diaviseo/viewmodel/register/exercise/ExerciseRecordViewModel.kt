@@ -3,10 +3,12 @@ package com.example.diaviseo.viewmodel.register.exercise
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.diaviseo.mapper.toExercise
 import com.example.diaviseo.model.exercise.Exercise
 import com.example.diaviseo.network.RetrofitInstance
 import com.example.diaviseo.network.exercise.dto.req.ExercisePutRecordRequest
 import com.example.diaviseo.network.exercise.dto.req.ExerciseRecordRequest
+import com.example.diaviseo.network.exercise.dto.res.ExerciseDetailResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -59,6 +61,14 @@ class ExerciseRecordViewModel : ViewModel(){
         _registerDate.value = date
     }
 
+    private val _recentExercises = MutableStateFlow<List<Exercise>>(emptyList())
+    val recentExercises = _recentExercises
+
+
+    private val _favoriteExercises = MutableStateFlow<List<Exercise>>(emptyList())
+    val favoriteExercises = _favoriteExercises
+
+
     private fun toExerciseRecordRequest(): ExerciseRecordRequest? {
         val exercise = _selectedExercise.value ?: return null
         val time = _exerciseTime.value
@@ -73,6 +83,39 @@ class ExerciseRecordViewModel : ViewModel(){
             exerciseDate = formattedDate,
             exerciseTime = time
         )
+    }
+    private val _exerciseDetail = MutableStateFlow<ExerciseDetailResponse?>(null)
+    val exerciseDetail = _exerciseDetail.asStateFlow()
+
+
+    fun fetchExerciseDetail(exerciseNumber: Int) {
+        viewModelScope.launch {
+            runCatching {
+                RetrofitInstance.exerciseApiService.getExerciseDetail(exerciseNumber)
+            }.onSuccess { response ->
+                _exerciseDetail.value = response.data
+            }.onFailure { error ->
+                Log.e("ExerciseDetail", "상세 조회 실패", error)
+            }
+        }
+    }
+
+
+    fun toggleFavorite() {
+        val current = _exerciseDetail.value ?: return
+        viewModelScope.launch {
+            runCatching {
+                RetrofitInstance.exerciseApiService.toggleFavorite(current.exerciseNumber)
+            }.onSuccess { response ->
+                val updatedFavorite = response.data?.favorite ?: false
+                _exerciseDetail.value = current.copy(isFavorite = updatedFavorite)
+
+                // 즐겨찾기 목록 즉시 갱신
+                fetchFavoriteExercises()
+            }.onFailure {
+                Log.e("FavoriteToggle", "토글 실패", it)
+            }
+        }
     }
 
     private fun toPutExercise(totalKcal: Int): ExercisePutRecordRequest? {
@@ -90,6 +133,29 @@ class ExerciseRecordViewModel : ViewModel(){
         )
     }
 
+    fun fetchRecentExercises(){
+        viewModelScope.launch {
+            runCatching {
+                RetrofitInstance.exerciseApiService.getRecentExercises()
+            }.onSuccess { response ->
+                _recentExercises.value = response.data.orEmpty().map{it.toExercise()}
+            }.onFailure {
+                _recentExercises.value = emptyList()
+            }
+        }
+    }
+
+    fun fetchFavoriteExercises() {
+        viewModelScope.launch {
+            runCatching {
+                RetrofitInstance.exerciseApiService.getFavoriteExercises()
+            }.onSuccess { response ->
+                _favoriteExercises.value = response.data.orEmpty().map { it.toExercise() }
+            }.onFailure {
+                _favoriteExercises.value = emptyList()
+            }
+        }
+    }
     fun submitExercise(onSuccess: () -> Unit, onError: (Throwable) -> Unit) {
         val request = toExerciseRecordRequest() ?: return
         Log.d("ExerciseSubmit", "submitExercise 진입")
@@ -99,6 +165,7 @@ class ExerciseRecordViewModel : ViewModel(){
                 val response = RetrofitInstance.exerciseApiService.registerExercise(request)
                 Log.d("ExerciseSubmit", "서버 응답: $response")
                 if (response.status == "OK") {
+                    fetchRecentExercises() // 최신 운동 목록 갱신
                     onSuccess()
                 } else {
                     onError(Exception("서버 오류: ${response.message}"))
