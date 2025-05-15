@@ -541,18 +541,27 @@ public class MealService {
                 result = (Object[]) result[0];
             }
 
-            // null 체크 추가
+            // 안전한 타입 변환 로직
             Number calorieNum = result[0] instanceof Number ? (Number) result[0] : null;
             Integer calories = (calorieNum != null) ? calorieNum.intValue() : 0;
 
-            BigDecimal carbs = (result[1] instanceof BigDecimal) ? (BigDecimal) result[1] : BigDecimal.ZERO;
-            BigDecimal protein = (result[2] instanceof BigDecimal) ? (BigDecimal) result[2] : BigDecimal.ZERO;
-            BigDecimal fat = (result[3] instanceof BigDecimal) ? (BigDecimal) result[3] : BigDecimal.ZERO;
-            BigDecimal sugar = (result[4] instanceof BigDecimal) ? (BigDecimal) result[4] : BigDecimal.ZERO;
-            BigDecimal sodium = (result[5] instanceof BigDecimal) ? (BigDecimal) result[5] : BigDecimal.ZERO;
+            // 안전한 변환 메서드 사용
+            BigDecimal carbs = toBigDecimal(result[1]);
+            BigDecimal protein = toBigDecimal(result[2]);
+            BigDecimal fat = toBigDecimal(result[3]);
+            BigDecimal sugar = toBigDecimal(result[4]);
+            BigDecimal sodium = toBigDecimal(result[5]);
 
+            // 로그 추가하여 실제 결과값과 타입 확인
+            log.info("[DAILY] 결과 확인: [1]={} ({}), [2]={} ({}), [3]={} ({}), [4]={} ({}), [5]={} ({})",
+                    result[1], result[1] != null ? result[1].getClass().getName() : "null",
+                    result[2], result[2] != null ? result[2].getClass().getName() : "null",
+                    result[3], result[3] != null ? result[3].getClass().getName() : "null",
+                    result[4], result[4] != null ? result[4].getClass().getName() : "null",
+                    result[5], result[5] != null ? result[5].getClass().getName() : "null");
 
-            log.info("[DAILY] 계산 완료: userId={}, date={}, 칼로리={}", userId, date, calories);
+            log.info("[DAILY] 계산 완료: userId={}, date={}, 칼로리={}, 탄수화물={}, 단백질={}, 지방={}, 당={}, 나트륨={}",
+                    userId, date, calories, carbs, protein, fat, sugar, sodium);
 
             return DailyNutritionResponse.builder()
                     .date(date)
@@ -576,6 +585,28 @@ public class MealService {
                     .totalSugar(BigDecimal.ZERO)
                     .totalSodium(BigDecimal.ZERO)
                     .build();
+        }
+    }
+
+    // 안전한 BigDecimal 변환 메서드 추가
+    private BigDecimal toBigDecimal(Object value) {
+        if (value == null) {
+            return BigDecimal.ZERO;
+        }
+
+        if (value instanceof BigDecimal) {
+            return (BigDecimal) value;
+        }
+
+        if (value instanceof Number) {
+            return BigDecimal.valueOf(((Number) value).doubleValue());
+        }
+
+        try {
+            return new BigDecimal(value.toString());
+        } catch (Exception e) {
+            log.warn("BigDecimal 변환 실패: {}", value);
+            return BigDecimal.ZERO;
         }
     }
 
