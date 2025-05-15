@@ -1,7 +1,26 @@
-from sqlalchemy.orm import Session
-from sqlalchemy import func
-from datetime import date
+from typing import Type
 
+from sqlalchemy.orm import Session
+from datetime import date
+from app.models.user import User
+
+
+def get_user_info(user_db: Session, user_id: int) -> Type[User]:
+  """
+  사용자 ID를 기반으로 사용자 정보를 조회합니다.
+
+  Args:
+      user_db: 사용자 정보 데이터베이스 세션
+      user_id: 조회할 사용자 ID
+
+  Returns:
+      User: 조회된 사용자 객체
+  """
+  from app.models.user import User
+  user = user_db.query(User).filter(User.user_id == user_id).first()
+  if not user:
+    raise ValueError(f"사용자 ID {user_id}에 대한 정보를 찾을 수 없습니다.")
+  return user
 
 def get_bmr(user_db: Session, user_id: int) -> float:
   """

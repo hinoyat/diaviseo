@@ -39,3 +39,32 @@ workout_feedback_prompt = PromptTemplate(
 지금 위의 정보를 바탕으로 운동 피드백 3줄을 작성해주세요.
 """
 )
+
+weight_trend_feedback_prompt = PromptTemplate(
+    input_variables=[
+        "goal",
+        "weight",
+        "days",
+        "weight_trend",
+        "muscle_trend",
+        "projected_change",
+        "future_weight",
+        "status"
+    ],
+    template="""
+사용자 정보:
+- 목표: {goal}
+- 현재 체중: {weight}kg
+- 최근 {days}일간 체중 변화: {weight_trend}kg
+- 근육량 변화: {muscle_trend}kg
+- 체중 예측 : {projected_change}kg
+
+예측 정보:
+- {days}일간의 칼로리 섭취/소모 추세 기반 예상 체중 변화: {projected_change}kg
+- 현재 체중을 기준으로 앞으로 {days}일 후 예상 체중: {future_weight}kg
+- 상태: {status}
+
+위 정보를 바탕으로 사용자의 체중 변화 추이에 대한 분석과 앞으로의 조언을 제공해주세요.
+조언은 간결하면서도 실용적이어야 합니다. 체중 예측 정보(kg, 기간)를 포함하여 200자 이내로 작성해주세요.
+"""
+)
