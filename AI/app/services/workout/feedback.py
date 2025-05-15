@@ -1,9 +1,11 @@
+from langchain.chains.conversation.base import ConversationChain
 from langchain_openai import ChatOpenAI
 from requests import Session
 
 from app.config.settings import get_settings
 from app.repositories.body_info_repository import get_user_info_for_feedback, \
   calculate_additional_calories_to_burn
+from app.services.memory.mongo_memory import get_memory
 from app.services.workout.prompt.prompt_templates import \
   workout_feedback_prompt, weight_trend_feedback_prompt
 
@@ -11,13 +13,18 @@ settings = get_settings()
 
 
 # GPT 운동 피드백 생성 함수 (간소화된 버전)
-def generate_workout_feedback(user_id: int, user_db: Session,
+def generate_workout_feedback(user_id: int, session_id:str, user_db: Session,
     health_db: Session) -> str:
+  memory = get_memory(session_id)
   # LLM 초기화
   llm = ChatOpenAI(
       model="gpt-4o-mini",
       temperature=0.1,
       api_key=settings.openai_api_key
+  )
+  chain = ConversationChain(
+      llm = llm,
+      memory = memory,
   )
 
   # 사용자 정보 가져오기
@@ -37,10 +44,10 @@ def generate_workout_feedback(user_id: int, user_db: Session,
   )
 
   # LLM 호출하여 피드백 생성
-  response = llm.invoke(formatted_prompt)
+  reply = chain.predict(input=formatted_prompt)
 
   # 결과 반환
-  return response.content
+  return reply
 
 # 체중 추이 피드백 생성 함수
 def generate_trend_weight_feedback(user_id: int, user_db: Session,
