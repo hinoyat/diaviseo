@@ -8,11 +8,15 @@ import com.example.diaviseo.network.exercise.dto.res.DayExerciseStatsResponse
 import com.example.diaviseo.network.exercise.dto.req.HealthSyncExerciseRequest
 import com.example.diaviseo.network.exercise.dto.res.HealthSyncExerciseListResponse
 import com.example.diaviseo.network.exercise.dto.req.StepRecordRequest
+import com.example.diaviseo.network.exercise.dto.res.DailyExerciseStatsResponse
+import com.example.diaviseo.network.exercise.dto.res.MonthlyExerciseStatsResponse
 import com.example.diaviseo.network.exercise.dto.res.ExerciseDetailResponse
 import com.example.diaviseo.network.exercise.dto.res.ExerciseFavoriteToggleResponse
 import com.example.diaviseo.network.exercise.dto.res.FavoriteExerciseResponse
 import com.example.diaviseo.network.exercise.dto.res.RecentExerciseResponse
 import com.example.diaviseo.network.exercise.dto.res.StepRecordResponse
+import com.example.diaviseo.network.exercise.dto.res.StepWeeklyResponse
+import com.example.diaviseo.network.exercise.dto.res.WeeklyExerciseStatsResponse
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -46,6 +50,11 @@ interface ExerciseApiService {
         @Body records: List<StepRecordRequest>
     ): ApiResponse<List<StepRecordResponse>>
 
+    // 일주일 걸음 수 조회
+    @GET("exercises/step-week")
+    suspend fun fetchStepWeekly(
+    ): ApiResponse<StepWeeklyResponse>
+
     // 운동 삭제
     @DELETE("exercises/{exerciseId}")
     suspend fun deleteExercise(
@@ -58,6 +67,24 @@ interface ExerciseApiService {
         @Path("exerciseId") exerciseId: Int,
         @Body request: ExercisePutRecordRequest
     ): ApiResponse<ExerciseRecordResponse>
+
+    // 날짜로 7일 운동 기록 조회
+    @GET("exercises/daily")
+    suspend fun getDailyExerciseStats(
+        @Query("date") date: String
+    ): ApiResponse<DailyExerciseStatsResponse>
+
+    // 날짜로 7주 운동 평균 기록 조회
+    @GET("exercises/weekly")
+    suspend fun getWeeklyExerciseStats(
+        @Query("date") date: String
+    ): ApiResponse<WeeklyExerciseStatsResponse>
+
+    // 날짜로 7달 운동 평균 기록 조회
+    @GET("exercises/monthly")
+    suspend fun getMonthlyExerciseStats(
+        @Query("date") date: String
+    ): ApiResponse<MonthlyExerciseStatsResponse>
 
     // 최근한 운동 목록 조회
     @GET("exercises/latest")
