@@ -66,7 +66,7 @@ class DietSearchViewModel : ViewModel() {
     }
 
     // 식사 시간 선택 처리
-    fun onTimeSelected(time: LocalTime) {
+    fun onTimeSelected(time: LocalTime?) {
         selectedTime = time
     }
 

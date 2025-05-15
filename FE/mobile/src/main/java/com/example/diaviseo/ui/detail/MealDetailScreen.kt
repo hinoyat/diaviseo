@@ -1,8 +1,6 @@
 package com.example.diaviseo.ui.detail
 
-import android.R.attr.delay
 import android.annotation.SuppressLint
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -17,52 +15,43 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.diaviseo.R
+import com.example.diaviseo.network.meal.dto.res.MealTimeNutritionResponse
 import com.example.diaviseo.ui.components.CommonTopBar
 import com.example.diaviseo.ui.components.DiaDatePickerDialog
 import com.example.diaviseo.ui.components.LoadingOverlay
 import com.example.diaviseo.ui.detail.components.meal.MealCard
-import com.example.diaviseo.ui.main.components.goal.meal.DonutChartWithLegend
-import com.example.diaviseo.viewmodel.goal.GoalViewModel
-import com.example.diaviseo.viewmodel.ProfileViewModel
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.platform.LocalContext
-import com.example.diaviseo.network.meal.dto.res.MealFoodResponse
-import com.example.diaviseo.network.meal.dto.res.MealNutritionResponse
-import com.example.diaviseo.network.meal.dto.res.MealTimeNutritionResponse
-import com.example.diaviseo.R
-import com.example.diaviseo.network.meal.dto.res.MealDailyResponse
 import com.example.diaviseo.ui.detail.components.meal.MealEmptyCard
 import com.example.diaviseo.ui.detail.components.meal.MealSkippedCard
+import com.example.diaviseo.ui.main.components.goal.meal.DonutChartWithLegend
 import com.example.diaviseo.ui.theme.DiaViseoColors
 import com.example.diaviseo.viewmodel.DietSearchViewModel
-import com.example.diaviseo.viewmodel.goal.ExerciseViewModel
+import com.example.diaviseo.viewmodel.goal.GoalViewModel
 import com.example.diaviseo.viewmodel.goal.MealViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
 fun MealDetailScreen(
     navController: NavHostController,
-    viewModel: ProfileViewModel = viewModel()
+    dietViewModel: DietSearchViewModel
 ) {
     val context = LocalContext.current
     // 1) 먼저 이전 엔트리를 확인해본다
@@ -93,12 +82,6 @@ fun MealDetailScreen(
     val selectedDate by goalViewModel.selectedDate.collectAsState()
     val isLoading by goalViewModel.isLoading.collectAsState()
 
-    // 닉네임 가져오게 viewModel : profileviewmodel
-    val myProfile by viewModel.myProfile.collectAsState()
-    val nickname by remember(myProfile) {
-        mutableStateOf(myProfile?.nickname)
-    }
-
     // 몇월 며칠 날짜 파싱
     val day = selectedDate.dayOfMonth.toString()
 
@@ -106,15 +89,11 @@ fun MealDetailScreen(
     val mealViewModel: MealViewModel = viewModel(parentEntry)
     LaunchedEffect(selectedDate) {
         // 비동기 작업
-        coroutineScope {
-            val job1 = async { mealViewModel.fetchPhysicalInfo(selectedDate.toString()) }
-            val job2 = async { mealViewModel.fetchMealDaily(selectedDate.toString()) }
-
-            job1.await()
-            job2.await()
-        }
+        awaitAll(
+            async { mealViewModel.fetchPhysicalInfo(selectedDate.toString()) },
+            async { mealViewModel.fetchMealDaily(selectedDate.toString()) }
+        )
         mealViewModel.fetchDailyNutrition(selectedDate.toString())
-        delay(100)
     }
 
     val dailyNutrition by mealViewModel.dailyNutrition.collectAsState()
@@ -135,9 +114,6 @@ fun MealDetailScreen(
         mealList.clear()
         mealList.addAll(mealDaily?.mealTimes ?: emptyList())
     }
-
-    // 식단 등록, 수정
-    val dietViewModel: DietSearchViewModel = viewModel()
 
     LoadingOverlay(isVisible = isLoading || mealLoading)
 
@@ -222,7 +198,6 @@ fun MealDetailScreen(
                                 dietViewModel.skipSelectedItems()
                                 // 선댁된 끼니는 mealType으로
                                 dietViewModel.onMealSelected(mealType.label)
-                                Log.d("끼니 거르기 클릭", mealType.label)
 
                                 dietViewModel.submitDiet(
                                     context = context,
@@ -241,6 +216,17 @@ fun MealDetailScreen(
                                 mealViewModel.fetchMealDaily(selectedDate.toString())
                             },
                             onWriteClick = {
+                                // toPostDietRequest를 하기위해
+                                // 뷰모델 내 selectDate 바꾸기, selectedDate는 여기 선택된 날짜로
+                                dietViewModel.onDateSelected(selectedDate)
+                                // 식단 시간은 비어서 보내자
+                                dietViewModel.onTimeSelected(null)
+                                // selectedItems는 emptyList()로
+                                dietViewModel.skipSelectedItems()
+                                // 선댁된 끼니는 mealType으로
+                                dietViewModel.onMealSelected(mealType.label)
+
+
                                 navController.navigate("diet_register")
                             }
                         )
