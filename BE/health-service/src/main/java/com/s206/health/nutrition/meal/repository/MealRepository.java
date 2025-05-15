@@ -18,11 +18,11 @@ public interface MealRepository extends JpaRepository<Meal, Integer> {
 
     @Query("SELECT " +
             "COALESCE(SUM(f.calorie * mf.quantity), 0), " +
-            "COALESCE(SUM(f.carbohydrate * mf.quantity), 0), " +
-            "COALESCE(SUM(f.protein * mf.quantity), 0), " +
-            "COALESCE(SUM(f.fat * mf.quantity), 0), " +
-            "COALESCE(SUM(f.sweet * mf.quantity), 0), " +
-            "COALESCE(SUM(f.sodium * mf.quantity), 0) " +
+            "COALESCE(SUM(f.carbohydrate * CAST(mf.quantity AS double)), 0), " +
+            "COALESCE(SUM(f.protein * CAST(mf.quantity AS double)), 0), " +
+            "COALESCE(SUM(f.fat * CAST(mf.quantity AS double)), 0), " +
+            "COALESCE(SUM(f.sweet * CAST(mf.quantity AS double)), 0), " +
+            "COALESCE(SUM(f.sodium * CAST(mf.quantity AS double)), 0) " +
             "FROM Meal m JOIN m.mealTimes mt JOIN mt.mealFoods mf JOIN mf.food f " +
             "WHERE m.userId = :userId AND m.mealDate = :date " +
             "AND m.isDeleted = false AND mt.isDeleted = false")
