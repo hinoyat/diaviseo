@@ -15,10 +15,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.diaviseo.ui.theme.DiaViseoColors
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material3.Icon
+import androidx.navigation.NavController
 
 @Composable
 fun MySyncSection(
-    onConnectClick: () -> Unit = {}
+    onConnectClick: () -> Unit = {},
 ) {
     Column {
         Text(
@@ -30,7 +34,9 @@ fun MySyncSection(
         )
 
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onConnectClick() },
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(2.dp)
@@ -47,20 +53,17 @@ fun MySyncSection(
                     fontSize = 14.sp,
                     color = DiaViseoColors.Unimportant
                 )
-                Text(
-                    text = "연결하기",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = DiaViseoColors.Main1,
-                    modifier = Modifier.clickable { onConnectClick() }
+                Icon(
+                    imageVector = Icons.Filled.ChevronRight,
+                    contentDescription = "헬스 커넥트 관리",
                 )
             }
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun MySyncSectionPreview() {
-    MySyncSection()
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun MySyncSectionPreview() {
+//    MySyncSection()
+//}
