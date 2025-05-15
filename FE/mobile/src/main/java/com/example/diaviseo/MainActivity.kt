@@ -39,6 +39,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.activity.compose.setContent
 import androidx.work.*
 import com.example.diaviseo.ui.theme.DiaViseoTheme
+import com.example.diaviseo.utils.FcmTokenSender
 import com.example.diaviseo.worker.StepResetWorker
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.RemoteMessage
@@ -115,7 +116,8 @@ class MainActivity : ComponentActivity() {
             val token = task.result
             Log.d("FCM", "현재 FCM 토큰: $token")
 
-            // TODO: 서버에 전송
+            // 서버에 토큰 전송
+            FcmTokenSender.sendTokenToServer(token)
         }
 
 
