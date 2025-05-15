@@ -6,6 +6,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.example.diaviseo.ui.detail.MealDetailScreen
 import com.example.diaviseo.viewmodel.DietSearchViewModel
 
 fun NavGraphBuilder.dietGraph(navController: NavHostController) {
@@ -49,6 +50,17 @@ fun NavGraphBuilder.dietGraph(navController: NavHostController) {
             FoodSetRegisterScreen(
                 navController = navController,
                 viewModel = viewModel
+            )
+        }
+
+        composable("meal_detail") { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry("diet_graph")
+            }
+            val viewModel = viewModel<DietSearchViewModel>(parentEntry)
+            MealDetailScreen(
+                navController = navController,
+                dietViewModel = viewModel
             )
         }
 

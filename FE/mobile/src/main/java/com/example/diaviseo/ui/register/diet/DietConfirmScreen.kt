@@ -56,7 +56,7 @@ fun DietConfirmScreen(
     var showSheet by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     val selectedFoods = viewModel.selectedItems
-    val selectedMeal = viewModel.selectedMeal
+    val selectedMeal by viewModel.selectedMeal.collectAsState()
     val selectedTime = viewModel.selectedTime
 
     val totalCalorie = selectedFoods.sumOf { it.calorie }

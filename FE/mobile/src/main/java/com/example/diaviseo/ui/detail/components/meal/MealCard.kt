@@ -31,6 +31,7 @@ import com.example.diaviseo.ui.theme.*
 import java.math.BigDecimal
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.text.DecimalFormat
 
 @Composable
 fun MealCard(
@@ -47,6 +48,9 @@ fun MealCard(
     var isExpanded by remember { mutableStateOf(false) }
 
     val showPreview = remember { mutableStateOf(false) }
+
+    // DecimalFormat("0.#") → 소수점 이하가 0이면 버리고, 아니면 한 자리만 표시
+    val df = DecimalFormat("0.#")
 
 //    val mealIcon = when (mealIconRes) {
 //        "BREAKFAST" -> R.drawable.morning
@@ -138,9 +142,10 @@ fun MealCard(
         // 음식 리스트
         if (!isExpanded) {
             foods.forEach {
+                val quantityString = df.format(it.quantity)
                 MealFoodRow(
                     name = it.foodName,
-                    quantityLabel = "${it.quantity} 인분",
+                    quantityLabel = "$quantityString 인분",
                     kcal = it.totalCalorie
                 )
             }
@@ -148,10 +153,11 @@ fun MealCard(
             AnimatedVisibility(visible = isExpanded) {
                 Column {
                     foods.forEach {
+                        val quantityString = df.format(it.quantity)
                         Spacer(modifier = Modifier.height(8.dp))
                         MealFoodRow(
                             name = it.foodName,
-                            quantityLabel = "${it.quantity} 인분",
+                            quantityLabel = "$quantityString 인분",
                             kcal = it.totalCalorie
                         )
                         Spacer(modifier = Modifier.height(8.dp))

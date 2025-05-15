@@ -190,12 +190,12 @@ fun MainScreen() {
             }
 
             // 식단 상세화면
-            composable("meal_detail") { backStackEntry ->
-                MealDetailScreen(
-                    navController = navController,
-                    viewModel = profileViewModel
-                )
-            }
+//            composable("meal_detail") { backStackEntry ->
+//                MealDetailScreen(
+//                    navController = navController,
+////                    viewModel = profileViewModel
+//                )
+//            }
 
             // 홈 상세화면
             composable("home_detail") { backStackEntry ->
