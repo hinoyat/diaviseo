@@ -73,6 +73,11 @@ class DietSearchViewModel : ViewModel() {
         selectedMeal = meal
     }
 
+    // 끼니 스킵처리
+    fun skipSelectedItems() {
+        selectedItems = emptyList()
+    }
+
     // 서버 전송용 요청 객체로 변환
     fun toPostDietRequest(): PostDietRequest? {
         val time = selectedTime ?: return null

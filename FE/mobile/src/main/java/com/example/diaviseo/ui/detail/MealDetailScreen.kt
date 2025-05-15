@@ -1,6 +1,9 @@
 package com.example.diaviseo.ui.detail
 
+import android.R.attr.delay
 import android.annotation.SuppressLint
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,8 +17,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -32,6 +37,7 @@ import com.example.diaviseo.ui.main.components.goal.meal.DonutChartWithLegend
 import com.example.diaviseo.viewmodel.goal.GoalViewModel
 import com.example.diaviseo.viewmodel.ProfileViewModel
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import com.example.diaviseo.network.meal.dto.res.MealFoodResponse
 import com.example.diaviseo.network.meal.dto.res.MealNutritionResponse
 import com.example.diaviseo.network.meal.dto.res.MealTimeNutritionResponse
@@ -40,10 +46,17 @@ import com.example.diaviseo.network.meal.dto.res.MealDailyResponse
 import com.example.diaviseo.ui.detail.components.meal.MealEmptyCard
 import com.example.diaviseo.ui.detail.components.meal.MealSkippedCard
 import com.example.diaviseo.ui.theme.DiaViseoColors
+import com.example.diaviseo.viewmodel.DietSearchViewModel
 import com.example.diaviseo.viewmodel.goal.ExerciseViewModel
 import com.example.diaviseo.viewmodel.goal.MealViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @SuppressLint("UnrememberedGetBackStackEntry")
 @Composable
@@ -51,6 +64,7 @@ fun MealDetailScreen(
     navController: NavHostController,
     viewModel: ProfileViewModel = viewModel()
 ) {
+    val context = LocalContext.current
     // 1) 먼저 이전 엔트리를 확인해본다
     val previousEntry = navController.previousBackStackEntry
 
@@ -100,6 +114,7 @@ fun MealDetailScreen(
             job2.await()
         }
         mealViewModel.fetchDailyNutrition(selectedDate.toString())
+        delay(100)
     }
 
     val dailyNutrition by mealViewModel.dailyNutrition.collectAsState()
@@ -111,172 +126,20 @@ fun MealDetailScreen(
     val fatRatio by mealViewModel.fatRatio.collectAsState()
     val mealLoading by mealViewModel.isLoading.collectAsState()
 
+    val mealList = remember { mutableStateListOf<MealTimeNutritionResponse>().apply { addAll(
+        mealDaily?.mealTimes ?: emptyList()
+    ) } }
+
+    // 2) mealDaily가 바뀔 때마다 mealList 갱신
+    LaunchedEffect(mealDaily?.mealTimes) {
+        mealList.clear()
+        mealList.addAll(mealDaily?.mealTimes ?: emptyList())
+    }
+
+    // 식단 등록, 수정
+    val dietViewModel: DietSearchViewModel = viewModel()
+
     LoadingOverlay(isVisible = isLoading || mealLoading)
-
-    val dummyMealData = MealDailyResponse(
-        mealId = 1,
-        mealDate = "2025-05-07",
-        isMeal = true,
-        createdAt = "2025-05-07T16:51:24.424027",
-        updatedAt = "2025-05-07T16:51:24.424027",
-        totalNutrition = MealNutritionResponse(
-            totalCalorie = 3060,
-            totalCarbohydrate = 384.00,
-            totalProtein = 280.40,
-            totalFat = 42.00,
-            totalSugar = 1.80,
-            totalSodium = 590.00
-        ),
-        mealTimes = listOf(
-            MealTimeNutritionResponse(
-                mealTimeId = 1,
-                mealType = "BREAKFAST",
-                eatingTime = "08:30:00",
-                foods = listOf(
-                    MealFoodResponse(
-                        mealFoodId = 6,
-                        foodId = 2,
-                        foodName = "닭가슴살",
-                        calorie = 165,
-                        carbohydrate = 0.00,
-                        protein = 31.00,
-                        fat = 3.60,
-                        sugar = 0.00,
-                        sodium = 70.00,
-                        quantity = 2,
-                        foodImageUrl = "https://example.com/image1.jpg",
-                        totalCalorie = 330,
-                        totalCarbohydrate = 0.00,
-                        totalProtein = 62.00,
-                        totalFat = 7.20,
-                        totalSugar = 0.00,
-                        totalSodium = 140.00
-                    ),
-                    MealFoodResponse(
-                        mealFoodId = 7,
-                        foodId = 1,
-                        foodName = "현미밥",
-                        calorie = 290,
-                        carbohydrate = 64.00,
-                        protein = 5.40,
-                        fat = 2.20,
-                        sugar = 0.30,
-                        sodium = 5.00,
-                        quantity = 2,
-                        foodImageUrl = "https://example.com/image1.jpg",
-                        totalCalorie = 580,
-                        totalCarbohydrate = 128.00,
-                        totalProtein = 10.80,
-                        totalFat = 4.40,
-                        totalSugar = 0.60,
-                        totalSodium = 10.00
-                    )
-                ),
-                nutrition = MealNutritionResponse(
-                    totalCalorie = 910,
-                    totalCarbohydrate = 128.00,
-                    totalProtein = 72.80,
-                    totalFat = 11.60,
-                    totalSugar = 0.60,
-                    totalSodium = 150.00
-                ),
-                createdAt = "2025-05-07T17:15:16.205127",
-                updatedAt = "2025-05-07T17:15:16.205127",
-                mealTimeImageUrl = "https://picsum.photos/300/300"
-            ),
-            MealTimeNutritionResponse(
-                mealTimeId = 2,
-                mealType = "LUNCH",
-                eatingTime = "08:30:00",
-                foods = listOf(),
-                nutrition = MealNutritionResponse(
-                    totalCalorie = 0,
-                    totalCarbohydrate = 0.00,
-                    totalProtein = 0.0,
-                    totalFat = 0.0,
-                    totalSugar = 0.0,
-                    totalSodium = 0.00
-                ),
-                createdAt = "2025-05-07T17:15:16.205127",
-                updatedAt = "2025-05-07T17:15:16.205127",
-                mealTimeImageUrl = null
-            ),
-            MealTimeNutritionResponse(
-                mealTimeId = 3,
-                mealType = "DINNER",
-                eatingTime = "08:30:00",
-                foods = listOf(
-                    MealFoodResponse(
-                        mealFoodId = 10,
-                        foodId = 2,
-                        foodName = "닭가슴살",
-                        calorie = 165,
-                        carbohydrate = 0.00,
-                        protein = 31.00,
-                        fat = 3.60,
-                        sugar = 0.00,
-                        sodium = 70.00,
-                        quantity = 2,
-                        foodImageUrl = "https://example.com/image1.jpg",
-                        totalCalorie = 330,
-                        totalCarbohydrate = 0.00,
-                        totalProtein = 62.00,
-                        totalFat = 7.20,
-                        totalSugar = 0.00,
-                        totalSodium = 140.00
-                    ),
-                    MealFoodResponse(
-                        mealFoodId = 11,
-                        foodId = 1,
-                        foodName = "현미밥",
-                        calorie = 290,
-                        carbohydrate = 64.00,
-                        protein = 5.40,
-                        fat = 2.20,
-                        sugar = 0.30,
-                        sodium = 5.00,
-                        quantity = 2,
-                        foodImageUrl = "https://example.com/image1.jpg",
-                        totalCalorie = 580,
-                        totalCarbohydrate = 128.00,
-                        totalProtein = 10.80,
-                        totalFat = 4.40,
-                        totalSugar = 0.60,
-                        totalSodium = 10.00
-                    )
-                ),
-                nutrition = MealNutritionResponse(
-                    totalCalorie = 910,
-                    totalCarbohydrate = 128.00,
-                    totalProtein = 72.00,
-                    totalFat = 11.60,
-                    totalSugar = 0.60,
-                    totalSodium = 150.00
-                ),
-                createdAt = "2025-05-07T17:15:16.205127",
-                updatedAt = "2025-05-07T17:15:16.205127",
-                mealTimeImageUrl = "https://picsum.photos/500/700"
-            ),
-//            MealTimeNutritionResponse(
-//                mealTimeId = 4,
-//                mealType = "SNACK",
-//                eatingTime = "08:30:00",
-//                foods = listOf(
-//                    MealFood(
-//                    )
-//                ),
-//                nutrition = MealNutritionResponse(
-//                    totalCalorie = 330f,
-//                    totalCarbohydrate = 0.00f,
-//                    totalProtein = 62.00f,
-//                    totalFat = 7.20f,
-//                    totalSugar = 0.00f,
-//                    totalSodium = 140.00f
-//                )
-//            )
-        )
-    )
-
 
     Scaffold(
         topBar = {
@@ -316,7 +179,7 @@ fun MealDetailScreen(
 
             // 시간대별 식단 카드 4개
             MealTimeType.entries.forEach { mealType ->
-                val timeData = mealDaily?.mealTimes?.find { it.mealType == mealType.name }
+                val timeData = mealList.find { it.mealType == mealType.name }
 
                 when {
                     timeData != null && timeData.foods.isNotEmpty() -> {
@@ -347,8 +210,39 @@ fun MealDetailScreen(
                             kcal = 0,
                             gradient = mealType.gradient,
                             mealIconRes = mealType.iconRes,
-                            onSkippedClick = { /* TODO */ },
-                            onWriteClick = { /* TODO */ }
+                            onSkippedClick = {
+                                // dietsearch뷰모델에서 submitDiet 사용
+                                // toPostDietRequest를 하기위해
+                                // 뷰모델 내 selectDate 바꾸기, selectedDate는 여기 선택된 날짜로
+                                dietViewModel.onDateSelected(selectedDate)
+                                // 스킵한 시간은 클릭한 시간
+                                val seoulTime: LocalTime = LocalTime.now(ZoneId.of("Asia/Seoul"))
+                                dietViewModel.onTimeSelected(seoulTime)
+                                // selectedItems는 emptyList()로
+                                dietViewModel.skipSelectedItems()
+                                // 선댁된 끼니는 mealType으로
+                                dietViewModel.onMealSelected(mealType.label)
+                                Log.d("끼니 거르기 클릭", mealType.label)
+
+                                dietViewModel.submitDiet(
+                                    context = context,
+                                    imageUri = null,
+                                    onSuccess = {
+                                        Toast.makeText(context, "${mealType.label}을 거르셨어요", Toast.LENGTH_SHORT).show()
+
+                                        dietViewModel.clearDietState()
+                                    },
+                                    onError = { message ->
+                                        Toast.makeText(context, "거르기 등록 실패: $message", Toast.LENGTH_SHORT).show()
+                                    }
+                                )
+
+                                // 식단 다시부르기
+                                mealViewModel.fetchMealDaily(selectedDate.toString())
+                            },
+                            onWriteClick = {
+                                navController.navigate("diet_register")
+                            }
                         )
                     }
                 }
