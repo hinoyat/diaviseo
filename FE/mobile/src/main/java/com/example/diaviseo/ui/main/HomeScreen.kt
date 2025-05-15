@@ -28,6 +28,11 @@ fun HomeScreen(
     navController: NavHostController,
     viewModel: ProfileViewModel
 ) {
+    // 화면 진입 시 한 번 실행됨
+    LaunchedEffect(Unit) {
+        viewModel.fetchMyProfile()
+    }
+
     val homeViewModel: HomeViewModel = viewModel()
 
     // 현재 이 composable의 BackStackEntry를 State로 구독

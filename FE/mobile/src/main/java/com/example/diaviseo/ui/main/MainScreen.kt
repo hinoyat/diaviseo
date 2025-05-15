@@ -32,10 +32,10 @@ import java.time.LocalDate
 fun MainScreen() {
     // 화면 뜨자마자 회원정보 불러오기
     val profileViewModel: ProfileViewModel = viewModel()
-    // 화면 진입 시 한 번 실행됨
-    LaunchedEffect(Unit) {
-        profileViewModel.fetchMyProfile()
-    }
+//    // 화면 진입 시 한 번 실행됨
+//    LaunchedEffect(Unit) {
+//        profileViewModel.fetchMyProfile()
+//    }
 
     val profile by profileViewModel.myProfile.collectAsState()
     // profile이 바뀔 때마다 로그 찍고싶을 때 사용
