@@ -72,7 +72,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel,) {
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-            .padding(bottom = 120.dp), // 패딩 유지
+            .padding(bottom = 80.dp), // 패딩 유지
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // 2. HorizontalPager 수정: count 파라미터 제거
@@ -87,7 +87,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel,) {
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = 8.dp), // 하단 패딩 유지
+                    .padding(bottom = 4.dp), // 하단 패딩 유지
                 contentScale = ContentScale.Crop // 이미지 스케일 유지
             )
         }
@@ -97,7 +97,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel,) {
             Modifier
                 .wrapContentHeight()
                 .fillMaxWidth()
-                .padding(bottom = 8.dp, top = 8.dp), // 상하 패딩 조정
+                .padding(bottom = 12.dp, top = 6.dp), // 상하 패딩 조정
             horizontalArrangement = Arrangement.Center
         ) {
             repeat(pagerState.pageCount) { iteration ->
@@ -113,7 +113,7 @@ fun SignupScreen(navController: NavController, authViewModel: AuthViewModel,) {
         }
 
 
-        Spacer(modifier = Modifier.height(24.dp)) // 간격 유지
+        Spacer(modifier = Modifier.height(4.dp)) // 간격 유지
 
         // 소셜 로그인 버튼 (기존 로직 유지)
         SocialLoginButtons(
