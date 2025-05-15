@@ -44,12 +44,13 @@ public interface MealRepository extends JpaRepository<Meal, Integer> {
                                             @Param("endDate") LocalDate endDate);
 
 
+    // 주간 영양소 평균 섭취량 (모든 식사 유형 포함)
     @Query(value = "SELECT YEARWEEK(m.meal_date, 1) as year_week, " +
-            "AVG(f.calorie * mf.quantity) as avg_calorie, " +
-            "AVG(f.carbohydrate * mf.quantity) as avg_carbohydrate, " +
-            "AVG(f.protein * mf.quantity) as avg_protein, " +
-            "AVG(f.fat * mf.quantity) as avg_fat, " +
-            "AVG(f.sweet * mf.quantity) as avg_sugar, " +
+            "SUM(f.calorie * mf.quantity) / COUNT(DISTINCT m.meal_date) as avg_daily_calorie, " +
+            "SUM(f.carbohydrate * mf.quantity) / COUNT(DISTINCT m.meal_date) as avg_daily_carbohydrate, " +
+            "SUM(f.protein * mf.quantity) / COUNT(DISTINCT m.meal_date) as avg_daily_protein, " +
+            "SUM(f.fat * mf.quantity) / COUNT(DISTINCT m.meal_date) as avg_daily_fat, " +
+            "SUM(f.sweet * mf.quantity) / COUNT(DISTINCT m.meal_date) as avg_daily_sugar, " +
             "COUNT(DISTINCT m.meal_date) as day_count " +
             "FROM meal_tb m " +
             "JOIN meal_time_tb mt ON m.meal_id = mt.meal_id " +
@@ -63,14 +64,14 @@ public interface MealRepository extends JpaRepository<Meal, Integer> {
                                                    @Param("startDate") LocalDate startDate,
                                                    @Param("endDate") LocalDate endDate);
 
-    // 월별 영양소 데이터 조회 (네이티브 쿼리 수정)
+    // 월별 영양소 평균 섭취량 (모든 식사 유형 포함)
     @Query(value = "SELECT YEAR(m.meal_date) as year, " +
             "MONTH(m.meal_date) as month, " +
-            "AVG(f.calorie * mf.quantity) as avg_calorie, " +
-            "AVG(f.carbohydrate * mf.quantity) as avg_carbohydrate, " +
-            "AVG(f.protein * mf.quantity) as avg_protein, " +
-            "AVG(f.fat * mf.quantity) as avg_fat, " +
-            "AVG(f.sweet * mf.quantity) as avg_sugar, " +
+            "SUM(f.calorie * mf.quantity) / COUNT(DISTINCT m.meal_date) as avg_daily_calorie, " +
+            "SUM(f.carbohydrate * mf.quantity) / COUNT(DISTINCT m.meal_date) as avg_daily_carbohydrate, " +
+            "SUM(f.protein * mf.quantity) / COUNT(DISTINCT m.meal_date) as avg_daily_protein, " +
+            "SUM(f.fat * mf.quantity) / COUNT(DISTINCT m.meal_date) as avg_daily_fat, " +
+            "SUM(f.sweet * mf.quantity) / COUNT(DISTINCT m.meal_date) as avg_daily_sugar, " +
             "COUNT(DISTINCT m.meal_date) as day_count " +
             "FROM meal_tb m " +
             "JOIN meal_time_tb mt ON m.meal_id = mt.meal_id " +
@@ -83,6 +84,5 @@ public interface MealRepository extends JpaRepository<Meal, Integer> {
     List<Object[]> calculateMonthlyAverageNutrition(@Param("userId") Integer userId,
                                                     @Param("startDate") LocalDate startDate,
                                                     @Param("endDate") LocalDate endDate);
-    
     // TODO: List<Object[]> 반환을 DTO 사용해서 반환해주기
 }
