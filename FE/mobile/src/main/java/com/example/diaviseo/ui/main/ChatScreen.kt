@@ -1,3 +1,4 @@
+// 리팩토링: ChatInputBar 위치 개선 버전
 package com.example.diaviseo.ui.main
 
 import androidx.compose.animation.AnimatedVisibility
@@ -7,16 +8,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -31,10 +28,7 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun ChatScreen(navController: NavController) {
-    val history = navController
-        .previousBackStackEntry
-        ?.savedStateHandle
-        ?.get<ChatHistory>("selectedHistory")
+    val history = navController.previousBackStackEntry?.savedStateHandle?.get<ChatHistory>("selectedHistory")
 
     ChatContent(
         history = history,
@@ -64,13 +58,7 @@ fun ChatContent(
     val messages = remember {
         mutableStateListOf<ChatMessage>().apply {
             history?.let {
-                add(
-                    ChatMessage(
-                        text = it.lastMessage,
-                        isUser = true,
-                        timestamp = it.timestamp
-                    )
-                )
+                add(ChatMessage(it.lastMessage, true, it.timestamp))
             }
         }
     }
@@ -87,51 +75,6 @@ fun ChatContent(
                 onBackClick = onBackClick,
                 onExitClick = { showExitDialog = true }
             )
-        },
-        bottomBar = {
-            if (!showExitDialog) {
-                ChatInputBar(
-                    inputText = input,
-                    onInputChange = { input = it },
-                    onSendClick = {
-                        if (selectedTopic != null && input.isNotBlank()) {
-                            messages.removeAll { it.text == "__SHOW_INITIAL_QUESTION_BUTTONS__" }
-                            hasAskedFirstQuestion = true
-
-                            messages.add(
-                                ChatMessage(
-                                    text = input,
-                                    isUser = true,
-                                    timestamp = LocalDateTime.now()
-                                )
-                            )
-                            input = ""
-                            isTyping = true
-                            keyboardController?.hide()
-                            focusManager.clearFocus()
-
-                            coroutineScope.launch {
-                                delay(1000)
-                                messages.add(
-                                    ChatMessage(
-                                        text = "이건 예시 챗봇 응답이에요 🍱",
-                                        isUser = false,
-                                        timestamp = LocalDateTime.now(),
-                                        characterImageRes = when (selectedTopic) {
-                                            ChatTopic.DIET -> R.drawable.charac_eat
-                                            ChatTopic.EXERCISE -> R.drawable.charac_exercise
-                                            else -> null
-                                        }
-                                    )
-                                )
-                                isTyping = false
-                            }
-                        }
-                    },
-                    isSending = isTyping,
-                    enabled = selectedTopic != null && !showExitDialog
-                )
-            }
         }
     ) { padding ->
         Column(
@@ -149,32 +92,30 @@ fun ChatContent(
             ) {
                 if (selectedTopic == null) {
                     item {
-                        FixedIntroScenario(
-                            onSelectTopic = { topic ->
-                                selectedTopic = topic
-                                messages.add(
-                                    ChatMessage(
-                                        text = when (topic) {
-                                            ChatTopic.DIET -> "식단이🥗를 골라주셨어요! 어떤 질문으로 시작해볼까요?"
-                                            ChatTopic.EXERCISE -> "운동이💪를 골라주셨어요! 어떤 질문으로 시작해볼까요?"
-                                        },
-                                        isUser = false,
-                                        timestamp = LocalDateTime.now(),
-                                        characterImageRes = when (topic) {
-                                            ChatTopic.DIET -> R.drawable.charac_eat
-                                            ChatTopic.EXERCISE -> R.drawable.charac_exercise
-                                        }
-                                    )
+                        FixedIntroScenario(onSelectTopic = { topic ->
+                            selectedTopic = topic
+                            messages.add(
+                                ChatMessage(
+                                    text = when (topic) {
+                                        ChatTopic.DIET -> "식단이🥗를 골라주셨어요! 어떤 질문으로 시작해볼까요?"
+                                        ChatTopic.EXERCISE -> "운동이💪를 골라주셨어요! 어떤 질문으로 시작해볼까요?"
+                                    },
+                                    isUser = false,
+                                    timestamp = LocalDateTime.now(),
+                                    characterImageRes = when (topic) {
+                                        ChatTopic.DIET -> R.drawable.chat_char_diet
+                                        ChatTopic.EXERCISE -> R.drawable.chat_char_exercise
+                                    }
                                 )
-                                messages.add(
-                                    ChatMessage(
-                                        text = "__SHOW_INITIAL_QUESTION_BUTTONS__",
-                                        isUser = false,
-                                        timestamp = LocalDateTime.now()
-                                    )
+                            )
+                            messages.add(
+                                ChatMessage(
+                                    text = "__SHOW_INITIAL_QUESTION_BUTTONS__",
+                                    isUser = false,
+                                    timestamp = LocalDateTime.now()
                                 )
-                            }
-                        )
+                            )
+                        })
                     }
                 }
 
@@ -191,25 +132,19 @@ fun ChatContent(
                                     messages.removeAll { it.text == "__SHOW_INITIAL_QUESTION_BUTTONS__" }
                                     hasAskedFirstQuestion = true
 
-                                    messages.add(
-                                        ChatMessage(
-                                            text = question,
-                                            isUser = true,
-                                            timestamp = LocalDateTime.now()
-                                        )
-                                    )
+                                    messages.add(ChatMessage(question, true, LocalDateTime.now()))
                                     isTyping = true
 
                                     coroutineScope.launch {
-                                        delay(800)
+                                        delay(5000)
                                         messages.add(
                                             ChatMessage(
                                                 text = "이건 $question 에 대한 답변입니다! 😄",
                                                 isUser = false,
                                                 timestamp = LocalDateTime.now(),
                                                 characterImageRes = when (selectedTopic) {
-                                                    ChatTopic.DIET -> R.drawable.charac_eat
-                                                    ChatTopic.EXERCISE -> R.drawable.charac_exercise
+                                                    ChatTopic.DIET -> R.drawable.chat_char_diet
+                                                    ChatTopic.EXERCISE -> R.drawable.chat_char_exercise
                                                     else -> null
                                                 }
                                             )
@@ -230,20 +165,61 @@ fun ChatContent(
                     }
                 }
             }
-        }
 
-        if (showExitDialog) {
-            ExitChatDialog(
-                onConfirm = {
-                    showExitDialog = false
-                    input = ""
-                    messages.clear()
-                    selectedTopic = null
-                    hasAskedFirstQuestion = false
-                    onExitClick()
-                },
-                onDismiss = { showExitDialog = false }
-            )
+            if (!showExitDialog && selectedTopic != null) {
+                ChatInputBar(
+                    inputText = input,
+                    onInputChange = { input = it },
+                    onSendClick = {
+                        if (input.isNotBlank()) {
+                            messages.removeAll { it.text == "__SHOW_INITIAL_QUESTION_BUTTONS__" }
+                            hasAskedFirstQuestion = true
+
+                            messages.add(ChatMessage(input, true, LocalDateTime.now()))
+                            input = ""
+                            isTyping = true
+                            keyboardController?.hide()
+                            focusManager.clearFocus()
+
+                            coroutineScope.launch {
+                                delay(5000)
+                                messages.add(
+                                    ChatMessage(
+                                        text = "이건 예시 챗봇 응답이에요 🍱",
+                                        isUser = false,
+                                        timestamp = LocalDateTime.now(),
+                                        characterImageRes = when (selectedTopic) {
+                                            ChatTopic.DIET -> R.drawable.chat_char_diet
+                                            ChatTopic.EXERCISE -> R.drawable.chat_char_exercise
+                                            else -> null
+                                        }
+                                    )
+                                )
+                                isTyping = false
+                            }
+                        }
+                    },
+                    isSending = isTyping,
+                    enabled = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                )
+            }
+
+            if (showExitDialog) {
+                ExitChatDialog(
+                    onConfirm = {
+                        showExitDialog = false
+                        input = ""
+                        messages.clear()
+                        selectedTopic = null
+                        hasAskedFirstQuestion = false
+                        onExitClick()
+                    },
+                    onDismiss = { showExitDialog = false }
+                )
+            }
         }
     }
 }
@@ -269,10 +245,4 @@ fun ChatDateDivider(date: LocalDate) {
 
 fun isNewDay(prev: ChatMessage, current: ChatMessage): Boolean {
     return prev.timestamp.toLocalDate() != current.timestamp.toLocalDate()
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewChatDateDivider() {
-    ChatDateDivider(date = LocalDate.now())
 }

@@ -29,7 +29,7 @@ fun MyHeaderSection(userName: String = "김디아") {
                 fontWeight = FontWeight.Bold,
                 color = DiaViseoColors.Main1
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = "오늘도 건강하세요!",
                 fontSize = 16.sp,

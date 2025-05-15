@@ -18,6 +18,8 @@ import androidx.compose.ui.unit.sp
 import com.example.diaviseo.viewmodel.register.exercise.ExerciseRecordViewModel
 import com.example.diaviseo.ui.theme.*
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.res.painterResource
+import com.example.diaviseo.R
 
 @Composable
 fun ExerciseRegisterBottomSheet(
@@ -40,6 +42,12 @@ fun ExerciseRegisterBottomSheet(
 
     val totalKcal = exercise.calorie * exerciseTime
 
+    val detail by viewModel.exerciseDetail.collectAsState()
+
+    LaunchedEffect(exercise.id) {
+        viewModel.fetchExerciseDetail(exercise.id)
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -50,7 +58,31 @@ fun ExerciseRegisterBottomSheet(
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp, vertical = 12.dp)
         ) {
-            Text(text = exercise.name, style = bold20)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = detail?.exerciseName ?: exercise.name, style = bold20)
+
+                IconButton(
+                    onClick = { viewModel.toggleFavorite() },
+                    enabled = detail != null
+                ) {
+                    Icon(
+                        painter = painterResource(
+                            id = if (detail?.isFavorite == true)
+                                R.drawable.favorite_star
+                            else
+                                R.drawable.unfavorite_star
+                        ),
+                        contentDescription = "즐겨찾기",
+                        tint = Color.Unspecified,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             Card(

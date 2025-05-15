@@ -98,20 +98,13 @@ fun MainScreen() {
                 }
             }
 
-
-
             composable("chat_history") {
-                Box(modifier = Modifier.padding(innerPadding)) {
-                    ChatHistoryScreen(navController)
-                }
+                ChatHistoryScreen(navController)
             }
 
             composable("chat") {
-                Box(modifier = Modifier.padding(innerPadding)) {
-                    ChatScreen(navController)
-                }
+                ChatScreen(navController)
             }
-
 
             composable("goal") {
                 Box(modifier = Modifier.padding(innerPadding)) {
@@ -120,9 +113,7 @@ fun MainScreen() {
             }
             // 마이페이지
             composable("my") {
-                Box(modifier = Modifier.padding(innerPadding)) {
-                    MyScreen(navController)
-                }
+                MyScreen(navController)
             }
             // 회원 정보 수정
             composable("edit_profile") {

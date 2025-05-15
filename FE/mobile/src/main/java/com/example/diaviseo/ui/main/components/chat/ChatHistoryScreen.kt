@@ -1,3 +1,4 @@
+// ChatHistoryScreen.kt
 package com.example.diaviseo.ui.main.components.chat
 
 import androidx.compose.foundation.background
@@ -9,14 +10,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -24,7 +24,6 @@ import com.example.diaviseo.ui.theme.DiaViseoColors
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-// ChatHistory data class remains unchanged
 data class ChatHistory(
     val id: String,
     val topic: ChatTopic,
@@ -32,39 +31,42 @@ data class ChatHistory(
     val timestamp: LocalDateTime
 ) : java.io.Serializable
 
-// ✅ Wrapping composable that handles NavController logic
 @Composable
 fun ChatHistoryScreen(navController: NavController) {
     val mockHistories = remember {
         listOf(
             ChatHistory("1", ChatTopic.DIET, "오늘 뭐 먹지?", LocalDateTime.now().minusHours(1)),
-            ChatHistory("2", ChatTopic.EXERCISE, "하체 루틴 뭐할까", LocalDateTime.now().minusDays(1))
+            ChatHistory("2", ChatTopic.EXERCISE, "하체 루틴 뭐할까", LocalDateTime.now().minusDays(3))
         )
     }
+    var selectedFilter by remember { mutableStateOf<ChatTopic?>(null) }
+
+    val filteredHistories = selectedFilter?.let { topic ->
+        mockHistories.filter { it.topic == topic }
+    } ?: mockHistories
 
     ChatHistoryContent(
-        histories = mockHistories,
+        histories = filteredHistories,
+        selectedFilter = selectedFilter,
+        onFilterSelected = { selectedFilter = it },
         onBackClick = { navController.popBackStack() },
         onChatClick = { selected ->
-            navController.currentBackStackEntry
-                ?.savedStateHandle
-                ?.set("selectedHistory", selected)
+            navController.currentBackStackEntry?.savedStateHandle?.set("selectedHistory", selected)
             navController.navigate("chat")
         },
         onNewChatClick = {
-            navController.currentBackStackEntry
-                ?.savedStateHandle
-                ?.set("selectedHistory", null)
+            navController.currentBackStackEntry?.savedStateHandle?.set("selectedHistory", null)
             navController.navigate("chat")
         }
     )
 }
 
-// ✅ UI-only composable
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatHistoryContent(
     histories: List<ChatHistory>,
+    selectedFilter: ChatTopic?,
+    onFilterSelected: (ChatTopic?) -> Unit,
     onChatClick: (ChatHistory) -> Unit,
     onBackClick: () -> Unit,
     onNewChatClick: () -> Unit = {}
@@ -73,7 +75,7 @@ fun ChatHistoryContent(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("AI 디아비서", fontSize = 20.sp, color = DiaViseoColors.Basic, fontWeight = FontWeight.Bold)
+                    Text("과거 대화 기록", fontSize = 20.sp, color = DiaViseoColors.Basic, fontWeight = FontWeight.Bold)
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
@@ -91,27 +93,22 @@ fun ChatHistoryContent(
                 .background(Color(0xFFF9FAFB))
         ) {
             Spacer(modifier = Modifier.height(8.dp))
-            Button(
-                onClick = onNewChatClick,
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = DiaViseoColors.Main1)
-            ) {
-                Text("+ 새로운 대화 시작", color = Color.White, fontSize = 16.sp)
-            }
-
+            FilterTabRow(selectedFilter, onFilterSelected)
+            Spacer(modifier = Modifier.height(8.dp))
+            NewChatButton(onClick = onNewChatClick)
             Spacer(modifier = Modifier.height(12.dp))
-
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(histories) { history ->
-                    ChatHistoryCard(history = history, onClick = { onChatClick(history) })
+            if (histories.isEmpty()) {
+                EmptyHistoryMessage(selectedFilter)
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(histories) { history ->
+                        ChatHistoryCard(history = history, onClick = { onChatClick(history) })
+                    }
                 }
             }
         }
@@ -119,7 +116,64 @@ fun ChatHistoryContent(
 }
 
 @Composable
-fun ChatHistoryCard(history: ChatHistory, onClick: () -> Unit) {
+private fun FilterTabRow(selected: ChatTopic?, onSelected: (ChatTopic?) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        val tabs = listOf<Pair<String, ChatTopic?>>("전체" to null, "식단이" to ChatTopic.DIET, "운동이" to ChatTopic.EXERCISE)
+        tabs.forEach { (label, value) ->
+            val isSelected = selected == value
+            Button(
+                onClick = { onSelected(value) },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isSelected) DiaViseoColors.Main1 else Color.LightGray
+                ),
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(label, color = Color.White)
+            }
+        }
+    }
+}
+
+@Composable
+private fun NewChatButton(onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(containerColor = DiaViseoColors.Main1)
+    ) {
+        Text("+ 새로운 대화 시작", color = Color.White, fontSize = 16.sp)
+    }
+}
+
+@Composable
+private fun EmptyHistoryMessage(selectedFilter: ChatTopic?) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = when (selectedFilter) {
+                ChatTopic.DIET -> "식단이와의 대화 기록이 없어요"
+                ChatTopic.EXERCISE -> "운동이와의 대화 기록이 없어요"
+                null -> "아직 대화 기록이 없어요"
+            },
+            color = DiaViseoColors.Placeholder,
+            fontSize = 14.sp
+        )
+    }
+}
+
+@Composable
+private fun ChatHistoryCard(history: ChatHistory, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -152,19 +206,4 @@ fun ChatHistoryCard(history: ChatHistory, onClick: () -> Unit) {
             color = DiaViseoColors.Placeholder
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewChatHistoryScreen() {
-    val mockData = listOf(
-        ChatHistory("1", ChatTopic.DIET, "오늘 점심은 뭘 먹을까?", LocalDateTime.now().minusHours(1)),
-        ChatHistory("2", ChatTopic.EXERCISE, "하체 운동 추천해줘", LocalDateTime.now().minusDays(1))
-    )
-    ChatHistoryContent(
-        histories = mockData,
-        onChatClick = {},
-        onBackClick = {},
-        onNewChatClick = {}
-    )
 }

@@ -14,6 +14,10 @@ import com.s206.health.client.dto.request.BodyCompositionRequest;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -60,13 +64,20 @@ public class BodyInfoController {
 			@RequestParam("image") MultipartFile imageFile) {
 
 		try {
-			// OCR로 인바디 이미지에서 정보 추출
-			BodyInfoCreateRequest extractedData = inBodyOcrService.extractBodyInfoFromImage(imageFile);
+			// 비동기 OCR 처리
+			CompletableFuture<BodyInfoCreateRequest> future =
+					inBodyOcrService.extractBodyInfoFromImageAsync(imageFile);
 
-			// 추출된 데이터만 반환 (바로 저장하지 않음)
+			// 결과 대기 (타임아웃 30초)
+			BodyInfoCreateRequest extractedData = future.get(30, TimeUnit.SECONDS);
+
 			return ResponseEntity.ok()
 					.body(ResponseDto.success(HttpStatus.OK, "OCR 정보 추출 성공", extractedData));
 
+		} catch (TimeoutException e) {
+			log.error("OCR 처리 시간 초과", e);
+			return ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+					.body(ResponseDto.error(HttpStatus.REQUEST_TIMEOUT, "처리 시간이 초과되었습니다."));
 		} catch (Exception e) {
 			log.error("OCR 처리 중 오류 발생", e);
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)

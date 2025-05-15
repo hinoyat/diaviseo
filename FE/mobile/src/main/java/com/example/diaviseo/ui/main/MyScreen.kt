@@ -1,11 +1,11 @@
 package com.example.diaviseo.ui.main
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -21,44 +21,65 @@ import com.example.diaviseo.viewmodel.ProfileViewModel
 
 @Composable
 fun MyScreen(navController: NavHostController) {
-    var isAlarmEnabled by remember { mutableStateOf(true) }
-
     val profileViewModel: ProfileViewModel = viewModel()
     val profile by profileViewModel.myProfile.collectAsState()
+
+    // 최초 1회 프로필 로드
     LaunchedEffect(Unit) {
         profileViewModel.fetchMyProfile()
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp)
-    ) {
-        CommonTopBar(onLeftActionClick = { /* TODO */ })
-
-        Spacer(Modifier.height(16.dp))
-        HeaderSection(userName = profile?.nickname ?: "불러오는 중")
-        Spacer(Modifier.height(16.dp))
-
-        ProfileSection(navController, profile)
-        Spacer(Modifier.height(24.dp))
-
-        HealthSection(navController)
-        Spacer(Modifier.height(24.dp))
-
-        SyncSection()
-        Spacer(Modifier.height(32.dp))
-
-        SettingSection(
-            isAlarmEnabled = profile?.notificationEnabled ?: true, // ✅ 프로필에서 바로 가져옴
-            onToggle = {
-                profileViewModel.updateUserProfile(
-                    UserUpdateRequest(notificationEnabled = it) // ✅ 이것만 보내면 돼
+    Scaffold(
+        topBar = {
+            Surface(
+                color = Color.White,
+//                shadowElevation = 4.dp
+            ) {
+                CommonTopBar(
+                    title = "마이페이지",
+                    onLeftActionClick = { /* TODO */ }
                 )
-            },
-            onFaqClick = { navController.navigate("faq") }
-        )
+            }
+        }
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = innerPadding.calculateTopPadding(),
+                bottom = innerPadding.calculateBottomPadding() // ✅ FAQ 잘리는 현상 방지
+            ),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            item {
+                HeaderSection(userName = profile?.nickname ?: "불러오는 중")
+            }
+            item {
+                ProfileSection(navController, profile)
+            }
+            item {
+                HealthSection(navController)
+            }
+            item {
+                SyncSection()
+            }
+            item {
+                SettingSection(
+                    isAlarmEnabled = profile?.notificationEnabled ?: true,
+                    onToggle = {
+                        profileViewModel.updateUserProfile(
+                            UserUpdateRequest(notificationEnabled = it)
+                        )
+                    },
+                    onFaqClick = { navController.navigate("faq") }
+                )
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(55.dp))
+            }
+        }
     }
 }
 
@@ -69,7 +90,6 @@ private fun HeaderSection(userName: String) {
 
 @Composable
 private fun ProfileSection(navController: NavHostController, profile: FetchProfileResponse?) {
-
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         MyProfileEditCard(navController = navController)
         MyPhysicalInfoCard(
@@ -110,10 +130,9 @@ private fun SettingSection(
         text = "설정관리",
         fontSize = 16.sp,
         color = DiaViseoColors.Basic,
-        modifier = Modifier.padding(vertical = 8.dp)
+        modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
     )
 
-    Spacer(Modifier.height(8.dp))
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         MyAlarmSettingCard(
             isEnabled = isAlarmEnabled,
