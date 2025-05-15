@@ -29,12 +29,12 @@ public interface MealRepository extends JpaRepository<Meal, Integer> {
     Object[] calculateDailyNutritionRaw(@Param("userId") Integer userId, @Param("date") LocalDate date);
 
     @Query("SELECT m.mealDate as date, " +
-            "SUM(f.calorie * mf.quantity) as totalCalorie, " +
-            "SUM(f.carbohydrate * mf.quantity) as totalCarbohydrate, " +
-            "SUM(f.protein * mf.quantity) as totalProtein, " +
-            "SUM(f.fat * mf.quantity) as totalFat, " +
-            "SUM(f.sweet * mf.quantity) as totalSugar, " +
-            "SUM(f.sodium * mf.quantity) as totalSodium " +
+            "SUM(f.calorie * CAST(mf.quantity AS float)) as totalCalorie, " +
+            "SUM(f.carbohydrate * CAST(mf.quantity AS float)) as totalCarbohydrate, " +
+            "SUM(f.protein * CAST(mf.quantity AS float)) as totalProtein, " +
+            "SUM(f.fat * CAST(mf.quantity AS float)) as totalFat, " +
+            "SUM(f.sweet * CAST(mf.quantity AS float)) as totalSugar, " +
+            "SUM(f.sodium * CAST(mf.quantity AS float)) as totalSodium " +
             "FROM Meal m JOIN m.mealTimes mt JOIN mt.mealFoods mf JOIN mf.food f " +
             "WHERE m.userId = :userId AND m.mealDate BETWEEN :startDate AND :endDate " +
             "AND m.isDeleted = false AND mt.isDeleted = false " +
@@ -42,7 +42,6 @@ public interface MealRepository extends JpaRepository<Meal, Integer> {
     List<Object[]> calculateWeeklyNutrition(@Param("userId") Integer userId,
                                             @Param("startDate") LocalDate startDate,
                                             @Param("endDate") LocalDate endDate);
-
 
     // 주간 영양소 평균 섭취량 (모든 식사 유형 포함)
     @Query(value = "SELECT YEARWEEK(m.meal_date, 1) as year_week, " +
@@ -84,5 +83,5 @@ public interface MealRepository extends JpaRepository<Meal, Integer> {
     List<Object[]> calculateMonthlyAverageNutrition(@Param("userId") Integer userId,
                                                     @Param("startDate") LocalDate startDate,
                                                     @Param("endDate") LocalDate endDate);
-    // TODO: List<Object[]> 반환을 DTO 사용해서 반환해주기
+
 }

@@ -28,7 +28,7 @@ public class MealFood {
     private Food food;
 
     @Column(nullable = false)
-    private Integer quantity;
+    private Float quantity;
 
     @Column(length = 250)
     private String foodImageUrl;
@@ -39,7 +39,7 @@ public class MealFood {
     }
 
     // 음식 수량 업데이트
-    public void updateQuantity(Integer quantity) {
+    public void updateQuantity(Float quantity) {
         this.quantity = quantity;
     }
 }
