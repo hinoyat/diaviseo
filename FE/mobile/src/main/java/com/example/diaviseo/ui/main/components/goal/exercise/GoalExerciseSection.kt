@@ -124,8 +124,8 @@ fun GoalExerciseSection(
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .offset(x = 12.dp, y = (-86).dp)
-                    .size(96.dp)
+                    .offset(x = (0).dp, y = (-65).dp)
+                    .size(65.dp)
             )
         }
 

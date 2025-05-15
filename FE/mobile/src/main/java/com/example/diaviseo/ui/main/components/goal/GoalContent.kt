@@ -109,7 +109,7 @@ fun GoalContent(
                     proteinRatio = proteinRatio,
                     fatRatio = fatRatio
                 )
-                Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.height(60.dp))
 
                 AiTipBox(
                     message = "탄단지당 균형이 좋아요!\n" +
@@ -184,7 +184,7 @@ fun GoalContent(
                     age = 26,
                     isMale = isMale
                 )
-                Spacer(modifier = Modifier.height(48.dp))
+                Spacer(modifier = Modifier.height(60.dp))
 
                 AiTipBox(
                     message = "현재 체중 대비 골격근량은 꽤 좋은 편이라 근육량은 잘 유지되고 있어요. 다만 체지방률이 약간 높은 편일 수 있으니, 유산소 운동과 함께 단백질 섭취를 늘려 체지방을 천천히 줄이는 방향이 이상적이에요. 균형 잡힌 식단과 꾸준한 활동이 핵심이에요!", // 또는 null로 빈 상태 테스트

@@ -74,9 +74,9 @@ fun AiTipBox(
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
-                        .size(70.dp)
+                        .size(60.dp)
                         .align(Alignment.TopEnd)
-                        .offset(x = 5.dp, y = (-70).dp) // 박스 밖 오른쪽 위에 배치
+                        .offset(x = 5.dp, y = (-60).dp) // 박스 밖 오른쪽 위에 배치
                 )
 
                 // 말풍선 형태의 다시받기 버튼 (캐릭터 왼쪽에)
@@ -88,7 +88,7 @@ fun AiTipBox(
                     shape = RoundedCornerShape(20.dp),
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .offset(x = (-69).dp, y = (-38).dp) // 캐릭터 왼쪽에 배치
+                        .offset(x = (-60).dp, y = (-45).dp) // 캐릭터 왼쪽에 배치
                         .shadow(
                             elevation = 4.dp,
                             shape = RoundedCornerShape(20.dp)
