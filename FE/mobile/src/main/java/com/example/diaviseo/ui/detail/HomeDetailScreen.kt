@@ -140,7 +140,13 @@ fun HomeDetailScreen(
             Spacer(modifier = Modifier.height(72.dp))
 
             Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-                AiTipBox("안녕")
+                AiTipBox(
+                    message = "안녕", // 또는 null로 빈 상태 테스트
+                    onRequestFeedback = {
+                        // 피드백 요청 처리
+                        // 예: goalViewModel.requestAiFeedback()
+                    }
+                )
             }
         }
 
