@@ -45,7 +45,7 @@ interface ExerciseApiService {
     ): HealthSyncExerciseListResponse
 
     // 걸음수 등록
-    @POST("/api/steps")
+    @POST("exercises/step")
     suspend fun uploadStepRecords(
         @Body records: List<StepRecordRequest>
     ): ApiResponse<List<StepRecordResponse>>

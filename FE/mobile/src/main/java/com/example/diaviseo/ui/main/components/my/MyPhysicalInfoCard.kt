@@ -16,6 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.diaviseo.ui.theme.DiaViseoColors
+import com.example.diaviseo.ui.theme.*
 
 @Composable
 fun MyPhysicalInfoCard(
@@ -23,70 +24,59 @@ fun MyPhysicalInfoCard(
     weight: Double,
     onEditClick: () -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(2.dp)
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "나의 신체정보",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = DiaViseoColors.Basic
-                )
-                Text(
-                    text = "수정",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = DiaViseoColors.Main1,
-                    modifier = Modifier.clickable { onEditClick() }
-                )
-            }
+        Text(
+            text = "나의 신체정보",
+            style = semibold16
+        )
 
-            Spacer(modifier = Modifier.height(12.dp))
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onEditClick() }
+            ,
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(2.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "키", fontSize = 14.sp, color = DiaViseoColors.Unimportant)
+                    Text(
+                        text = String.format("%.1f cm", height),
+                        fontSize = 16.sp,
+                        color = DiaViseoColors.Basic
+                    )
+                }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = "키", fontSize = 14.sp, color = DiaViseoColors.Unimportant)
-                Text(
-                    text = String.format("%.1f cm", height),
-                    fontSize = 16.sp,
-                    color = DiaViseoColors.Basic
+                Divider(
+                    color = DiaViseoColors.BorderGray,
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(vertical = 8.dp)
                 )
-            }
 
-            Divider(
-                color = DiaViseoColors.BorderGray,
-                thickness = 1.dp,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = "몸무게", fontSize = 14.sp, color = DiaViseoColors.Unimportant)
-                Text(
-                    text = String.format("%.1f kg", weight),
-                    fontSize = 16.sp,
-                    color = DiaViseoColors.Basic
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "몸무게", fontSize = 14.sp, color = DiaViseoColors.Unimportant)
+                    Text(
+                        text = String.format("%.1f kg", weight),
+                        fontSize = 16.sp,
+                        color = DiaViseoColors.Basic
+                    )
+                }
             }
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

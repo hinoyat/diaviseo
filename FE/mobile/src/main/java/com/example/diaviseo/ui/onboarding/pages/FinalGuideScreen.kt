@@ -37,6 +37,9 @@ import com.example.diaviseo.healthconnect.HealthConnectPermissionHandler
 import com.example.diaviseo.healthconnect.processor.StepDataProcessor
 import com.example.diaviseo.healthconnect.processor.ExerciseSessionRecordProcessor
 import com.example.diaviseo.viewmodel.register.exercise.ExerciseSyncViewModel
+import com.example.diaviseo.datastore.HealthConnectDataStore
+import com.example.diaviseo.healthconnect.worker.scheduleDailyHealthSync
+import java.time.ZonedDateTime
 
 @Composable
 fun FinalGuideScreen(
@@ -45,6 +48,8 @@ fun FinalGuideScreen(
     authViewModel: AuthViewModel
 ) {
     val syncViewModel: ExerciseSyncViewModel = viewModel()
+
+    val now = ZonedDateTime.now()
 
     var showDialog by remember { mutableStateOf(false) }
 
@@ -135,53 +140,85 @@ fun FinalGuideScreen(
                 manager = manager,
                 scope = coroutineScope
             )
+            // 워커 스케줄 등록
+            scheduleDailyHealthSync(context)
 
             coroutineScope.launch {
-                // 1. Health Connect에서 운동 기록 읽기
+                // 1. Health Connect에서 운동 기록 조회 + 가공
                 val sessionRecords = manager.readExerciseSessions()
                 val processedExercises = ExerciseSessionRecordProcessor.toRequestList(sessionRecords)
+
                 Log.d("ExerciseProcessed", "✅ 운동 ${processedExercises.size}건")
+
                 processedExercises.forEach {
                     Log.d("ExerciseProcessed", it.toString())
                 }
 
-                //  2. Health Connect에서 걸음 수 기록 읽기
+                //  2. Health Connect에서 걸음 수 조회 + 가공
                 val stepRecords = manager.readSteps()
                 val processedSteps = StepDataProcessor.process(stepRecords)
                 Log.d("StepProcessed", "✅ 걸음 수 ${processedSteps.size}건")
+
                 processedSteps.forEach {
                     Log.d("StepProcessed", it.toString())
                 }
 
-                // 3. 서버에 운동 데이터 전송
+                var exerciseSynced = false
+                var stepSynced = false
+
+                fun checkAndSaveSyncTime() {
+                    if (exerciseSynced && stepSynced) {
+                        coroutineScope.launch {
+                            val now = ZonedDateTime.now()
+                            HealthConnectDataStore.setLinked(context, true)
+                            HealthConnectDataStore.setLastSyncTime(context, now)
+                            Log.d("HealthConnect", "✅ 연동 상태 및 마지막 동기화 시간 저장 완료: $now")
+                        }
+                    }
+                }
+
+                // 3. 운동 데이터 서버 전송
                 if (processedExercises.isNotEmpty()) {
                     syncViewModel.syncExerciseRecords(
                         requests = processedExercises,
                         onSuccess = {
                             Log.d("ExerciseSync", "✅ 운동 데이터 서버 전송 성공")
+                            exerciseSynced = true
+                            checkAndSaveSyncTime()
                         },
                         onError = {
                             Log.e("ExerciseSync", "❌ 운동 데이터 서버 전송 실패", it)
                         }
                     )
+                } else {
+                    // 운동 데이터가 아예 없는 경우
+                    exerciseSynced = true
+                    checkAndSaveSyncTime()
                 }
 
-                // 4. 서버에 걸음 수 데이터 전송
+                // 4. 걸음수 데이터 서버 전송
                 if (processedSteps.isNotEmpty()) {
                     syncViewModel.syncStepRecords(
                         requests = processedSteps,
                         onSuccess = {
                             Log.d("StepSync", "✅ 걸음 수 서버 전송 성공")
+                            stepSynced = true
+                            checkAndSaveSyncTime()
                         },
                         onError = {
                             Log.e("StepSync", "❌ 걸음 수 서버 전송 실패", it)
                         }
                     )
+                } else {
+                    // 걸음 수 데이터가 아예 없는 경우
+                    stepSynced = true
+                    checkAndSaveSyncTime()
                 }
             }
         } else {
             Log.e("HealthConnect", "권한 결과 처리 중 HCManager null")
         }
+
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
