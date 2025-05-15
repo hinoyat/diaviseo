@@ -72,10 +72,10 @@ class MainActivity : ComponentActivity() {
         stepViewModel = ViewModelProvider(this).get(StepViewModel::class.java)
 
         // 앱 켤 때마다 토큰 초기화 (테스트용)
-        val context = this.applicationContext
-        CoroutineScope(Dispatchers.IO).launch {
-            com.example.diaviseo.datastore.TokenDataStore.clearAccessToken(context)
-        }
+//        val context = this.applicationContext
+//        CoroutineScope(Dispatchers.IO).launch {
+//            com.example.diaviseo.datastore.TokenDataStore.clearAccessToken(context)
+//        }
 
         // WorkManager에 자정 스케줄 예약
         scheduleMidnightWorker()
