@@ -20,6 +20,8 @@ import com.example.diaviseo.network.food.dto.res.RecentFoodItemResponse
 import com.example.diaviseo.network.foodset.dto.req.FoodIdWithQuantity
 import com.example.diaviseo.network.foodset.dto.req.FoodSetRegisterRequest
 import com.example.diaviseo.network.foodset.dto.res.FoodSetResponse
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -55,8 +57,8 @@ class DietSearchViewModel : ViewModel() {
         private set
 
     // 선택된 끼니 ("아침", "점심", "저녁")
-    var selectedMeal by mutableStateOf("점심")
-        private set
+    private val _selectedMeal = MutableStateFlow("점심")
+    val selectedMeal: StateFlow<String> = _selectedMeal
 
     // 날짜 선택 처리
     fun onDateSelected(date: LocalDate) {
@@ -70,7 +72,7 @@ class DietSearchViewModel : ViewModel() {
 
     // 끼니 선택 처리
     fun onMealSelected(meal: String) {
-        selectedMeal = meal
+        _selectedMeal.value = meal
     }
 
     // 끼니 스킵처리
@@ -87,7 +89,7 @@ class DietSearchViewModel : ViewModel() {
             isMeal = true,
             mealTimes = listOf(
                 MealTimeRequest(
-                    mealType = MealType.fromKorean(selectedMeal),
+                    mealType = MealType.fromKorean(_selectedMeal.value),
                     eatingTime = time.toString(),
                     foods = selectedItems.map { it.toRequest() } // 변환 함수 사용
                 )
@@ -272,7 +274,7 @@ class DietSearchViewModel : ViewModel() {
         selectedItems = emptyList()
         selectedDate = LocalDate.now()
         selectedTime = null
-        selectedMeal = "점심"
+        _selectedMeal.value = "점심"
         recentFoods = emptyList()
         recentFetchedDate = null
     }

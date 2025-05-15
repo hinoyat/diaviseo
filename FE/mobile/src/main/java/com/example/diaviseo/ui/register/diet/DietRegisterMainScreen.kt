@@ -24,7 +24,7 @@ fun DietRegisterMainScreen(
 ) {
     var selectedTab by remember { mutableStateOf(0) }
     var showMealSheet by remember { mutableStateOf(false) }
-    var selectedMeal by remember { mutableStateOf("점심") }
+    val selectedMeal by viewModel.selectedMeal.collectAsState()
 
     val tabs = listOf("오늘 뭐먹지", "즐겨찾기")
 
@@ -189,7 +189,7 @@ fun DietRegisterMainScreen(
         if (showMealSheet) {
             MealSelectBottomSheet(
                 selected = selectedMeal,
-                onSelect = { selectedMeal = it },
+                onSelect = { viewModel.onMealSelected(it) },
                 onConfirm = { showMealSheet = false },
                 onDismiss = { showMealSheet = false }
             )
