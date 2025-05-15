@@ -33,11 +33,11 @@ fun MyScreen(navController: NavHostController) {
         topBar = {
             Surface(
                 color = Color.White,
-//                shadowElevation = 4.dp
             ) {
                 CommonTopBar(
-                    title = "마이페이지",
-                    onLeftActionClick = { /* TODO */ }
+                    onLeftActionClick = {
+                        navController.popBackStack()
+                    }
                 )
             }
         }
@@ -53,7 +53,10 @@ fun MyScreen(navController: NavHostController) {
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             item {
-                HeaderSection(userName = profile?.nickname ?: "불러오는 중")
+                HeaderSection(
+                    userName = profile?.nickname ?: "불러오는 중",
+                    navController = navController
+                    )
             }
             item {
                 ProfileSection(navController, profile)
@@ -62,7 +65,7 @@ fun MyScreen(navController: NavHostController) {
                 HealthSection(navController)
             }
             item {
-                SyncSection()
+                SyncSection(navController)
             }
             item {
                 SettingSection(
@@ -84,14 +87,19 @@ fun MyScreen(navController: NavHostController) {
 }
 
 @Composable
-private fun HeaderSection(userName: String) {
-    MyHeaderSection(userName = userName)
+private fun HeaderSection(
+    userName: String,
+    navController: NavHostController
+) {
+    MyHeaderSection(
+        userName = userName,
+        navController = navController
+    )
 }
 
 @Composable
 private fun ProfileSection(navController: NavHostController, profile: FetchProfileResponse?) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        MyProfileEditCard(navController = navController)
         MyPhysicalInfoCard(
             height = profile?.height ?: 0.0,
             weight =  profile?.weight ?: 0.0,
@@ -116,8 +124,13 @@ private fun HealthSection(navController: NavHostController) {
 }
 
 @Composable
-private fun SyncSection() {
-    MySyncSection(onConnectClick = { /* TODO */ })
+private fun SyncSection(navController: NavHostController) {
+    MySyncSection(
+        onConnectClick = {
+            navController.navigate("healthConnect/manage")
+        },
+
+    )
 }
 
 @Composable
