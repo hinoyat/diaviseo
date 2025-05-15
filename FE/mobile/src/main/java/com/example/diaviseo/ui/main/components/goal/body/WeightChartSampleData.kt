@@ -2,13 +2,6 @@ package com.example.diaviseo.ui.main.components.goal.body
 
 import com.example.diaviseo.ui.main.components.goal.meal.ChartPeriod
 
-data class WeightMultiLineEntry(
-    val weight: Float,         // 체중 (kg)
-    val muscleMass: Float,     // 골격근량 (kg)
-    val bodyFat: Float,        // 체지방량 (kg)
-    val dateLabel: String      // x축 라벨
-)
-
 object WeightChartSampleData {
     fun getSampleData(period: ChartPeriod): List<WeightMultiLineEntry> {
         return when (period) {

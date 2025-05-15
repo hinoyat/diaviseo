@@ -9,10 +9,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.diaviseo.network.body.dto.res.MonthlyAverageBodyInfoResponse
+import com.example.diaviseo.network.body.dto.res.OcrBodyResultResponse
+import com.example.diaviseo.network.body.dto.res.WeeklyAverageBodyInfoResponse
 import com.example.diaviseo.ui.main.components.goal.meal.ChartPeriod
 import com.example.diaviseo.ui.main.components.goal.meal.PeriodSelector
 import com.example.diaviseo.ui.theme.DiaViseoColors
 import com.example.diaviseo.ui.theme.* // 사용자 테마 (ChartPeriod, WeightChartSampleData 등)
+import com.example.diaviseo.viewmodel.goal.GoalViewModel
+import com.example.diaviseo.viewmodel.goal.MealViewModel
+import com.example.diaviseo.viewmodel.goal.WeightViewModel
 
 // Vico 1.13.0 경로
 import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
@@ -32,6 +39,8 @@ import com.patrykandpatrick.vico.core.entry.ChartEntry
 import java.text.DecimalFormat
 import com.patrykandpatrick.vico.core.component.shape.ShapeComponent // 마커 배경용 모양 컴포넌트
 import com.patrykandpatrick.vico.core.component.shape.Shapes
+import java.time.LocalDate
+
 //import com.patrykandpatrick.vico.compose.chart.marker.rememberMarker
 
 // 모달에 표시할 데이터 클래스
@@ -42,6 +51,13 @@ data class ModalChartData(
     val bodyFat: String
 )
 
+data class WeightMultiLineEntry(
+    val weight: Float,         // 체중 (kg)
+    val muscleMass: Float,     // 골격근량 (kg)
+    val bodyFat: Float,        // 체지방량 (kg)
+    val dateLabel: String      // x축 라벨
+)
+
 @Composable
 fun WeightChartSection() {
     var selectedPeriod by remember { mutableStateOf(ChartPeriod.Day) }
@@ -50,16 +66,32 @@ fun WeightChartSection() {
     var showDataModal by remember { mutableStateOf(false) }
     var modalData by remember { mutableStateOf<ModalChartData?>(null) }
 
-    val sampleData = WeightChartSampleData.getSampleData(selectedPeriod)
+    val weightViewModel : WeightViewModel = viewModel()
+    val goalViewModel : GoalViewModel = viewModel()
+
+    val selectedDate by goalViewModel.selectedDate.collectAsState()
+
+    val dayList by weightViewModel.dayList.collectAsState()
+    val weekList by weightViewModel.weekList.collectAsState()
+    val monthList by weightViewModel.monthList.collectAsState()
+    LaunchedEffect(selectedDate) {
+        weightViewModel.fetchAllLists(selectedDate.toString())
+    }
+
+    val chartData: List<WeightMultiLineEntry> = when (selectedPeriod) {
+        ChartPeriod.Day -> convertDayDataToChart(dayList)
+        ChartPeriod.Week -> convertWeekDataToChart(weekList, selectedDate)
+        ChartPeriod.Month -> convertMonthDataToChart(monthList, selectedDate)
+    }
 
     // 3개의 라인에 대한 ChartEntry 리스트 생성
-    val entriesLine1 = sampleData.mapIndexed { index, entry ->
+    val entriesLine1 = chartData.mapIndexed { index, entry ->
         entryOf(index.toFloat(), entry.weight)
     }
-    val entriesLine2 = sampleData.mapIndexed { index, entry ->
+    val entriesLine2 = chartData.mapIndexed { index, entry ->
         entryOf(index.toFloat(), entry.muscleMass)
     }
-    val entriesLine3 = sampleData.mapIndexed { index, entry ->
+    val entriesLine3 = chartData.mapIndexed { index, entry ->
         entryOf(index.toFloat(), entry.bodyFat)
     }
 
@@ -102,13 +134,13 @@ fun WeightChartSection() {
     val transparentMarkerLabel = remember { TextComponent.Builder().apply { color = Color.Transparent.toArgb() }.build() }
 
     // 마커의 labelFormatter를 사용하여 모달 데이터 설정 및 표시 트리거
-    val modalTriggerFormatter = remember(sampleData) {
+    val modalTriggerFormatter = remember(chartData) {
         object : MarkerLabelFormatter {
             private val decimalFormat = DecimalFormat("#.#")
             override fun getLabel(markedEntries: List<Marker.EntryModel>, chartValues: ChartValues): CharSequence {
                 val xIndex = markedEntries.firstOrNull()?.entry?.x?.toInt()
-                if (xIndex != null && xIndex >= 0 && xIndex < sampleData.size) {
-                    val dataPoint = sampleData[xIndex]
+                if (xIndex != null && xIndex >= 0 && xIndex < chartData.size) {
+                    val dataPoint = chartData[xIndex]
                     modalData = ModalChartData(
                         dateLabel = dataPoint.dateLabel,
                         weight = decimalFormat.format(dataPoint.weight),
@@ -162,8 +194,8 @@ fun WeightChartSection() {
                 valueFormatter = { value, chartValues ->
                     val index = value.toInt()
                     // X축 레이블은 multiLineData의 dateLabel을 사용 (모든 라인이 동일한 X축 레이블 공유 가정)
-                    if (index >= 0 && index < sampleData.size) {
-                        sampleData[index].dateLabel
+                    if (index >= 0 && index < chartData.size) {
+                        chartData[index].dateLabel
                     } else {
                         ""
                     }
@@ -178,9 +210,9 @@ fun WeightChartSection() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            WeightLegendItem("체중", Color(0xFF7987FF))
-            WeightLegendItem("골격근량", Color(0xFFE697FF))
-            WeightLegendItem("체지방량", Color(0xFFFFA5CB))
+            WeightLegendItem("체중(kg)", Color(0xFF7987FF))
+            WeightLegendItem("골격근량(kg)", Color(0xFFE697FF))
+            WeightLegendItem("체지방량(kg)", Color(0xFFFFA5CB))
         }
     }
 }
@@ -196,4 +228,58 @@ fun WeightLegendItem(label: String, color: Color) {
         )
         Text(text = label, color = DiaViseoColors.Basic, style = medium12)
     }
+}
+
+
+fun convertDayDataToChart(data: List<OcrBodyResultResponse>): List<WeightMultiLineEntry> {
+    return data.map {
+        val date = LocalDate.parse(it.measurementDate)
+        WeightMultiLineEntry(
+            weight = it.weight.toFloat(),
+            muscleMass = it.muscleMass.toFloat(),
+            bodyFat = it.bodyFat.toFloat(),
+            dateLabel = "${date.monthValue}/${date.dayOfMonth}"
+        )
+    }
+}
+
+fun convertWeekDataToChart(
+    data: List<WeeklyAverageBodyInfoResponse>,
+    selectedDate: LocalDate
+): List<WeightMultiLineEntry> {
+    return (0..6).map { i ->
+        val weekDate = selectedDate.minusWeeks((6 - i).toLong())
+        val weekLabel = getKoreanWeekLabel(weekDate)
+        val item = data.getOrNull(i)
+        WeightMultiLineEntry(
+            weight = item?.avgWeight?.toFloat() ?: 0f,
+            muscleMass = item?.avgMuscleMass?.toFloat() ?: 0f,
+            bodyFat = item?.avgBodyFat?.toFloat() ?: 0f,
+            dateLabel = weekLabel
+        )
+    }
+}
+
+fun convertMonthDataToChart(
+    data: List<MonthlyAverageBodyInfoResponse>,
+    selectedDate: LocalDate
+): List<WeightMultiLineEntry> {
+    return (0..6).map { i ->
+        val month = selectedDate.minusMonths((6 - i).toLong())
+        val label = "${month.monthValue}월"
+        val item = data.getOrNull(i)
+        WeightMultiLineEntry(
+            weight = item?.avgWeight?.toFloat() ?: 0f,
+            muscleMass = item?.avgMuscleMass?.toFloat() ?: 0f,
+            bodyFat = item?.avgBodyFat?.toFloat() ?: 0f,
+            dateLabel = label
+        )
+    }
+}
+
+fun getKoreanWeekLabel(date: LocalDate): String {
+    val firstDay = date.withDayOfMonth(1)
+    val offset = firstDay.dayOfWeek.value % 7
+    val weekOfMonth = ((date.dayOfMonth + offset - 1) / 7) + 1
+    return "${date.monthValue}월${weekOfMonth}주"
 }
