@@ -50,8 +50,7 @@ fun MyHealthDataList(
                 Text(
                     text = "수정",
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = DiaViseoColors.Main1,
+                    color = DiaViseoColors.Unimportant,
                     modifier = Modifier.clickable { onEditAllergy() }
                 )
             }
@@ -75,8 +74,7 @@ fun MyHealthDataList(
                 Text(
                     text = "수정",
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = DiaViseoColors.Main1,
+                    color = DiaViseoColors.Unimportant,
                     modifier = Modifier.clickable { onEditDisease() }
                 )
             }
