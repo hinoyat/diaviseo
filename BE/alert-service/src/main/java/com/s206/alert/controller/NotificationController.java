@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,5 +60,24 @@ public class NotificationController {
 				.message("읽음 처리 됐습니다")
 				.timestamp(LocalDateTime.now())
 				.build());
+	}
+
+	@DeleteMapping("/{notificationId}/delete")
+	public ResponseEntity<ResponseDto<Void>> deleteNotification(
+			@RequestHeader(name = "X-USER-ID") Integer userId,
+			@PathVariable("notificationId") Long notificationId) {
+		notificationService.removeOne(userId, notificationId);
+		return ResponseEntity.ok(ResponseDto.<Void>builder()
+				.status(HttpStatus.OK)
+				.message("알림이 삭제되었습니다")
+				.timestamp(LocalDateTime.now())
+				.build());
+	}
+
+	@DeleteMapping("/delete-all")
+	public ResponseEntity<ResponseDto<Integer>> deleteAllNotification(
+			@RequestHeader(name = "X-USER-ID") Integer userId) {
+		int count = notificationService.deleteAll(userId);
+		return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "알림 전체 삭제 요청이 처리됐습니다", count));
 	}
 }

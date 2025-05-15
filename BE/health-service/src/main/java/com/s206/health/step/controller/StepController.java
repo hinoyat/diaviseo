@@ -23,11 +23,11 @@ public class StepController {
 
     // 걸음 수 등록
     @PostMapping("/step")
-    public ResponseEntity<ResponseDto<StepResponse>> createStepCount(
+    public ResponseEntity<ResponseDto<List<StepResponse>>> createStepCount(
             @RequestHeader("X-USER-ID") Integer userId,
-            @RequestBody StepCreateRequest request) {
+            @RequestBody List<StepCreateRequest> request) {
 
-        StepResponse response = stepService.createOrUpdateStepCount(userId, request);
+        List<StepResponse> response = stepService.createOrUpdateStepCount(userId, request);
         return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK,"걸음 수 등록 성공",response));
     }
 

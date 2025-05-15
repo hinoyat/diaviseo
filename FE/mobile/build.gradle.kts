@@ -112,4 +112,5 @@ dependencies {
     //헬스 커넥트
     implementation("androidx.health.connect:connect-client:1.1.0-rc01")
 
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }

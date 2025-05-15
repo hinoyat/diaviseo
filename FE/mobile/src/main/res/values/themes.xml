@@ -1,8 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.DiaViseo" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- 기본 스플래시 비활성화 -->
+        <item name="android:windowDisablePreview">true</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
 
     <style name="Theme.DiaViseo" parent="Base.Theme.DiaViseo" />
