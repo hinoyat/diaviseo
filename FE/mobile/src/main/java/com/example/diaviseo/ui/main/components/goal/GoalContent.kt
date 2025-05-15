@@ -64,6 +64,8 @@ fun GoalContent(
     val isToday = remember(selectedDate) {
         selectedDate == LocalDate.now()
     }
+
+    // 16일 할일, 성별 불러오고 체성분 불러오기
     val isMale = false
 
     LaunchedEffect(selectedDate) {

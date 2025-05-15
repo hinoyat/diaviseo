@@ -1,6 +1,7 @@
 package com.example.diaviseo.network.body
 
 import com.example.diaviseo.network.body.dto.req.BodyRegisterRequest
+import com.example.diaviseo.network.body.dto.res.BodyInfoResponse
 import com.example.diaviseo.network.body.dto.res.BodyRegisterResponse
 import com.example.diaviseo.network.body.dto.res.MonthlyAverageBodyInfoResponse
 import com.example.diaviseo.network.body.dto.res.OcrBodyResultResponse
@@ -42,4 +43,9 @@ interface BodyApiService {
         @Query("date") date: String
     ): ApiResponse<List<MonthlyAverageBodyInfoResponse>>
 
+    //체성분 날짜 조회
+    @GET("bodies")
+    suspend fun loadBodyData(
+        @Query("date") date: String
+    ): ApiResponse<List<BodyInfoResponse>>
 }
