@@ -23,7 +23,7 @@ public class StepService {
 
     private final StepRepository stepRepository;
 
-    // 걸음 수 등록 (새로운 걸음 수 등록 또는 기존 기록 업데이트)
+    // 단일 걸음 수 등록 (새로운 걸음 수 등록 또는 기존 기록 업데이트)
     @Transactional
     public StepResponse createOrUpdateStepCount(Integer userId, StepCreateRequest request) {
         LocalDate stepDate = request.getStepDate();
@@ -67,6 +67,19 @@ public class StepService {
             Step savedStep = stepRepository.save(newStep);
             return mapToResponse(savedStep);
         }
+    }
+
+    // 걸음 수 리스트로 등록
+    @Transactional
+    public List<StepResponse> createOrUpdateStepCount(Integer userId, List<StepCreateRequest> requestList) {
+        List<StepResponse> responseList = new ArrayList<>();
+
+        for (StepCreateRequest request : requestList) {
+            StepResponse response = createOrUpdateStepCount(userId, request);
+            responseList.add(response);
+        }
+
+        return responseList;
     }
 
     // 사용자의 모든 걸을 수 기록 조회
