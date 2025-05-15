@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.diaviseo.R
+import com.example.diaviseo.network.food.dto.res.FoodItem
 import com.example.diaviseo.network.meal.dto.res.MealTimeNutritionResponse
 import com.example.diaviseo.ui.components.CommonTopBar
 import com.example.diaviseo.ui.components.DiaDatePickerDialog
@@ -167,7 +168,39 @@ fun MealDetailScreen(
                             foods = timeData.foods,
                             gradient = mealType.gradient,
                             mealIconRes = mealType.iconRes,
-                            onEditClick = { /* TODO */ },
+                            onEditClick = {
+                                dietViewModel.onDateSelected(selectedDate)
+
+                                val localTime: LocalTime = LocalTime.parse(timeData.eatingTime)
+                                dietViewModel.onTimeSelected(localTime)
+
+                                // selectedItems는 채워줍쇼
+                                // timeData.foods가 리스트인데요 이거 다 돌면서 foodId, quantity 을 넣어줍쇼
+                                timeData.foods.forEach { food ->
+                                    // 1) food → UI용 FoodItem 으로 매핑
+                                    val uiFood = FoodItem(
+                                        foodId       = food.foodId,
+                                        foodName     = food.foodName,
+                                        calorie      = food.calorie,
+                                        carbohydrate = food.carbohydrate,
+                                        protein      = food.protein,
+                                        fat          = food.fat,
+                                        sweet        = food.sugar,
+                                        baseAmount   = "",
+                                        isFavorite   = false
+                                    )
+                                    // 2) 원하는 수량(quantity)을 넣어서 뷰모델에 추가
+                                    //    food 에 quantity 필드가 있다면 (예: food.quantity)
+                                    dietViewModel.addSelectedFood(
+                                        food     = uiFood,
+                                        quantity = food.quantity.toFloat()
+                                    )
+                                }
+
+                                // 선댁된 끼니는 mealType으로
+                                dietViewModel.onMealSelected(mealType.label)
+                                navController.navigate("diet_register")
+                            },
                             imgUrl = timeData.mealTimeImageUrl
                         )
                     }
@@ -177,7 +210,18 @@ fun MealDetailScreen(
                             kcal = 0,
                             gradient = mealType.gradient,
                             mealIconRes = mealType.iconRes,
-                            onEditClick = { /* TODO */ }
+                            onEditClick = {
+                                // 아뇨, 식단 추가할게요랑 똑같은 로직
+                                dietViewModel.onDateSelected(selectedDate)
+                                // 식단 시간은 비어서 보내자
+                                dietViewModel.onTimeSelected(null)
+                                // selectedItems는 emptyList()로
+                                dietViewModel.skipSelectedItems()
+                                // 선댁된 끼니는 mealType으로
+                                dietViewModel.onMealSelected(mealType.label)
+
+                                navController.navigate("diet_register")
+                            }
                         )
                     }
                     else -> {
@@ -206,14 +250,14 @@ fun MealDetailScreen(
                                         Toast.makeText(context, "${mealType.label}을 거르셨어요", Toast.LENGTH_SHORT).show()
 
                                         dietViewModel.clearDietState()
+                                        // 식단 다시부르기
+                                        mealViewModel.fetchMealDaily(selectedDate.toString())
                                     },
                                     onError = { message ->
                                         Toast.makeText(context, "거르기 등록 실패: $message", Toast.LENGTH_SHORT).show()
                                     }
                                 )
 
-                                // 식단 다시부르기
-                                mealViewModel.fetchMealDaily(selectedDate.toString())
                             },
                             onWriteClick = {
                                 // toPostDietRequest를 하기위해
@@ -225,7 +269,6 @@ fun MealDetailScreen(
                                 dietViewModel.skipSelectedItems()
                                 // 선댁된 끼니는 mealType으로
                                 dietViewModel.onMealSelected(mealType.label)
-
 
                                 navController.navigate("diet_register")
                             }
