@@ -2,7 +2,8 @@ from langchain_openai import ChatOpenAI
 from requests import Session
 
 from app.config.settings import get_settings
-from app.repositories.body_info_repository import get_user_info_for_feedback
+from app.repositories.body_info_repository import get_user_info_for_feedback, \
+  calculate_additional_calories_to_burn
 from app.services.workout.prompt.prompt_templates import \
   workout_feedback_prompt, weight_trend_feedback_prompt
 
@@ -62,7 +63,7 @@ def generate_trend_weight_feedback(user_id: int, user_db: Session,
   # 사용자 정보 및 체중 변화 예측 정보 가져오기
   user_info = get_user_info_for_feedback(health_db, user_db, user_id)
   prediction = predict_weight_change(health_db, user_db, user_id, days)
-
+  remaining_calorie = calculate_additional_calories_to_burn(health_db, user_db, user_id)
   # LLM 초기화
   llm = ChatOpenAI(
       model="gpt-4o-mini",
@@ -76,6 +77,7 @@ def generate_trend_weight_feedback(user_id: int, user_db: Session,
       weight=user_info.get('weight'),
       days=days,
       weight_trend=user_info.get('weight_trend'),
+      remaining_calorie=remaining_calorie,
       muscle_trend=user_info.get('muscle_trend'),
       projected_change=prediction['projected_change'],
       future_weight=user_info.get('weight') + prediction['projected_change'],
