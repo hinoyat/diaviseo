@@ -10,6 +10,7 @@ import androidx.health.connect.client.time.TimeRangeFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Instant
+import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
 class HealthConnectManager private constructor(
@@ -79,4 +80,37 @@ class HealthConnectManager private constructor(
             emptyList()
         }
     }
+
+    // 범위 지정 버전 추가 (WorkManager 등에서 사용 가능)
+    suspend fun readExerciseSessions(
+        start: ZonedDateTime,
+        end: ZonedDateTime
+    ): List<ExerciseSessionRecord> =
+        withContext(Dispatchers.IO) {
+            try {
+                val request = ReadRecordsRequest(
+                    recordType = ExerciseSessionRecord::class,
+                    timeRangeFilter = TimeRangeFilter.between(start.toInstant(), end.toInstant())
+                )
+                healthConnectClient.readRecords(request).records
+            } catch (e: Exception) {
+                Log.e("HealthConnect", "readExerciseSessions(start, end) error: ${e.message}")
+                emptyList()
+            }
+        }
+
+
+    suspend fun readSteps(start: ZonedDateTime, end: ZonedDateTime): List<StepsRecord> =
+        withContext(Dispatchers.IO) {
+            try {
+                val request = ReadRecordsRequest(
+                    recordType = StepsRecord::class,
+                    timeRangeFilter = TimeRangeFilter.between(start.toInstant(), end.toInstant())
+                )
+                healthConnectClient.readRecords(request).records
+            } catch (e: Exception) {
+                Log.e("HealthConnect", "readSteps(start, end) error: ${e.message}")
+                emptyList()
+            }
+        }
 }
