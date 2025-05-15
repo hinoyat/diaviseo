@@ -12,6 +12,7 @@ import com.example.diaviseo.ui.detail.MealDetailScreen
 import com.example.diaviseo.ui.detail.HomeDetailScreen
 import com.example.diaviseo.ui.main.components.FabOverlayMenu
 import com.example.diaviseo.ui.main.components.chat.ChatHistoryScreen
+import com.example.diaviseo.ui.main.components.my.HealthConnectManageScreen
 import com.example.diaviseo.ui.mypageedit.screen.AllergyEditScreen
 import com.example.diaviseo.ui.mypageedit.screen.DiseaseEditScreen
 import com.example.diaviseo.ui.mypageedit.screen.FaqScreen
@@ -68,7 +69,9 @@ fun MainScreen() {
         "food_set_register",
         "home_detail",
         "chat",
-        "chat_history"
+        "chat_history",
+        "my",
+        "healthConnect/manage"
         )
     val isBottomBarVisible = currentRoute !in hideBottomBarRoutes
 
@@ -113,7 +116,7 @@ fun MainScreen() {
             }
             // 마이페이지
             composable("my") {
-                MyScreen(navController)
+                    MyScreen(navController)
             }
             // 회원 정보 수정
             composable("edit_profile") {
@@ -143,6 +146,11 @@ fun MainScreen() {
                 )
             }
 
+            composable("healthConnect/manage") {
+                HealthConnectManageScreen(
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
             composable("edit_exercise") {
                 PreferredExerciseScreen(navController)
             }
