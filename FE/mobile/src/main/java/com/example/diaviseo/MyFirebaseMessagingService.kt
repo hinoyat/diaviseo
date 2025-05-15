@@ -1,6 +1,7 @@
 package com.example.diaviseo
 
 import android.util.Log
+import com.example.diaviseo.utils.FcmTokenSender
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
@@ -9,7 +10,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         Log.d("FCM", "FCM Token: $token")
-
+        // 서버에 토큰 전송
+        FcmTokenSender.sendTokenToServer(token)
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {

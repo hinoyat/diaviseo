@@ -7,6 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import com.example.diaviseo.BuildConfig
 import kotlinx.coroutines.runBlocking
 import com.example.diaviseo.datastore.TokenDataStore
+import com.example.diaviseo.network.alarm.AlarmApiService
 import com.example.diaviseo.network.auth.AuthApiService
 import com.example.diaviseo.network.body.BodyApiService
 import com.example.diaviseo.network.condition.ConditionApiService
@@ -173,5 +174,9 @@ object RetrofitInstance {
 
     val bodyApiService: BodyApiService by lazy {
         retro.create(BodyApiService::class.java)
+    }
+
+    val alarmApi: AlarmApiService by lazy {
+        retro.create(AlarmApiService::class.java)
     }
 }
