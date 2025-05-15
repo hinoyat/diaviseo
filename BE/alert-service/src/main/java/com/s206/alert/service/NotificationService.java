@@ -98,4 +98,25 @@ public class NotificationService {
 		log.info("사용자({})의 읽지 않은 알림 {}건을 읽음 처리 완료", userId, updatedCount);
 		return updatedCount;
 	}
+
+	@Transactional
+	public void removeOne(Integer userId, Long notificationId) {
+
+		Notification notification = notificationRepository.findById(notificationId)
+				.orElseThrow(() -> new NotFoundException("알림이 존재하지 않습니다."));
+
+		if (!notification.getUserId().equals(userId)) {
+			throw new ForbiddenException("다른 사용자의 알림입니다.");
+		}
+
+		notificationRepository.delete(notification);
+		log.info("알림 삭제 완료: userId={}, notificationId={}", userId, notificationId);
+	}
+
+	@Transactional
+	public int deleteAll(Integer userId) {
+		int count = notificationRepository.deleteAllByUserId(userId);
+		log.info("사용자({})의 알림 {}건을 전체 삭제 완료", userId, count);
+		return count;
+	}
 }
