@@ -61,35 +61,48 @@ public class BodyInfoService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<BodyInfoResponse> findByUserId(Integer userId) {
-		log.info("사용자 ID: {}의 신체 정보 조회 시작", userId);
+	public List<BodyInfoResponse> findLatestByUserIdAndDate(Integer userId, LocalDate date) {
+		log.info("사용자 ID: {}의 {} 이전 최신 신체 정보 조회 시작", userId, date);
 
-		List<BodyInfo> bodyInfos = bodyInfoRepository.findByUserIdAndIsDeletedFalse(userId);
+		try {
+			// 사용자 정보 조회 (빈 리스트 여부와 상관없이 항상 필요)
+			UserDetailResponse userDetailResponse = userClient.getUserByUserId(userId).getData();
+			int age = Period.between(userDetailResponse.getBirthday(), LocalDate.now()).getYears();
 
-		// 사용자 정보 조회 (빈 리스트 여부와 상관없이 항상 필요)
-		UserDetailResponse userDetailResponse = userClient.getUserByUserId(userId).getData();
-		int age = Period.between(userDetailResponse.getBirthday(), LocalDate.now()).getYears();
+			// 해당 날짜 이전의 체성분 정보 목록 조회 (최신순)
+			List<BodyInfo> bodyInfoList = bodyInfoRepository.findBodyInfoBeforeOrEqualDate(userId, date);
 
-		if (bodyInfos.isEmpty()) {
-			log.info("사용자 ID: {}의 체성분 정보가 없습니다. 초기 응답 생성", userId);
-			// 빈 리스트일 경우, 회원 가입 시 정보로 초기 응답 생성
-			BodyInfoResponse initialResponse = bodyMapper.createInitialResponse(userId, userDetailResponse);
-			return List.of(initialResponse);
+			if (bodyInfoList.isEmpty()) {
+				log.info("사용자 ID: {}의 {} 이전 체성분 정보가 없습니다. 초기 응답 생성", userId, date);
+				// 데이터가 없는 경우, 회원 가입 시 정보로 초기 응답 생성
+				BodyInfoResponse initialResponse = bodyMapper.createInitialResponse(userId, userDetailResponse);
+				return List.of(initialResponse);
+			}
+
+			// 리스트의 첫 번째 항목이 가장 최신 데이터
+			BodyInfo latestBodyInfo = bodyInfoList.get(0);
+			log.info("조회된 최신 체성분 정보: {}", latestBodyInfo);
+
+			// BMI, BMR 계산하여 응답 생성
+			BigDecimal bmi = HealthCalculator.calculateBMI(
+					latestBodyInfo.getWeight(),
+					userDetailResponse.getHeight());
+
+			BigDecimal bmr = HealthCalculator.calculateBMR(
+					userDetailResponse.getGender(),
+					age,
+					latestBodyInfo.getWeight(),
+					userDetailResponse.getHeight());
+
+			BodyInfoResponse response = bodyMapper.toDto(latestBodyInfo, bmi, bmr);
+
+			log.info("사용자 ID: {}의 {} 이전 최신 신체 정보 조회 완료: 측정일 {}",
+					userId, date, latestBodyInfo.getMeasurementDate());
+			return List.of(response);
+		} catch (Exception e) {
+			log.error("사용자 ID: {}의 체성분 정보 조회 중 오류 발생: {}", userId, e.getMessage(), e);
+			throw e;
 		}
-
-		// BMI, BMR 포함하여 응답 생성
-		List<BodyInfoResponse> responses = bodyInfos.stream()
-				.map(bodyInfo -> {
-					BigDecimal bmi = HealthCalculator.calculateBMI(bodyInfo.getWeight(),
-							userDetailResponse.getHeight());
-					BigDecimal bmr = HealthCalculator.calculateBMR(userDetailResponse.getGender(),
-							age, bodyInfo.getWeight(), userDetailResponse.getHeight());
-					return bodyMapper.toDto(bodyInfo, bmi, bmr);
-				})
-				.toList();
-
-		log.info("사용자 ID: {}의 신체 정보 {}건 조회 완료", userId, responses.size());
-		return responses;
 	}
 
 	@Transactional
