@@ -45,6 +45,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.CoroutineScope   // 테스트용 지우지 말기
 import kotlinx.coroutines.Dispatchers   // 테스트용 지우지 말기
+import kotlinx.coroutines.flow.firstOrNull
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -116,8 +117,18 @@ class MainActivity : ComponentActivity() {
             val token = task.result
             Log.d("FCM", "현재 FCM 토큰: $token")
 
-            // 서버에 토큰 전송
-            FcmTokenSender.sendTokenToServer(token)
+            // access Token 확인 후 전송
+            val context = this
+            CoroutineScope(Dispatchers.IO).launch {
+                val accessToken = TokenDataStore.getAccessToken(context).firstOrNull()
+                if (accessToken.isNullOrBlank()){
+                    Log.d("FCM", "🔒 로그인되어 있지 않아 FCM 토큰 전송 생략")
+                    return@launch
+                }
+                // 서버에 토큰 전송
+                FcmTokenSender.sendTokenToServer(token)
+            }
+
         }
 
 
@@ -186,7 +197,7 @@ class MainActivity : ComponentActivity() {
     override fun onPause() {
         super.onPause()
         // Activity가 보이지 않을 때 센서 리스너 해제 (배터리 절약)
-         stepViewModel.stopListening()
+        stepViewModel.stopListening()
     }
 }
 

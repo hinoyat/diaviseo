@@ -76,7 +76,7 @@ fun AiAssistantCard(navController: NavHostController) {
                     modifier = Modifier.wrapContentWidth()
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.charac_main),
+                        painter = painterResource(id = R.drawable.charac_main_nontext),
                         contentDescription = "디아비서 캐릭터",
                         modifier = Modifier.size(84.dp)
                     )

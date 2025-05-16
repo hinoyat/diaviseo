@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from py_eureka_client.eureka_client import EurekaClient
+
+from app.routes import session, chat
 from app.routes.workout import router as workout_router
 
 from app.config.settings import get_settings
@@ -31,8 +33,9 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 # 라우터 추가 (한 번만)
-app.include_router(workout_router, prefix="/api/chatbot", tags=["Chat"])
-
+app.include_router(workout_router, prefix="/api/chatbot")
+app.include_router(session.router, prefix="/api/chatbot")  # 세션 생성 등
+app.include_router(chat.router, prefix="/api/chatbot")     # 채팅 기능
 # 헬스체크 엔드포인트
 @app.get("/health")
 def health():
