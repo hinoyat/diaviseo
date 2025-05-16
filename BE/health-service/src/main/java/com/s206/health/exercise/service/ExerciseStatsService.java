@@ -81,8 +81,10 @@ public class ExerciseStatsService {
                 .map(exercise -> {
                     ExerciseType type = exerciseTypeMap.get(exercise.getExerciseTypeId());
                     String categoryName = "";
+                    Integer exerciseNumber = null;
 
                     if (type != null) {
+                        exerciseNumber = type.getExerciseNumber();
                         ExerciseCategory category = exerciseCategoryMap.get(type.getExerciseCategoryId());
                         if (category != null) {
                             categoryName = category.getExerciseCategoryName();
@@ -93,6 +95,7 @@ public class ExerciseStatsService {
                             .exerciseId(exercise.getExerciseId())
                             .exerciseName(type != null ? type.getExerciseName() : "")
                             .categoryName(categoryName)
+                            .exerciseNumber(exerciseNumber)
                             .exerciseDate(exercise.getExerciseDate())
                             .exerciseTime(exercise.getExerciseTime())
                             .exerciseCalorie(exercise.getExerciseCalorie())
