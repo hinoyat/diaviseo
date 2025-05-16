@@ -137,7 +137,8 @@ fun HomeDetailScreen(
                 predictValue = predictValue
             )
 
-            Spacer(modifier = Modifier.height(72.dp))
+            // 아래에 넣을 string이 null이면 30, 아니면 90
+            Spacer(modifier = Modifier.height(90.dp))
 
             Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                 AiTipBox(
@@ -148,6 +149,7 @@ fun HomeDetailScreen(
                     }
                 )
             }
+            Spacer(modifier = Modifier.height(30.dp))
         }
 
 
