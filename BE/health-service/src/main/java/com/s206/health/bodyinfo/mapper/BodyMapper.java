@@ -6,6 +6,9 @@ import com.s206.health.bodyinfo.entity.BodyInfo;
 import com.s206.health.bodyinfo.entity.InputType;
 import java.math.BigDecimal;
 import java.util.List;
+
+import com.s206.health.bodyinfo.util.HealthCalculator;
+import com.s206.health.client.dto.response.Gender;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -57,5 +60,15 @@ public class BodyMapper {
 				.bmi(bmi)
 				.bmr(bmr)
 				.build();
+	}
+	// BodyMapper 클래스에 아래 메서드 추가
+	public List<BodyInfoResponse> toDtoListWithBmiAndBmr(List<BodyInfo> bodyInfos, BigDecimal height, Gender gender, int age) {
+		return bodyInfos.stream()
+				.map(bodyInfo -> {
+					BigDecimal bmi = HealthCalculator.calculateBMI(bodyInfo.getWeight(), height);
+					BigDecimal bmr = HealthCalculator.calculateBMR(gender, age, bodyInfo.getWeight(), height);
+					return toDto(bodyInfo, bmi, bmr);
+				})
+				.toList();
 	}
 }
