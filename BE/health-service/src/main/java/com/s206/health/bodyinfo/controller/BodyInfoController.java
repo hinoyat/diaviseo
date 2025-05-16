@@ -98,11 +98,19 @@ public class BodyInfoController {
 	}
 
 	@GetMapping
-	public ResponseEntity<ResponseDto<List<BodyInfoResponse>>> findByUserId(
-			@RequestHeader("X-USER-ID") Integer userId) {
-		List<BodyInfoResponse> response = bodyInfoService.findByUserId(userId);
+	public ResponseEntity<ResponseDto<List<BodyInfoResponse>>> findLatestByDate(
+			@RequestHeader("X-USER-ID") Integer userId,
+			@RequestParam(name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+		// date 파라미터가 없는 경우 현재 날짜로 설정
+		LocalDate targetDate = (date != null) ? date : LocalDate.now();
+
+		List<BodyInfoResponse> response = bodyInfoService.findLatestByUserIdAndDate(userId, targetDate);
+
 		return ResponseEntity.ok(
-				ResponseDto.success(HttpStatus.OK, "유저 체성분 정보 목록 요청이 성공적으로 반환 처리됐습니다.", response));
+				ResponseDto.success(HttpStatus.OK,
+						"유저 체성분 정보 목록 요청이 성공적으로 반환 처리됐습니다.",
+						response));
 	}
 
 	@PatchMapping("/{bodyId}")
