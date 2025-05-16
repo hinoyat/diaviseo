@@ -111,7 +111,9 @@ fun MainScreen() {
 
             composable("goal") {
                 Box(modifier = Modifier.padding(innerPadding)) {
-                    GoalScreen(navController)
+                    GoalScreen(
+                        navController = navController,
+                        gender = profile?.gender)
                 }
             }
             // 마이페이지

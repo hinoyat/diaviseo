@@ -1,7 +1,15 @@
 package com.example.diaviseo.ui.main.components.goal.body
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -11,38 +19,21 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.diaviseo.ui.theme.DiaViseoColors
-import com.example.diaviseo.ui.theme.*
+import com.example.diaviseo.ui.theme.medium14
 
-fun calculateBMR(weightKg: Float, heightCm: Float, age: Int, isMale: Boolean): Int {
-    return if (isMale) {
-        (66.47 + 13.75 * weightKg + 5.003 * heightCm - 6.755 * age).toInt()
-    } else {
-        (655.1 + 9.563 * weightKg + 1.850 * heightCm - 4.676 * age).toInt()
-    }
-}
-
-fun calculateBMI(weightKg: Float, heightCm: Float): Float {
-    val heightM = heightCm / 100f
-    return (weightKg / (heightM * heightM) * 10).toInt() / 10f // 소수점 1자리 반올림
-}
-
+@SuppressLint("DefaultLocale")
 @Composable
 fun BMRMBISection(
-    weight: Float,
-    heightCm: Float,
-    age: Int,
-    isMale: Boolean
+    bmr: Double,   // 기초대사량
+    bmi: Double
 ) {
-    val bmr = calculateBMR(weight, heightCm, age, isMale)
-    val bmi = calculateBMI(weight, heightCm)
-
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        InfoBox("나의 기초대사량 :  ", "${bmr} kcal")
-        InfoBox("나의 BMI  :  ", "$bmi")
+        InfoBox("나의 기초대사량 :  ", "${bmr.toInt()} kcal")
+        InfoBox("나의 BMI  :  ", String.format("%.1f", bmi))
     }
 }
 

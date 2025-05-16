@@ -44,8 +44,8 @@ interface BodyApiService {
     ): ApiResponse<List<MonthlyAverageBodyInfoResponse>>
 
     //체성분 날짜 조회
-    @GET("bodies")
+    @GET("bodies/date")
     suspend fun loadBodyData(
         @Query("date") date: String
-    ): ApiResponse<List<BodyInfoResponse>>
+    ): ApiResponse<BodyInfoResponse>
 }

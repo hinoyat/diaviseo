@@ -11,6 +11,7 @@ import com.example.diaviseo.network.body.dto.res.WeeklyAverageBodyInfoResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 class WeightViewModel : ViewModel() {
     private val _isLoading = MutableStateFlow(false)
@@ -61,16 +62,29 @@ class WeightViewModel : ViewModel() {
             try {
                 val response = RetrofitInstance.bodyApiService.loadBodyData(date)
                 if (response.status == "OK") {
-                    _bodyInfo.value = response.data!![0]  // data는 리스트로 오더라
+                    _bodyInfo.value = response.data!!
                 } else if (response.status == "NOT_FOUND") {
                     // CODE 404
-                    _bodyInfo.value = null // data : []
+                    _bodyInfo.value = null // data : null
                 }
 
                 _isLoading.value = false
             } catch (e: Exception) {
-                Log.e("WeightViewModel", "체성분 날짜 조회 예외 발생: ${e.message}")
-                e.printStackTrace()
+                when {
+                    // Retrofit 의 HTTP 에러를 HttpException 으로 던져줄 때
+                    e is HttpException && e.code() == 404 -> {
+                        // 여기서 404 전용 로직 처리
+                        _bodyInfo.value = null
+                        Log.d("WeightViewModel", "404 에러 발생해서 데이터는 null 로 세팅됨")
+                    }
+
+                    else -> {
+                        // 그 외 예외 처리
+                        Log.e("WeightViewModel", "체성분 조회 실패: ${e.message}")
+                    }
+                }
+            } finally {
+                _isLoading.value = false
             }
         }
     }

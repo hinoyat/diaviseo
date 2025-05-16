@@ -34,7 +34,8 @@ import kotlinx.coroutines.coroutineScope
 @Composable
 fun GoalContent(
     selectedTab: String,
-    navController: NavHostController
+    navController: NavHostController,
+    gender: String?
 ) {
     // 평가<->디테일 날짜 관리
     val goalViewModel: GoalViewModel = viewModel()
@@ -73,7 +74,7 @@ fun GoalContent(
     }
 
     // 16일 할일, 성별 불러오고 체성분 불러오기
-    val isMale = false
+    val isMale = if (gender != null) {gender == "M"} else false
 
     LaunchedEffect(selectedDate) {
         // 비동기 작업
@@ -90,7 +91,6 @@ fun GoalContent(
 
     }
 
-    // 홍범이가 지워달래요!
 //    LoadingOverlay(isLoading || exIsLoading)
 
     Column(
@@ -190,12 +190,12 @@ fun GoalContent(
                 )
                 Spacer(modifier = Modifier.height(12.dp))
 
-                BMRMBISection(
-                    weight = 59.1f,
-                    heightCm = 166f,
-                    age = 26,
-                    isMale = isMale
-                )
+                if (bodyInfo != null) {
+                    BMRMBISection(
+                        bmr = bodyInfo!!.bmr,
+                        bmi = bodyInfo!!.bmi
+                    )
+                }
 
                 // 아래 메세지가 null이면 30 아니면 80
                 Spacer(modifier = Modifier.height(80.dp))

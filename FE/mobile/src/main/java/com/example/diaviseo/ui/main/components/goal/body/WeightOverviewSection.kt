@@ -3,7 +3,13 @@ package com.example.diaviseo.ui.main.components.goal.body
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,7 +34,7 @@ fun WeightOverviewSection(
     muscleMass: Double?,
     fatMass: Double?
 ) {
-    val weigthViewModel : WeightViewModel = viewModel()
+    val weightViewModel : WeightViewModel = viewModel()
     val goalViewModel : GoalViewModel = viewModel()
 
     val selectedDate by goalViewModel.selectedDate.collectAsState()
@@ -58,12 +64,49 @@ fun WeightOverviewSection(
 
             Spacer(modifier = Modifier.height(20.dp))
         } else {
-            Text(
-                text = "입력된 체중 정보가 없어요",
-                color = DiaViseoColors.Placeholder,
-                style = medium14,
-                modifier = Modifier.padding(top = 12.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(),
+//                    .padding(vertical = 32.dp)
+                contentAlignment = Alignment.Center
+            ) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth(1f),
+                    shape = RoundedCornerShape(12.dp),
+//                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = DiaViseoColors.Placeholder.copy(alpha = 0.1f)
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.FitnessCenter,
+                            contentDescription = null,
+                            modifier = Modifier.size(36.dp),
+                            tint = DiaViseoColors.Placeholder
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "아직 측정된 체중 정보가 없어요!",
+                            style = semibold16,
+                            color = DiaViseoColors.Unimportant
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "지금 바로 체중을 기록해보세요.",
+                            style = regular14,
+                            color = DiaViseoColors.Placeholder
+                        )
+                    }
+                }
+            }
         }
     }
 }
