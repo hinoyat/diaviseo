@@ -6,6 +6,7 @@ import com.example.diaviseo.network.exercise.dto.req.HealthSyncExerciseRequest
 import java.time.Duration
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 object ExerciseSessionRecordProcessor {
 
@@ -24,12 +25,14 @@ object ExerciseSessionRecordProcessor {
                 // 🔴 매핑되지 않은 운동은 무시 (혹은 Log 찍어서 테스트 예정)
                 null
             } else {
+                val uuid = record.metadata.id?.takeIf { it.isNotBlank() }
                 val totalCalorie = durationMinutes * exerciseInfo.calorie
                 HealthSyncExerciseRequest(
                     exerciseNumber = exerciseType,
                     exerciseDate = formattedDate,
                     exerciseTime = durationMinutes,
-                    exerciseCalorie = totalCalorie
+                    exerciseCalorie = totalCalorie,
+                    healthConnectUuid = uuid
                 )
             }
         }
