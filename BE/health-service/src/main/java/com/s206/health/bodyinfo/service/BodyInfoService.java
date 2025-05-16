@@ -64,23 +64,29 @@ public class BodyInfoService {
 	public List<BodyInfoResponse> findByUserId(Integer userId) {
 		log.info("사용자 ID: {}의 신체 정보 조회 시작", userId);
 
-		List<BodyInfo> bodyInfos = bodyInfoRepository.findByUserId(userId);
+		List<BodyInfo> bodyInfos = bodyInfoRepository.findByUserIdAndIsDeletedFalse(userId);
 
-		if (bodyInfos.isEmpty()) {
-			log.info("사용자 ID: {}의 신체 정보가 없습니다.", userId);
-			return new ArrayList<>();
-		}
-
-		// 사용자 정보 한 번만 조회
+		// 사용자 정보 조회 (빈 리스트 여부와 상관없이 항상 필요)
 		UserDetailResponse userDetailResponse = userClient.getUserByUserId(userId).getData();
 		int age = Period.between(userDetailResponse.getBirthday(), LocalDate.now()).getYears();
 
-		List<BodyInfoResponse> responses = bodyMapper.toDtoListWithBmiAndBmr(
-				bodyInfos,
-				userDetailResponse.getHeight(),
-				userDetailResponse.getGender(),
-				age
-		);
+		if (bodyInfos.isEmpty()) {
+			log.info("사용자 ID: {}의 체성분 정보가 없습니다. 초기 응답 생성", userId);
+			// 빈 리스트일 경우, 회원 가입 시 정보로 초기 응답 생성
+			BodyInfoResponse initialResponse = bodyMapper.createInitialResponse(userId, userDetailResponse);
+			return List.of(initialResponse);
+		}
+
+		// BMI, BMR 포함하여 응답 생성
+		List<BodyInfoResponse> responses = bodyInfos.stream()
+				.map(bodyInfo -> {
+					BigDecimal bmi = HealthCalculator.calculateBMI(bodyInfo.getWeight(),
+							userDetailResponse.getHeight());
+					BigDecimal bmr = HealthCalculator.calculateBMR(userDetailResponse.getGender(),
+							age, bodyInfo.getWeight(), userDetailResponse.getHeight());
+					return bodyMapper.toDto(bodyInfo, bmi, bmr);
+				})
+				.toList();
 
 		log.info("사용자 ID: {}의 신체 정보 {}건 조회 완료", userId, responses.size());
 		return responses;
