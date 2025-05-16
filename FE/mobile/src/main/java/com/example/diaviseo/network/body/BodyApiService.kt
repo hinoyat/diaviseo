@@ -1,6 +1,7 @@
 package com.example.diaviseo.network.body
 
 import com.example.diaviseo.network.body.dto.req.BodyRegisterRequest
+import com.example.diaviseo.network.body.dto.req.BodyUpdateRequest
 import com.example.diaviseo.network.body.dto.res.BodyInfoResponse
 import com.example.diaviseo.network.body.dto.res.BodyRegisterResponse
 import com.example.diaviseo.network.body.dto.res.MonthlyAverageBodyInfoResponse
@@ -12,8 +13,10 @@ import okhttp3.MultipartBody
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Multipart
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Part
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface BodyApiService {
@@ -54,4 +57,12 @@ interface BodyApiService {
     suspend fun loadLatestBodyData(
         @Query("date") date: String
     ): ApiResponse<List<BodyInfoResponse>>   // 리스트이긴 한데 요소 하나만 있음
+
+    // 체성분 수정
+    @PATCH("/api/bodies/{bodyId}")
+    suspend fun updateBodyInfo(
+        @Body request: BodyUpdateRequest,
+        @Path("bodyId") bodyId: Int
+    ): ApiResponse<BodyInfoResponse>
+
 }
