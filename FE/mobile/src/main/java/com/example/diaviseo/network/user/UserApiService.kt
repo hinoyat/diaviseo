@@ -9,6 +9,7 @@ import com.example.diaviseo.network.user.dto.res.FetchProfileResponse
 import com.example.diaviseo.network.user.dto.res.SignUpWithDiaResponse
 import com.example.diaviseo.network.user.dto.res.UserPhysicalInfoResponse
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -43,4 +44,8 @@ interface UserApiService {
     suspend fun fetchPhysicalInfo(
         @Query("date") date: String
     ): ApiResponse<UserPhysicalInfoResponse>
+
+    @DELETE("users")
+    suspend fun deleteUser(): ApiResponse<Unit>
+
 }

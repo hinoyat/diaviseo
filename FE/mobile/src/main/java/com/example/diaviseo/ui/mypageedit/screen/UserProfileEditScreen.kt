@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.diaviseo.R
@@ -33,7 +34,10 @@ import com.example.diaviseo.viewmodel.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserProfileEditScreen(navController: NavHostController) {
+fun UserProfileEditScreen(
+    navController: NavHostController,
+    rootNavController: NavHostController
+) {
     val nicknameSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val birthDateSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -94,6 +98,39 @@ fun UserProfileEditScreen(navController: NavHostController) {
             )
 
         }
+    }
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("회원 탈퇴") },
+            text = { Text("정말로 회원 탈퇴하시겠습니까?\n이 작업은 되돌릴 수 없습니다.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDialog = false
+                    authViewModel.deleteUser(
+                        onSuccess = {
+                            Toast.makeText(context, "회원 탈퇴가 완료되었습니다.", Toast.LENGTH_SHORT).show()
+                            rootNavController.navigate("signupGraph") {
+                                popUpTo("main") { inclusive = true }
+                            }
+
+                        },
+                        onFailure = { msg ->
+                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                }) {
+                    Text("탈퇴하기", color = Color.Red)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("취소")
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -157,7 +194,9 @@ fun UserProfileEditScreen(navController: NavHostController) {
                     text = "회원탈퇴",
                     fontSize = 14.sp,
                     color = DiaViseoColors.Unimportant,
-                    modifier = Modifier.clickable { /* TODO */ }
+                    modifier = Modifier.clickable {
+                        showDialog = true  // 다이얼로그 열기
+                    }
                 )
                 Text(
                     text = "로그아웃",
@@ -201,9 +240,9 @@ fun ProfileInfoRow(title: String, value: String, onClick: (() -> Unit)? = null) 
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun UserProfileEditScreenPreview() {
-    val navController = rememberNavController()
-    UserProfileEditScreen(navController = navController)
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun UserProfileEditScreenPreview() {
+//    val navController = rememberNavController()
+//    UserProfileEditScreen(navController = navController)
+//}

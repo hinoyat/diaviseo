@@ -354,5 +354,32 @@ class AuthViewModel (application: Application) : AndroidViewModel(application) {
             isLoading = false
         }
     }
+    fun deleteUser(onSuccess: () -> Unit = {}, onFailure: (String) -> Unit = {}) {
+        viewModelScope.launch {
+            isLoading = true
+            val context = getApplication<Application>().applicationContext
+
+            try {
+                val response = RetrofitInstance.userApiService.deleteUser()
+
+                if (response.status == "OK") {
+                    TokenDataStore.clearAccessToken(context)
+                    _toastMessage.emit("회원 탈퇴가 완료되었습니다.")
+                    onSuccess()
+                } else {
+                    val errorMsg = response.message.ifBlank { "회원 탈퇴 실패" }
+                    _toastMessage.emit(errorMsg)
+                    onFailure(errorMsg)
+                }
+            } catch (e: Exception) {
+                val errorMsg = "네트워크 오류 또는 예외 발생: ${e.localizedMessage}"
+                Log.e("DELETE_USER", errorMsg)
+                _toastMessage.emit(errorMsg)
+                onFailure(errorMsg)
+            }
+
+            isLoading = false
+        }
+    }
 
 }

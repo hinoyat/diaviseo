@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.example.diaviseo.ui.components.BottomNavigationBar
 import com.example.diaviseo.ui.detail.ExerciseDetailScreen
@@ -38,7 +39,7 @@ import java.time.LocalDate
 
 @Composable
 fun MainScreen(
-    navControll: NavController
+    navControll: NavHostController
 ) {
     // 화면 뜨자마자 회원정보 불러오기
     val profileViewModel: ProfileViewModel = viewModel()
@@ -197,7 +198,10 @@ fun MainScreen(
             }
             // 회원 정보 수정
             composable("edit_profile") {
-                UserProfileEditScreen(navController)
+                UserProfileEditScreen(
+                    navController = navController,
+                    rootNavController = navControll
+                )
             }
 
             composable("edit_physical_info") {
