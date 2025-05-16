@@ -15,9 +15,10 @@ public interface BodyInfoRepository extends JpaRepository<BodyInfo, Integer> {
 
 	Optional<BodyInfo> findByBodyIdAndIsDeletedFalse(Integer bodyId);
 
-	@Query(value = "SELECT * FROM body_tb b WHERE b.user_id = :userId AND b.measurement_date = :date AND b.is_deleted = false ORDER BY b.created_at DESC LIMIT 1", nativeQuery = true)
+	@Query("SELECT b FROM BodyInfo b WHERE b.userId = :userId AND b.measurementDate = :date AND b.isDeleted = false ORDER BY b.createdAt DESC")
 	Optional<BodyInfo> findLatestBodyInfoByMeasurementDate(@Param("userId") Integer userId,
-			@Param("date") LocalDate date);
+														   @Param("date") LocalDate date);
+
 
 	@Query("SELECT b.measurementDate AS measurementDate, " +
 			"b.weight AS weight, " +
