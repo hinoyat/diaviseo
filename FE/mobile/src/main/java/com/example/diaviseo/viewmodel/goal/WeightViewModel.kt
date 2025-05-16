@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.diaviseo.network.RetrofitInstance
+import com.example.diaviseo.network.body.dto.res.BodyInfoResponse
 import com.example.diaviseo.network.body.dto.res.MonthlyAverageBodyInfoResponse
 import com.example.diaviseo.network.body.dto.res.OcrBodyResultResponse
 import com.example.diaviseo.network.body.dto.res.WeeklyAverageBodyInfoResponse
@@ -14,6 +15,9 @@ import kotlinx.coroutines.launch
 class WeightViewModel : ViewModel() {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _bodyInfo = MutableStateFlow<BodyInfoResponse?>(null)
+    val bodyInfo: StateFlow<BodyInfoResponse?> = _bodyInfo
 
     private val _dayList = MutableStateFlow<List<OcrBodyResultResponse>>(emptyList())
     val dayList: StateFlow<List<OcrBodyResultResponse>> = _dayList
@@ -46,6 +50,26 @@ class WeightViewModel : ViewModel() {
                 _isLoading.value = false
             } catch (e: Exception) {
                 Log.e("WeightViewModel", "체성분 통계 조회 예외 발생: ${e.message}")
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun loadBodyData(date: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = RetrofitInstance.bodyApiService.loadBodyData(date)
+                if (response.status == "OK") {
+                    _bodyInfo.value = response.data!![0]  // data는 리스트로 오더라
+                } else if (response.status == "NOT_FOUND") {
+                    // CODE 404
+                    _bodyInfo.value = null // data : []
+                }
+
+                _isLoading.value = false
+            } catch (e: Exception) {
+                Log.e("WeightViewModel", "체성분 날짜 조회 예외 발생: ${e.message}")
                 e.printStackTrace()
             }
         }

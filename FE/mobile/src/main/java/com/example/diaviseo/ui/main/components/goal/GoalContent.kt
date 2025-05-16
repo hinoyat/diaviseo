@@ -27,11 +27,9 @@ import com.example.diaviseo.ui.theme.semibold16
 import com.example.diaviseo.viewmodel.goal.ExerciseViewModel
 import com.example.diaviseo.viewmodel.goal.GoalViewModel
 import com.example.diaviseo.viewmodel.goal.MealViewModel
+import com.example.diaviseo.viewmodel.goal.WeightViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import java.math.BigDecimal
-import java.math.RoundingMode
 
 @Composable
 fun GoalContent(
@@ -61,6 +59,15 @@ fun GoalContent(
     val stepData by exerciseViewModel.stepData.collectAsState()
     val exIsLoading by exerciseViewModel.isLoading.collectAsState()
 
+
+    // 평가 체성분
+    val weigthViewModel : WeightViewModel = viewModel()
+    val bodyInfo by weigthViewModel.bodyInfo.collectAsState()
+
+    LaunchedEffect(selectedDate) {
+        weigthViewModel.loadBodyData(selectedDate.toString())
+    }
+
     val isToday = remember(selectedDate) {
         selectedDate == LocalDate.now()
     }
@@ -83,7 +90,8 @@ fun GoalContent(
 
     }
 
-    LoadingOverlay(isLoading || exIsLoading)
+    // 홍범이가 지워달래요!
+//    LoadingOverlay(isLoading || exIsLoading)
 
     Column(
         modifier = Modifier
@@ -176,9 +184,9 @@ fun GoalContent(
                 WeightOverviewSection(
                     isToday = isToday,
                     isMale = isMale,
-                    weight = 59.1f,
-                    muscleMass = 19.3f,
-                    fatMass = 17.1f,
+                    weight = if (bodyInfo != null) bodyInfo!!.weight else null,
+                    muscleMass = if (bodyInfo != null) bodyInfo!!.muscleMass else null,
+                    fatMass = if (bodyInfo != null) bodyInfo!!.bodyFat else null,
                 )
                 Spacer(modifier = Modifier.height(12.dp))
 
