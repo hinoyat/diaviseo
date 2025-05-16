@@ -5,10 +5,13 @@ import com.s206.health.bodyinfo.dto.response.BodyInfoResponse;
 import com.s206.health.bodyinfo.entity.BodyInfo;
 import com.s206.health.bodyinfo.entity.InputType;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 
 import com.s206.health.bodyinfo.util.HealthCalculator;
 import com.s206.health.client.dto.response.Gender;
+import com.s206.health.client.dto.response.UserDetailResponse;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -70,5 +73,26 @@ public class BodyMapper {
 					return toDto(bodyInfo, bmi, bmr);
 				})
 				.toList();
+	}
+
+	public BodyInfoResponse createInitialResponse(Integer userId, UserDetailResponse userDetail) {
+		// 회원 가입시 입력한 키, 몸무게로 BMI, BMR 계산
+		int age = Period.between(userDetail.getBirthday(), LocalDate.now()).getYears();
+		BigDecimal bmi = HealthCalculator.calculateBMI(userDetail.getWeight(), userDetail.getHeight());
+		BigDecimal bmr = HealthCalculator.calculateBMR(userDetail.getGender(), age,
+				userDetail.getWeight(), userDetail.getHeight());
+
+		return BodyInfoResponse.builder()
+				.bodyId(null)
+				.userId(userId)
+				.weight(userDetail.getWeight())
+				.height(userDetail.getHeight())
+				.bodyFat(BigDecimal.ZERO)
+				.muscleMass(BigDecimal.ZERO)
+				.createdAt(null)
+				.measurementDate(null)
+				.bmi(bmi)
+				.bmr(bmr)
+				.build();
 	}
 }
