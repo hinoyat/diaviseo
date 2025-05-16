@@ -33,6 +33,9 @@ public class Exercise {
     @Column(name = "exercise_calorie", nullable = false)
     private Integer exerciseCalorie;
 
+    @Column(name = "health_connect_uuid ", nullable = true)
+    private String healthConnectUuid;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 

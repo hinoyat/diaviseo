@@ -100,6 +100,7 @@ public class ExerciseService {
             exerciseDate = LocalDateTime.now();
         }
 
+
         // 1. 운동 종류 존재 여부 확인
         ExerciseType exerciseType = exerciseTypeRepository.findByExerciseNumberAndIsDeletedFalse(request.getExerciseNumber())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 운동 종류입니다."));
@@ -118,6 +119,7 @@ public class ExerciseService {
                 .exerciseDate(exerciseDate)
                 .exerciseTime(request.getExerciseTime())
                 .exerciseCalorie(totalCalorie)
+                .healthConnectUuid(request.getHealthConnectUuid())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .isDeleted(false)
@@ -137,7 +139,28 @@ public class ExerciseService {
     // 운동 기록 리스트 저장
     @Transactional
     public List<ExerciseListResponse> createExercises(Integer userId, List<ExerciseCreateRequest> requests) {
+        // 현재부터 40일 전 날짜 계산
+        LocalDateTime fortyDaysAgo = LocalDateTime.now().minusDays(40);
+
+        // healthConnectUuid가 있는 요청들만 추출
+        Set<String> uuidsToCheck = requests.stream()
+                .filter(req -> req.getHealthConnectUuid() != null)
+                .map(ExerciseCreateRequest::getHealthConnectUuid)
+                .collect(Collectors.toSet());
+
+        // 중복 체크할 UUID가 있는 경우에만 조회
+        Set<String> existingUuids = new HashSet<>();
+        if (!uuidsToCheck.isEmpty()) {
+            existingUuids.addAll(exerciseRepository.findExistingUuids(uuidsToCheck, fortyDaysAgo));
+        }
+
+        // 중복되지 않은 요청만 처리하여 저장
         return requests.stream()
+                .filter(request -> {
+                    // healthConnectUuid가 없거나, 있어도 DB에 없는 경우만 저장
+                    return request.getHealthConnectUuid() == null ||
+                            !existingUuids.contains(request.getHealthConnectUuid());
+                })
                 .map(request -> createExercise(userId, request))
                 .collect(Collectors.toList());
     }
