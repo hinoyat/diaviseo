@@ -45,6 +45,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.CoroutineScope   // 테스트용 지우지 말기
 import kotlinx.coroutines.Dispatchers   // 테스트용 지우지 말기
+import kotlinx.coroutines.flow.firstOrNull
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -106,19 +107,18 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // FCM 토큰 가져오기
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-            if (!task.isSuccessful) {
-                Log.w("FCM", "FCM 토큰 가져오기 실패", task.exception)
-                return@addOnCompleteListener
+        // FCM 토큰 발급 및 저장
+        FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+            Log.d("FCM", "✅ FCM 토큰 발급됨: $token")
+
+            CoroutineScope(Dispatchers.IO).launch {
+                com.example.diaviseo.datastore.FcmTokenManager.saveToken(applicationContext, token)
+                Log.d("FCM", "✅ FCM 토큰 저장 완료")
             }
-
-            val token = task.result
-            Log.d("FCM", "현재 FCM 토큰: $token")
-
-            // 서버에 토큰 전송
-            FcmTokenSender.sendTokenToServer(token)
+        }.addOnFailureListener {
+            Log.e("FCM", "❌ FCM 토큰 발급 실패", it)
         }
+
 
 
         // 권한 체크 및 센서 리스너 시작
@@ -186,7 +186,7 @@ class MainActivity : ComponentActivity() {
     override fun onPause() {
         super.onPause()
         // Activity가 보이지 않을 때 센서 리스너 해제 (배터리 절약)
-         stepViewModel.stopListening()
+        stepViewModel.stopListening()
     }
 }
 

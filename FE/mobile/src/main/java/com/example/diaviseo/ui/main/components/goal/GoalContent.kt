@@ -27,16 +27,15 @@ import com.example.diaviseo.ui.theme.semibold16
 import com.example.diaviseo.viewmodel.goal.ExerciseViewModel
 import com.example.diaviseo.viewmodel.goal.GoalViewModel
 import com.example.diaviseo.viewmodel.goal.MealViewModel
+import com.example.diaviseo.viewmodel.goal.WeightViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import java.math.BigDecimal
-import java.math.RoundingMode
 
 @Composable
 fun GoalContent(
     selectedTab: String,
-    navController: NavHostController
+    navController: NavHostController,
+    gender: String?
 ) {
     // 평가<->디테일 날짜 관리
     val goalViewModel: GoalViewModel = viewModel()
@@ -52,7 +51,6 @@ fun GoalContent(
     val fatRatio by mealViewModel.fatRatio.collectAsState()
     val isLoading by mealViewModel.isLoading.collectAsState()
 
-
     // 평가<->디테일 운동 관리
     val exerciseViewModel: ExerciseViewModel = viewModel()
     val dailyData by exerciseViewModel.dailyStats.collectAsState()
@@ -61,10 +59,23 @@ fun GoalContent(
     val stepData by exerciseViewModel.stepData.collectAsState()
     val exIsLoading by exerciseViewModel.isLoading.collectAsState()
 
+    // 평가 체성분
+    val weightViewModel : WeightViewModel = viewModel()
+    val bodyInfo by weightViewModel.bodyInfo.collectAsState()
+    val dayList by weightViewModel.dayList.collectAsState()
+    val weekList by weightViewModel.weekList.collectAsState()
+    val monthList by weightViewModel.monthList.collectAsState()
+
+    LaunchedEffect(selectedDate) {
+        weightViewModel.loadBodyData(selectedDate.toString())
+    }
+
     val isToday = remember(selectedDate) {
         selectedDate == LocalDate.now()
     }
-    val isMale = false
+
+    // 16일 할일, 성별 불러오고 체성분 불러오기
+    val isMale = if (gender != null) {gender == "M"} else false
 
     LaunchedEffect(selectedDate) {
         // 비동기 작업
@@ -78,10 +89,10 @@ fun GoalContent(
         // 순서 중요 (아래는 동기)
         mealViewModel.fetchDailyNutrition(selectedDate.toString())
         exerciseViewModel.fetchDailyExercise(selectedDate.toString())
-
+        weightViewModel.fetchAllLists(selectedDate.toString())
     }
 
-    LoadingOverlay(isLoading || exIsLoading)
+//    LoadingOverlay(isLoading || exIsLoading)
 
     Column(
         modifier = Modifier
@@ -109,6 +120,8 @@ fun GoalContent(
                     proteinRatio = proteinRatio,
                     fatRatio = fatRatio
                 )
+
+                // 아래 메세지가 null이면 30 아니면 60
                 Spacer(modifier = Modifier.height(60.dp))
 
                 AiTipBox(
@@ -172,19 +185,21 @@ fun GoalContent(
                 WeightOverviewSection(
                     isToday = isToday,
                     isMale = isMale,
-                    weight = 59.1f,
-                    muscleMass = 19.3f,
-                    fatMass = 17.1f,
+                    weight = if (bodyInfo != null) bodyInfo!!.weight else null,
+                    muscleMass = if (bodyInfo != null) bodyInfo!!.muscleMass else null,
+                    fatMass = if (bodyInfo != null) bodyInfo!!.bodyFat else null,
                 )
                 Spacer(modifier = Modifier.height(12.dp))
 
-                BMRMBISection(
-                    weight = 59.1f,
-                    heightCm = 166f,
-                    age = 26,
-                    isMale = isMale
-                )
-                Spacer(modifier = Modifier.height(60.dp))
+                if (bodyInfo != null) {
+                    BMRMBISection(
+                        bmr = bodyInfo!!.bmr,
+                        bmi = bodyInfo!!.bmi
+                    )
+                }
+
+                // 아래 메세지가 null이면 30 아니면 80
+                Spacer(modifier = Modifier.height(80.dp))
 
                 AiTipBox(
                     message = "현재 체중 대비 골격근량은 꽤 좋은 편이라 근육량은 잘 유지되고 있어요. 다만 체지방률이 약간 높은 편일 수 있으니, 유산소 운동과 함께 단백질 섭취를 늘려 체지방을 천천히 줄이는 방향이 이상적이에요. 균형 잡힌 식단과 꾸준한 활동이 핵심이에요!", // 또는 null로 빈 상태 테스트
@@ -195,7 +210,11 @@ fun GoalContent(
                 )
                 Spacer(modifier = Modifier.height(24.dp))
 
-                WeightChartSection()
+                WeightChartSection(
+                    dayList = dayList,
+                    weekList = weekList,
+                    monthList = monthList
+                )
             }
         }
 

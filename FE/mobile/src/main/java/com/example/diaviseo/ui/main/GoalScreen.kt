@@ -13,7 +13,10 @@ import com.example.diaviseo.viewmodel.goal.GoalViewModel
 import com.example.diaviseo.viewmodel.goal.MealViewModel
 
 @Composable
-fun GoalScreen(navController: NavHostController) {
+fun GoalScreen(
+    navController: NavHostController,
+    gender: String?
+) {
     val selectedTab = remember { mutableStateOf("식단") }
     val today = remember { LocalDate.now() }
     val goalViewModel: GoalViewModel = viewModel()
@@ -33,7 +36,8 @@ fun GoalScreen(navController: NavHostController) {
             )
             GoalContent(
                 selectedTab = selectedTab.value,
-                navController = navController
+                navController = navController,
+                gender = gender
             )
         }
         // 날짜 선택 모달

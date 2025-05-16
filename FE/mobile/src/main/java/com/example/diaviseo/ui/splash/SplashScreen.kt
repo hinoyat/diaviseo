@@ -66,13 +66,13 @@ fun SplashScreen(
     // 순차적 애니메이션 실행
     LaunchedEffect(Unit) {
         logoAndTextVisible = true // 로고와 텍스트 동시에 나타남
-        delay(300)
+        delay(1000)
         bottomTextVisible = true
     }
 
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn != null) {
-            delay(3000)
+            delay(3500)
 
             if (isLoggedIn == true) {
                 navController.navigate("main") {
@@ -92,7 +92,7 @@ fun SplashScreen(
     ) {
         // 메인 콘텐츠를 위로 이동 (offset 사용)
         Column(
-            modifier = Modifier.offset(y = (-40).dp),
+            modifier = Modifier.offset(y = (-30).dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {

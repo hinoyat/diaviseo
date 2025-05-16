@@ -127,7 +127,7 @@ fun GoalSummaryCard(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "TDEE?\n 하루 총 에너지 소비량, 기초대사량에 신체 활동 수준을 곱한 것 입니다. 값으로 1.375를 사용합니다.",
+                        text = "TDEE?\n 하루 총 에너지 소비량, 기초대사량에 신체 활동 수준을 곱한 것 입니다. 신체 활동 수준 값으로 1.375를 사용합니다.",
                         style = medium12,
                         color = DiaViseoColors.Unimportant
                     )

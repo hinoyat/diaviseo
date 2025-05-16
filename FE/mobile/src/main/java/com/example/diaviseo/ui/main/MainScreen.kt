@@ -1,5 +1,7 @@
 package com.example.diaviseo.ui.main
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -33,20 +35,11 @@ import java.time.LocalDate
 fun MainScreen() {
     // 화면 뜨자마자 회원정보 불러오기
     val profileViewModel: ProfileViewModel = viewModel()
-//    // 화면 진입 시 한 번 실행됨
-//    LaunchedEffect(Unit) {
-//        profileViewModel.fetchMyProfile()
-//    }
 
     val profile by profileViewModel.myProfile.collectAsState()
-    // profile이 바뀔 때마다 로그 찍고싶을 때 사용
-//    LaunchedEffect(profile) {
-//        Log.d("Mainscreen", "nickname 값 변경 감지: ${profile?.nickname}")
-//    }
 
     // 화면 이동을 관리해주는 내비게이션 컨트롤러
     val navController = rememberNavController()
-//    val userNickname = profile?.nickname
     val isFabMenuOpen = remember { mutableStateOf(false) }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -72,8 +65,11 @@ fun MainScreen() {
         "chat_history",
         "my",
         "healthConnect/manage"
-        )
+    )
     val isBottomBarVisible = currentRoute !in hideBottomBarRoutes
+
+    // 메인 탭 화면들 (하단바에서 이동하는 화면들)
+    val mainTabRoutes = listOf("home", "chat_history", "goal", "my")
 
     Scaffold(
         bottomBar = {
@@ -89,7 +85,64 @@ fun MainScreen() {
         NavHost(
             navController = navController,
             startDestination = "home",
-            modifier = Modifier.fillMaxSize() // ✅ 여기서는 padding 제거
+            modifier = Modifier.fillMaxSize(),
+            // 메인 탭 간 이동을 위한 자연스러운 슬라이드 애니메이션
+            enterTransition = {
+                when {
+                    // 메인 탭 간 이동 시 슬라이드 애니메이션
+                    initialState.destination.route in mainTabRoutes &&
+                            targetState.destination.route in mainTabRoutes -> {
+                        slideInHorizontally(
+                            initialOffsetX = { it },
+                            animationSpec = tween(300)
+                        ) + fadeIn(animationSpec = tween(300))
+                    }
+                    // 다른 화면으로 이동 시 페이드 인
+                    else -> fadeIn(animationSpec = tween(250))
+                }
+            },
+            exitTransition = {
+                when {
+                    // 메인 탭 간 이동 시 슬라이드 애니메이션
+                    initialState.destination.route in mainTabRoutes &&
+                            targetState.destination.route in mainTabRoutes -> {
+                        slideOutHorizontally(
+                            targetOffsetX = { -it },
+                            animationSpec = tween(300)
+                        ) + fadeOut(animationSpec = tween(300))
+                    }
+                    // 다른 화면으로 이동 시 페이드 아웃
+                    else -> fadeOut(animationSpec = tween(250))
+                }
+            },
+            popEnterTransition = {
+                when {
+                    // 메인 탭 복귀 시 슬라이드 애니메이션
+                    initialState.destination.route in mainTabRoutes &&
+                            targetState.destination.route in mainTabRoutes -> {
+                        slideInHorizontally(
+                            initialOffsetX = { -it },
+                            animationSpec = tween(300)
+                        ) + fadeIn(animationSpec = tween(300))
+                    }
+                    // 뒤로가기 시 페이드 인
+                    else -> fadeIn(animationSpec = tween(250))
+                }
+            },
+            popExitTransition = {
+                when {
+                    // 메인 탭 복귀 시 슬라이드 애니메이션
+                    initialState.destination.route in mainTabRoutes &&
+                            targetState.destination.route in mainTabRoutes -> {
+                        slideOutHorizontally(
+                            targetOffsetX = { it },
+                            animationSpec = tween(300)
+                        ) + fadeOut(animationSpec = tween(300))
+                    }
+                    // 뒤로가기 시 페이드 아웃
+                    else -> fadeOut(animationSpec = tween(250))
+                }
+            }
         ) {
             composable("home") {
                 // 기존 HomeScreen을 그대로 재사용
@@ -111,12 +164,14 @@ fun MainScreen() {
 
             composable("goal") {
                 Box(modifier = Modifier.padding(innerPadding)) {
-                    GoalScreen(navController)
+                    GoalScreen(
+                        navController = navController,
+                        gender = profile?.gender)
                 }
             }
             // 마이페이지
             composable("my") {
-                    MyScreen(navController)
+                MyScreen(navController)
             }
             // 회원 정보 수정
             composable("edit_profile") {
@@ -161,17 +216,16 @@ fun MainScreen() {
             composable("body_register") {
                 BodyDataRegisterScreen(navController)
             }
-//            composable("diet_register") {
-//                DietRegisterMainScreen(navController)
-//            }
+
             dietGraph(navController)
-// 1. 기본 라우트 (오늘 날짜 사용)
+
+            // 기본 라우트 (오늘 날짜 사용)
             composable("exercise_register") {
                 val today = LocalDate.now().toString()
                 ExerciseRegisterMainScreen(date = today, navController = navController)
             }
 
-// 2. 날짜 파라미터를 받는 라우트
+            // 날짜 파라미터를 받는 라우트
             composable("exercise_register/{date}") { backStackEntry ->
                 val date = backStackEntry.arguments?.getString("date") ?: LocalDate.now().toString()
                 ExerciseRegisterMainScreen(date = date, navController = navController)
@@ -188,14 +242,6 @@ fun MainScreen() {
                     viewModel = profileViewModel
                 )
             }
-
-            // 식단 상세화면
-//            composable("meal_detail") { backStackEntry ->
-//                MealDetailScreen(
-//                    navController = navController,
-////                    viewModel = profileViewModel
-//                )
-//            }
 
             // 홈 상세화면
             composable("home_detail") { backStackEntry ->
