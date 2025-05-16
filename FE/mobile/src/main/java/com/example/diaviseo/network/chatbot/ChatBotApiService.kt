@@ -7,6 +7,7 @@ import com.example.diaviseo.network.chatbot.dto.res.ChatMessageResponse
 import com.example.diaviseo.network.chatbot.dto.res.ChatResponse
 import com.example.diaviseo.network.chatbot.dto.res.EndSessionResponse
 import com.example.diaviseo.network.chatbot.dto.res.SessionSummaryResponse
+import com.example.diaviseo.network.chatbot.dto.res.StartSessionResponse
 import com.example.diaviseo.network.common.dto.ApiResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -18,7 +19,7 @@ interface ChatBotApiService {
     @POST("chatbot/start-session")
     suspend fun startSession(
         @Body request: StartSessionRequest
-    ):ApiResponse<StartSessionRequest>
+    ):StartSessionResponse
 
 
     @POST("chatbot/chat/{sessionId}")
