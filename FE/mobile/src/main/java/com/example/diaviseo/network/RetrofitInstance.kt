@@ -10,6 +10,7 @@ import com.example.diaviseo.datastore.TokenDataStore
 import com.example.diaviseo.network.alarm.AlarmApiService
 import com.example.diaviseo.network.auth.AuthApiService
 import com.example.diaviseo.network.body.BodyApiService
+import com.example.diaviseo.network.chatbot.ChatBotApiService
 import com.example.diaviseo.network.condition.ConditionApiService
 import com.example.diaviseo.network.user.UserApiService
 import kotlinx.coroutines.flow.first
@@ -178,5 +179,9 @@ object RetrofitInstance {
 
     val alarmApi: AlarmApiService by lazy {
         retro.create(AlarmApiService::class.java)
+    }
+
+    val chatBotApiService: ChatBotApiService by lazy {
+        retro.create(ChatBotApiService::class.java)
     }
 }
