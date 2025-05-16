@@ -62,3 +62,4 @@ class Food(Base):
   deleted_at = Column(DateTime, nullable=True)
   is_deleted = Column(Boolean, default=False, nullable=False)
   meal_foods = relationship("MealFood", back_populates="food")
+
