@@ -102,7 +102,7 @@ class MainActivity : ComponentActivity() {
                 NavHost(navController, startDestination = "splash") {
                     composable("splash") { SplashScreen(navController) }
                     signupNavGraph(navController)
-                    composable("main") { MainScreen() }
+                    composable("main") { MainScreen(navController) }
                 }
             }
         }

@@ -1,6 +1,8 @@
 package com.example.diaviseo.ui.mypageedit.screen
 
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,6 +28,7 @@ import com.example.diaviseo.ui.components.CommonTopBar
 import com.example.diaviseo.ui.mypageedit.bottomsheet.EditBirthDateBottomSheet
 import com.example.diaviseo.ui.mypageedit.bottomsheet.EditNicknameBottomSheet
 import com.example.diaviseo.ui.theme.DiaViseoColors
+import com.example.diaviseo.viewmodel.AuthViewModel
 import com.example.diaviseo.viewmodel.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,6 +42,12 @@ fun UserProfileEditScreen(navController: NavHostController) {
 
     val profileViewModel: ProfileViewModel = viewModel()
     val profile by profileViewModel.myProfile.collectAsState()
+
+    val context = LocalContext.current
+    val authViewModel: AuthViewModel = viewModel(
+        viewModelStoreOwner = context as ComponentActivity
+    )
+
 
     LaunchedEffect(Unit) {
         profileViewModel.fetchMyProfile()
@@ -153,7 +163,9 @@ fun UserProfileEditScreen(navController: NavHostController) {
                     text = "로그아웃",
                     fontSize = 14.sp,
                     color = DiaViseoColors.Unimportant,
-                    modifier = Modifier.clickable { /* TODO */ }
+                    modifier = Modifier.clickable {
+                        authViewModel.logout()
+                    }
                 )
             }
         }

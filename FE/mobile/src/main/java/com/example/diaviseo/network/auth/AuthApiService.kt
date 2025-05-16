@@ -16,4 +16,11 @@ interface AuthApiService {
     @POST("auth/reissue")
     suspend fun refreshAuthToken(
     ): ApiResponse<RefreshAuthTokenResponse>
+
+    @POST("auth/logout")
+    suspend fun logoutWithTokens(
+        @Header("Authorization") accessToken: String,
+        @Header("Refresh-Token") refreshToken: String
+    ): ApiResponse<Unit>
+
 }
