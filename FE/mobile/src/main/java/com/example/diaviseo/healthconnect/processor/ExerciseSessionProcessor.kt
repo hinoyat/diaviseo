@@ -6,7 +6,6 @@ import com.example.diaviseo.network.exercise.dto.req.HealthSyncExerciseRequest
 import java.time.Duration
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.UUID
 
 object ExerciseSessionRecordProcessor {
 
