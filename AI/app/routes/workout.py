@@ -9,16 +9,6 @@ from app.services.workout.feedback import generate_workout_feedback
 
 router = APIRouter()
 
-@router.post("/workout")
-def workout_feedback(
-    request: Request,
-    user_id: int = Header(default="default_user", alias="X-USER-ID"),
-    user_db: Session = Depends(get_session('user')),
-    health_db: Session = Depends(get_session('health'))
-) -> WorkoutResponse:
-    feedback = generate_workout_feedback(user_id, user_db, health_db)
-    return WorkoutResponse(feedback=feedback)
-
 
 @router.get("/calories/remaining")
 def get_remaining_calories(
