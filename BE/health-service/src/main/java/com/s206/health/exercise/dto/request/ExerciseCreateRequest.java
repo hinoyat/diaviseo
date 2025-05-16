@@ -13,4 +13,5 @@ public class ExerciseCreateRequest {
     private LocalDateTime exerciseDate;
     private Integer exerciseTime;
     private Integer exerciseCalorie;
+    private String healthConnectUuid;
 }
