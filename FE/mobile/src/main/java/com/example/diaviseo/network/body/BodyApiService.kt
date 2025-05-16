@@ -48,4 +48,10 @@ interface BodyApiService {
     suspend fun loadBodyData(
         @Query("date") date: String
     ): ApiResponse<BodyInfoResponse>
+
+    // 최신 체성분 조회
+    @GET("bodies")
+    suspend fun loadLatestBodyData(
+        @Query("date") date: String
+    ): ApiResponse<List<BodyInfoResponse>>   // 리스트이긴 한데 요소 하나만 있음
 }
