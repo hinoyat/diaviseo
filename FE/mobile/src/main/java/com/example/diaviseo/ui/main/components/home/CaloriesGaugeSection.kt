@@ -59,7 +59,7 @@ fun CaloriesGaugeSection(
                 Image(
                     painter = painterResource(id = R.drawable.charac_exercise),
                     contentDescription = "운동 캐릭터",
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier.size(52.dp)
                 )
 
                 Spacer(modifier = Modifier.width(6.dp))
@@ -120,7 +120,8 @@ fun CaloriesGaugeSection(
                 Image(
                     painter = painterResource(id = R.drawable.charac_eat),
                     contentDescription = "식사 캐릭터",
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier.size(52.dp)
+
                 )
             }
 
