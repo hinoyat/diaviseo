@@ -8,6 +8,7 @@ import com.example.diaviseo.network.body.dto.res.BodyInfoResponse
 import com.example.diaviseo.network.body.dto.res.MonthlyAverageBodyInfoResponse
 import com.example.diaviseo.network.body.dto.res.OcrBodyResultResponse
 import com.example.diaviseo.network.body.dto.res.WeeklyAverageBodyInfoResponse
+import com.example.diaviseo.network.user.dto.res.UserPhysicalInfoResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -19,6 +20,12 @@ class WeightViewModel : ViewModel() {
 
     private val _bodyInfo = MutableStateFlow<BodyInfoResponse?>(null)
     val bodyInfo: StateFlow<BodyInfoResponse?> = _bodyInfo
+
+    private val _bodyLatestInfo = MutableStateFlow<BodyInfoResponse?>(null)
+    val bodyLatestInfo: StateFlow<BodyInfoResponse?> = _bodyLatestInfo
+
+    private val _physicalInfo = MutableStateFlow<UserPhysicalInfoResponse?>(null)
+    val physicalInfo: StateFlow<UserPhysicalInfoResponse?> = _physicalInfo
 
     private val _dayList = MutableStateFlow<List<OcrBodyResultResponse>>(emptyList())
     val dayList: StateFlow<List<OcrBodyResultResponse>> = _dayList
@@ -85,6 +92,54 @@ class WeightViewModel : ViewModel() {
                 }
             } finally {
                 _isLoading.value = false
+            }
+        }
+    }
+
+    fun loadLatestBodyData(date: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = RetrofitInstance.bodyApiService.loadLatestBodyData(date).data
+                if (response != null) {
+                    _bodyLatestInfo.value = response[0]
+                }
+
+                _isLoading.value = false
+            } catch (e: Exception) {
+                when {
+                    // Retrofit 의 HTTP 에러를 HttpException 으로 던져줄 때
+                    e is HttpException && e.code() == 404 -> {
+                        // 여기서 404 전용 로직 처리
+                        _bodyLatestInfo.value = null
+                        Log.d("WeightViewModel", "404 에러 발생해서 데이터는 null 로 세팅됨")
+                    }
+
+                    else -> {
+                        // 그 외 예외 처리
+                        Log.e("WeightViewModel", "최신 체성분 조회 실패: ${e.message}")
+                    }
+                }
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun fetchPhysicalInfo(date: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = RetrofitInstance.userApiService.fetchPhysicalInfo(date = date)
+                if (response.status == "OK") {
+                    _physicalInfo.value = response.data
+
+                    _isLoading.value = false
+                } else {
+                    Log.e("WeightViewModel", "일일 신체 칼로리 불러오기 실패: ${response.message}")
+                }
+            } catch (e: Exception) {
+                Log.e("WeightViewModel", "일일 신체 칼로리 예외 발생: ${e.message}")
             }
         }
     }

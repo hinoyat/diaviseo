@@ -8,8 +8,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,47 +28,70 @@ import com.example.diaviseo.ui.detail.components.home.BodyInfoEditSheet
 import com.example.diaviseo.ui.detail.components.home.DetailInfoCard
 import com.example.diaviseo.ui.detail.components.home.GoalSummaryCard
 import com.example.diaviseo.ui.main.components.goal.AiTipBox
+import com.example.diaviseo.viewmodel.HomeViewModel
 import com.example.diaviseo.viewmodel.ProfileViewModel
 import com.example.diaviseo.viewmodel.goal.GoalViewModel
+import com.example.diaviseo.viewmodel.goal.WeightViewModel
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnrememberedGetBackStackEntry")
+@SuppressLint("UnrememberedGetBackStackEntry", "DefaultLocale")
 @Composable
 fun HomeDetailScreen(
     navController: NavHostController,
     viewModel: ProfileViewModel = viewModel()
 ) {
-    val goalViewModel: GoalViewModel = viewModel()
+    val previousEntry = navController.previousBackStackEntry
+        ?: error("이전 스크린이 없습니다")
+
+    val goalViewModel: GoalViewModel = viewModel(previousEntry)
+    val weightViewModel: WeightViewModel = viewModel()
+    val homeViewModel : HomeViewModel = viewModel(previousEntry)
+
+    val totalHomeCalorie by homeViewModel.totalCalorie.collectAsState()
+    val totalHomeExerciseCalorie by homeViewModel.totalExerciseCalorie.collectAsState()
 
     val showDatePicker by goalViewModel.showDatePicker.collectAsState()
     val selectedDate by goalViewModel.selectedDate.collectAsState()
     LoadingOverlay(isVisible = goalViewModel.isLoading.collectAsState().value)
+
+    val physicalInfo by weightViewModel.physicalInfo.collectAsState()
+    val bodyLatestInfo by weightViewModel.bodyLatestInfo.collectAsState()
+
+    LaunchedEffect(selectedDate) {
+        weightViewModel.fetchPhysicalInfo(selectedDate.toString())  // 선택날 일일 권장 칼로리
+        weightViewModel.loadLatestBodyData(selectedDate.toString())   // 선택날 체성분 최근 기록
+    }
+    // 선택날 체정분 데이터, bodyLatestInfo.measurementDate 가 오늘이 아니라면
+    // 화면에 보이는 체지방, 골격근 0
+    // 수정하면 하나만 수정되긴 할텐데, weight는 bodyLatestInfo.weight, measurementDate는 selectedDate patch
+    // 근데 bodyLatestInfo.bodyId 가 null이면 post로 보내야해
+    // 그리고 수정하고 등록하면 다시 위에 lauch 2개 동일하게 해야 해
 
     // 닉네임 가져오게 viewModel : profileviewmodel
     val myProfile by viewModel.myProfile.collectAsState()
     val nickname by remember(myProfile) {
         mutableStateOf(myProfile?.nickname)
     }
+
     // 몇월 며칠 날짜 파싱
     val formatter = DateTimeFormatter.ofPattern("M월 d일 E요일", Locale.KOREAN)
     val formatted = selectedDate.format(formatter)
 
-
     // Dummy data - 추후 ViewModel 연동
-    var skeletalMuscle by remember { mutableStateOf<Double?>(32.2) }
-    val userHeight = 165.9
-    val userWeight = 57.9
-    val bodyFat: Double? = 25.5 * 0.01 * userWeight
-    val bmr = 1704.76500
-    val goal = "WEIGHT_LOSS"
-    val recommendedIntake = 1398
-    val recommendedExercise = 418
-    val totalCalorie = 1200
-    val tdee = 1480
-    val totalExerciseCalorie = 100
-    val predictValue = totalCalorie - tdee - totalExerciseCalorie
+    var muscleMass = bodyLatestInfo?.muscleMass
+    val userHeight = bodyLatestInfo?.height
+    val userWeight = bodyLatestInfo?.weight
+    val bodyFat: Double? = bodyLatestInfo?.bodyFat
+    val bmr = bodyLatestInfo?.bmr
+    val goal = physicalInfo?.goal
+    val recommendedIntake = physicalInfo?.recommendedIntake
+    val recommendedExercise = physicalInfo?.recommendedExercise
+    val totalCalorie = totalHomeCalorie
+    val tdee = if (physicalInfo != null) physicalInfo?.tdee else 0
+    val totalExerciseCalorie = totalHomeExerciseCalorie
+    val predictValue = totalCalorie - tdee!!.toInt() - totalExerciseCalorie
 
     var showMuscleSheet by remember { mutableStateOf(false) }
     var showFatSheet by remember { mutableStateOf(false) }
@@ -92,7 +115,7 @@ fun HomeDetailScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             BodyInfoCard(
-                skeletalMuscle = skeletalMuscle,
+                skeletalMuscle = muscleMass,
                 bodyFat = bodyFat,
                 onSkeletalEdit = { showMuscleSheet = true },
                 onBodyFatEdit = { showFatSheet = true }
@@ -128,7 +151,7 @@ fun HomeDetailScreen(
 
             GoalSummaryCard(
                 nickname = nickname.toString(),
-                goal = goal,
+                goal = goal.toString(),
                 recommendedIntake = recommendedIntake,
                 recommendedExercise = recommendedExercise,
                 totalCalorie = totalCalorie,
@@ -179,9 +202,9 @@ fun HomeDetailScreen(
                 BodyInfoEditSheet(
                     title = "골격근량 수정",
                     unit = "kg",
-                    initialValue = skeletalMuscle?.toString() ?: "",
+                    initialValue = muscleMass?.toString() ?: "",
                     onConfirm = { value ->
-                        skeletalMuscle = value // 업데이트 처리
+                        muscleMass = value // 업데이트 처리
                         showMuscleSheet = false
                     },
                     onDismiss = { showMuscleSheet = false }
