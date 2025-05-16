@@ -1,9 +1,8 @@
 from langchain_core.messages import HumanMessage, AIMessage
 from pymongo import MongoClient
 from app.config.settings import get_settings
-from langchain.memory import MongoDBChatMessageHistory
-from langchain.schema import BaseMessage
-
+from langchain_community.chat_message_histories import MongoDBChatMessageHistory
+from langchain_core.messages import BaseMessage
 settings = get_settings()
 
 
