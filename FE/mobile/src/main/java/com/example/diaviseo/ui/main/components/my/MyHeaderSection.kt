@@ -52,7 +52,7 @@ fun MyHeaderSection(
         Image(
             painter = painterResource(id = R.drawable.charac_main_nontext),
             contentDescription = "다이아비서 캐릭터",
-            modifier = Modifier.size(64.dp)
+            modifier = Modifier.size(120.dp)
         )
     }
 }
