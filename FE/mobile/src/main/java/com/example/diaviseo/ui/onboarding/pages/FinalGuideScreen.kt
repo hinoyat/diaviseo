@@ -131,6 +131,16 @@ fun FinalGuideScreen(
     // 현재 Activity 참조
     val activity = context as Activity
 
+    val moveToMain = remember { mutableStateOf(false) }
+
+    LaunchedEffect(moveToMain.value) {
+        if (moveToMain.value) {
+            navController.navigate("main") {
+                popUpTo("signup") { inclusive = true }
+            }
+        }
+    }
+
     // 알림 권한 요청 런처 (Android 13 이상에서만 의미 있음)
     val fcmPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -367,20 +377,14 @@ fun FinalGuideScreen(
                 text = "디아 비서 시작하기",
                 enabled = true,
                 onClick = {
-                    FCMInitializer.requestNotificationPermissionIfNeeded(
-                        activity = activity,
-                        launcher = fcmPermissionLauncher,
-                        onPermissionCheckComplete = {
-                            // 알림 권한 요청 후 메인으로 이동 (토큰 전송은 MainActivity에서 수행)
-                            navController.navigate("main") {
-                                popUpTo("signup") { inclusive = true }
-                            }
-                        }
-                    )
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                        fcmPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                        moveToMain.value = true
+                    } else {
+                        moveToMain.value = true
+                    }
                 }
             )
-
-
         }
     }
 }

@@ -107,29 +107,18 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // FCM 토큰 가져오기
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-            if (!task.isSuccessful) {
-                Log.w("FCM", "FCM 토큰 가져오기 실패", task.exception)
-                return@addOnCompleteListener
-            }
+        // FCM 토큰 발급 및 저장
+        FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+            Log.d("FCM", "✅ FCM 토큰 발급됨: $token")
 
-            val token = task.result
-            Log.d("FCM", "현재 FCM 토큰: $token")
-
-            // access Token 확인 후 전송
-            val context = this
             CoroutineScope(Dispatchers.IO).launch {
-                val accessToken = TokenDataStore.getAccessToken(context).firstOrNull()
-                if (accessToken.isNullOrBlank()){
-                    Log.d("FCM", "🔒 로그인되어 있지 않아 FCM 토큰 전송 생략")
-                    return@launch
-                }
-                // 서버에 토큰 전송
-                FcmTokenSender.sendTokenToServer(token)
+                com.example.diaviseo.datastore.FcmTokenManager.saveToken(applicationContext, token)
+                Log.d("FCM", "✅ FCM 토큰 저장 완료")
             }
-
+        }.addOnFailureListener {
+            Log.e("FCM", "❌ FCM 토큰 발급 실패", it)
         }
+
 
 
         // 권한 체크 및 센서 리스너 시작
