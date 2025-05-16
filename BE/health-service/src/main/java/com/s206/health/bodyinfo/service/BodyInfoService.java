@@ -1,5 +1,6 @@
 package com.s206.health.bodyinfo.service;
 
+import com.s206.common.exception.types.NotFoundException;
 import com.s206.health.bodyinfo.dto.request.BodyInfoCreateRequest;
 import com.s206.health.bodyinfo.dto.request.BodyInfoPatchRequest;
 import com.s206.health.bodyinfo.dto.response.BodyInfoProjection;
@@ -22,6 +23,7 @@ import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -47,18 +49,47 @@ public class BodyInfoService {
 
 		bodyInfoRepository.save(bodyInfo);
 		log.info("사용자 ID: {}의 신체 정보 저장 완료 (ID: {})", userId, bodyInfo.getBodyId());
+		UserDetailResponse userDetailResponse = userClient.getUserByUserId(userId).getData();
 
-		return bodyMapper.toDto(bodyInfo);
+		BigDecimal bmi = HealthCalculator.calculateBMI(bodyInfo.getWeight(),
+				userDetailResponse.getHeight());
+		int age = Period.between(userDetailResponse.getBirthday(), LocalDate.now()).getYears();
+		BigDecimal bmr = HealthCalculator.calculateBMR(userDetailResponse.getGender(), age,
+				bodyInfo.getWeight(), userDetailResponse.getHeight());
+
+		return bodyMapper.toDto(bodyInfo, bmi, bmr);
 	}
 
 	@Transactional(readOnly = true)
 	public List<BodyInfoResponse> findByUserId(Integer userId) {
 		log.info("사용자 ID: {}의 신체 정보 조회 시작", userId);
 
-		List<BodyInfo> bodyInfos = bodyInfoRepository.findByUserId(userId);
-		log.info("사용자 ID: {}의 신체 정보 {}건 조회 완료", userId, bodyInfos.size());
+		List<BodyInfo> bodyInfos = bodyInfoRepository.findByUserIdAndIsDeletedFalse(userId);
 
-		return bodyMapper.toDtoList(bodyInfos);
+		// 사용자 정보 조회 (빈 리스트 여부와 상관없이 항상 필요)
+		UserDetailResponse userDetailResponse = userClient.getUserByUserId(userId).getData();
+		int age = Period.between(userDetailResponse.getBirthday(), LocalDate.now()).getYears();
+
+		if (bodyInfos.isEmpty()) {
+			log.info("사용자 ID: {}의 체성분 정보가 없습니다. 초기 응답 생성", userId);
+			// 빈 리스트일 경우, 회원 가입 시 정보로 초기 응답 생성
+			BodyInfoResponse initialResponse = bodyMapper.createInitialResponse(userId, userDetailResponse);
+			return List.of(initialResponse);
+		}
+
+		// BMI, BMR 포함하여 응답 생성
+		List<BodyInfoResponse> responses = bodyInfos.stream()
+				.map(bodyInfo -> {
+					BigDecimal bmi = HealthCalculator.calculateBMI(bodyInfo.getWeight(),
+							userDetailResponse.getHeight());
+					BigDecimal bmr = HealthCalculator.calculateBMR(userDetailResponse.getGender(),
+							age, bodyInfo.getWeight(), userDetailResponse.getHeight());
+					return bodyMapper.toDto(bodyInfo, bmi, bmr);
+				})
+				.toList();
+
+		log.info("사용자 ID: {}의 신체 정보 {}건 조회 완료", userId, responses.size());
+		return responses;
 	}
 
 	@Transactional
@@ -88,7 +119,16 @@ public class BodyInfoService {
 
 		log.info("사용자 ID: {}의 체성분 정보(ID: {}) 업데이트 완료", userId, bodyId);
 
-		return bodyMapper.toDto(bodyInfo);
+
+		UserDetailResponse userDetailResponse = userClient.getUserByUserId(userId).getData();
+
+		BigDecimal bmi = HealthCalculator.calculateBMI(bodyInfo.getWeight(),
+				userDetailResponse.getHeight());
+		int age = Period.between(userDetailResponse.getBirthday(), LocalDate.now()).getYears();
+		BigDecimal bmr = HealthCalculator.calculateBMR(userDetailResponse.getGender(), age,
+				bodyInfo.getWeight(), userDetailResponse.getHeight());
+
+		return bodyMapper.toDto(bodyInfo, bmi, bmr);
 	}
 
 	@Transactional
@@ -111,20 +151,27 @@ public class BodyInfoService {
 
 
 	@Transactional(readOnly = true)
-	public BodyInfoResponse findByUserIdAndDate(Integer userId,
-			LocalDate date) {
-
+	public BodyInfoResponse findByUserIdAndDate(Integer userId, LocalDate date) {
 		log.info("사용자 ID: {}의 {} 날짜 신체 정보 조회", userId, date);
 
-		BodyInfo bodyInfo = bodyInfoRepository.findLatestBodyInfoByMeasurementDate(userId, date)
-				.orElseThrow(() -> new EntityNotFoundException(
-						String.format("사용자 ID: %d의 %s 날짜 체성분 정보가 없습니다.", userId, date)));
+		// Optional을 사용하여 체성분 정보 조회
+		Optional<BodyInfo> bodyInfoOpt = bodyInfoRepository.findLatestBodyInfoByMeasurementDate(userId, date);
+
+		// 데이터가 없는 경우 NotFoundException 발생
+		if (bodyInfoOpt.isEmpty()) {
+			log.info("사용자 ID: {}의 {} 날짜 체성분 정보가 없습니다.", userId, date);
+			throw new NotFoundException(
+					String.format("사용자 ID: %d의 %s 날짜 체성분 정보가 없습니다.", userId, date));
+		}
+
+		BodyInfo bodyInfo = bodyInfoOpt.get();
 
 		// 요청한 사용자의 데이터인지 검증
 		if (!bodyInfo.getUserId().equals(userId)) {
 			log.warn("사용자 ID: {}가 타인의 체성분 정보(ID: {})에 접근 시도", userId, bodyInfo.getBodyId());
 			throw new IllegalArgumentException("자신의 체성분 정보만 조회할 수 있습니다.");
 		}
+
 		UserDetailResponse userDetailResponse = userClient.getUserByUserId(userId).getData();
 
 		BigDecimal bmi = HealthCalculator.calculateBMI(bodyInfo.getWeight(),
