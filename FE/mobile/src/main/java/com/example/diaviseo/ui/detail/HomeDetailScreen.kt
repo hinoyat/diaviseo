@@ -20,11 +20,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.diaviseo.network.body.dto.req.BodyRegisterRequest
+import com.example.diaviseo.network.body.dto.req.BodyUpdateRequest
 import com.example.diaviseo.ui.components.CommonTopBar
 import com.example.diaviseo.ui.components.DiaDatePickerDialog
 import com.example.diaviseo.ui.components.LoadingOverlay
 import com.example.diaviseo.ui.detail.components.home.BodyInfoCard
 import com.example.diaviseo.ui.detail.components.home.BodyInfoEditSheet
+import com.example.diaviseo.ui.detail.components.home.BodyInfoEditSheet2Input
 import com.example.diaviseo.ui.detail.components.home.DetailInfoCard
 import com.example.diaviseo.ui.detail.components.home.GoalSummaryCard
 import com.example.diaviseo.ui.main.components.goal.AiTipBox
@@ -45,10 +48,12 @@ fun HomeDetailScreen(
     val previousEntry = navController.previousBackStackEntry
         ?: error("이전 스크린이 없습니다")
 
-    val goalViewModel: GoalViewModel = viewModel(previousEntry)
+    val goalViewModel: GoalViewModel = viewModel()
     val weightViewModel: WeightViewModel = viewModel()
     val homeViewModel : HomeViewModel = viewModel(previousEntry)
 
+    // 이거 홈이랑 연동돼서 과거를 봐도 "현재" 꺼 볼러온다
+    // 날짜관리로 또 먹은거, 운동한거 불러와야할듯 웨잍 뷰모델에서
     val totalHomeCalorie by homeViewModel.totalCalorie.collectAsState()
     val totalHomeExerciseCalorie by homeViewModel.totalExerciseCalorie.collectAsState()
 
@@ -59,7 +64,7 @@ fun HomeDetailScreen(
     val physicalInfo by weightViewModel.physicalInfo.collectAsState()
     val bodyLatestInfo by weightViewModel.bodyLatestInfo.collectAsState()
 
-    LaunchedEffect(selectedDate) {
+    LaunchedEffect(selectedDate, bodyLatestInfo) {
         weightViewModel.fetchPhysicalInfo(selectedDate.toString())  // 선택날 일일 권장 칼로리
         weightViewModel.loadLatestBodyData(selectedDate.toString())   // 선택날 체성분 최근 기록
     }
@@ -79,7 +84,6 @@ fun HomeDetailScreen(
     val formatter = DateTimeFormatter.ofPattern("M월 d일 E요일", Locale.KOREAN)
     val formatted = selectedDate.format(formatter)
 
-    // Dummy data - 추후 ViewModel 연동
     var muscleMass = bodyLatestInfo?.muscleMass
     val userHeight = bodyLatestInfo?.height
     val userWeight = bodyLatestInfo?.weight
@@ -95,6 +99,7 @@ fun HomeDetailScreen(
 
     var showMuscleSheet by remember { mutableStateOf(false) }
     var showFatSheet by remember { mutableStateOf(false) }
+    var showHWSheet by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -128,15 +133,7 @@ fun HomeDetailScreen(
                 height = userHeight,
                 weight = userWeight,
                 bmr = bmr,
-                onEditClick = {
-                    navController.navigate("edit_physical_info") {
-                        launchSingleTop = true
-                        restoreState = true
-//                        popUpTo(navController.graph.startDestinationId) {
-//                            saveState = true
-//                        }
-                    }
-                }
+                onEditClick = { showHWSheet = true }
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -185,8 +182,24 @@ fun HomeDetailScreen(
                     title = "체지방량 수정",
                     unit = "kg",
                     initialValue = bodyFat?.toString() ?: "",
-                    onConfirm = {
-                        // TODO: 체지방량은 계산 기반 값이라 바로 갱신 불가
+                    onConfirm = { value ->
+                        if (bodyLatestInfo?.bodyId != null) {
+                            val request = BodyUpdateRequest(
+                                bodyFat = value?.toDouble(),
+                                measurementDate = selectedDate.toString()
+                            )
+                            weightViewModel.updateBodyInfo(bodyLatestInfo!!.bodyId!!, request)
+                        } else {
+                            val request = BodyRegisterRequest(
+                                weight = userWeight!!.toDouble(),
+                                bodyFat = bodyFat!!.toDouble(),
+                                muscleMass = muscleMass!!.toDouble(),
+                                height = userHeight!!.toDouble(),
+                                measurementDate = selectedDate.toString()
+                            )
+                            weightViewModel.registerBodyData(request)
+                        }
+
                         showFatSheet = false
                     },
                     onDismiss = { showFatSheet = false }
@@ -204,10 +217,65 @@ fun HomeDetailScreen(
                     unit = "kg",
                     initialValue = muscleMass?.toString() ?: "",
                     onConfirm = { value ->
-                        muscleMass = value // 업데이트 처리
+                        if (bodyLatestInfo?.bodyId != null) {
+                            val request = BodyUpdateRequest(
+                                muscleMass = value?.toDouble(),
+                                measurementDate = selectedDate.toString()
+                            )
+                            weightViewModel.updateBodyInfo(bodyLatestInfo!!.bodyId!!, request)
+                        } else {
+                            val request = BodyRegisterRequest(
+                                weight = userWeight!!.toDouble(),
+                                bodyFat = bodyFat!!.toDouble(),
+                                muscleMass = muscleMass!!.toDouble(),
+                                height = userHeight!!.toDouble(),
+                                measurementDate = selectedDate.toString()
+                            )
+                            weightViewModel.registerBodyData(request)
+                        }
+
                         showMuscleSheet = false
                     },
                     onDismiss = { showMuscleSheet = false }
+                )
+            }
+        }
+
+        if (showHWSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showHWSheet = false },
+                containerColor = Color.White
+            ) {
+                BodyInfoEditSheet2Input(
+                    heightInitValue = userHeight?.toString() ?: "",
+                    weightInitValue = userWeight?.toString() ?: "",
+                    onConfirm = { heightStr, weightStr ->
+                        val height = heightStr.toDoubleOrNull()
+                        val weight = weightStr.toDoubleOrNull()
+
+                        if (height != null && weight != null) {
+                            val request = BodyUpdateRequest(
+                                height = height,
+                                weight = weight,
+                                measurementDate = selectedDate.toString()
+                            )
+                            if (bodyLatestInfo?.bodyId != null) {
+                                weightViewModel.updateBodyInfo(bodyLatestInfo!!.bodyId!!, request)
+                            } else {
+                                val newRequest = BodyRegisterRequest(
+                                    weight = weight,
+                                    height = height,
+                                    bodyFat = bodyFat!!,
+                                    muscleMass = muscleMass!!,
+                                    measurementDate = selectedDate.toString()
+                                )
+                                weightViewModel.registerBodyData(newRequest)
+                            }
+                        }
+
+                        showHWSheet = false
+                    },
+                    onDismiss = { showHWSheet = false }
                 )
             }
         }

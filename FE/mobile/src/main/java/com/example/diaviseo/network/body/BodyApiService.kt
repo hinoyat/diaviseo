@@ -3,12 +3,10 @@ package com.example.diaviseo.network.body
 import com.example.diaviseo.network.body.dto.req.BodyRegisterRequest
 import com.example.diaviseo.network.body.dto.req.BodyUpdateRequest
 import com.example.diaviseo.network.body.dto.res.BodyInfoResponse
-import com.example.diaviseo.network.body.dto.res.BodyRegisterResponse
 import com.example.diaviseo.network.body.dto.res.MonthlyAverageBodyInfoResponse
 import com.example.diaviseo.network.body.dto.res.OcrBodyResultResponse
 import com.example.diaviseo.network.body.dto.res.WeeklyAverageBodyInfoResponse
 import com.example.diaviseo.network.common.dto.ApiResponse
-import com.example.diaviseo.network.meal.dto.res.DailyNutritionResponse
 import okhttp3.MultipartBody
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -23,7 +21,7 @@ interface BodyApiService {
     @POST("bodies")
     suspend fun registerBodyData(
         @Body request: BodyRegisterRequest
-    ): ApiResponse<BodyRegisterResponse>
+    ): ApiResponse<BodyInfoResponse>
 
     @Multipart
     @POST("bodies/ocr")

@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.diaviseo.network.RetrofitInstance
+import com.example.diaviseo.network.body.dto.req.BodyRegisterRequest
+import com.example.diaviseo.network.body.dto.req.BodyUpdateRequest
 import com.example.diaviseo.network.body.dto.res.BodyInfoResponse
 import com.example.diaviseo.network.body.dto.res.MonthlyAverageBodyInfoResponse
 import com.example.diaviseo.network.body.dto.res.OcrBodyResultResponse
@@ -140,6 +142,45 @@ class WeightViewModel : ViewModel() {
                 }
             } catch (e: Exception) {
                 Log.e("WeightViewModel", "일일 신체 칼로리 예외 발생: ${e.message}")
+            }
+        }
+    }
+
+    fun updateBodyInfo(
+        bodyId: Int,
+        request: BodyUpdateRequest
+        ) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = RetrofitInstance.bodyApiService.updateBodyInfo(request = request, bodyId = bodyId)
+                if (response.status == "OK") {
+                    _bodyLatestInfo.value = response.data
+
+                    _isLoading.value = false
+                } else {
+                    Log.e("WeightViewModel", "신체 정보 업데이트 실패: ${response.message}")
+                }
+            } catch (e: Exception) {
+                Log.e("WeightViewModel", "신체 정보 업데이트 예외 발생: ${e.message}")
+            }
+        }
+    }
+
+    fun registerBodyData(request: BodyRegisterRequest) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = RetrofitInstance.bodyApiService.registerBodyData(request = request)
+                if (response.status == "OK") {
+                    _bodyLatestInfo.value = response.data
+
+                    _isLoading.value = false
+                } else {
+                    Log.e("WeightViewModel", "신체 정보 첫 등록 실패: ${response.message}")
+                }
+            } catch (e: Exception) {
+                Log.e("WeightViewModel", "신체 정보 첫 등록 발생: ${e.message}")
             }
         }
     }
