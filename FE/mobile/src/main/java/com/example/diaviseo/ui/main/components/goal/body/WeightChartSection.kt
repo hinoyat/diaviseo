@@ -59,7 +59,11 @@ data class WeightMultiLineEntry(
 )
 
 @Composable
-fun WeightChartSection() {
+fun WeightChartSection(
+    dayList: List<OcrBodyResultResponse>,
+    weekList : List<WeeklyAverageBodyInfoResponse>,
+    monthList: List<MonthlyAverageBodyInfoResponse>
+) {
     var selectedPeriod by remember { mutableStateOf(ChartPeriod.Day) }
 
     // 모달 표시 상태 및 데이터
@@ -71,12 +75,15 @@ fun WeightChartSection() {
 
     val selectedDate by goalViewModel.selectedDate.collectAsState()
 
-    val dayList by weightViewModel.dayList.collectAsState()
-    val weekList by weightViewModel.weekList.collectAsState()
-    val monthList by weightViewModel.monthList.collectAsState()
     LaunchedEffect(selectedDate) {
-        weightViewModel.fetchAllLists(selectedDate.toString())
+        selectedPeriod = ChartPeriod.Day
     }
+//    val dayList by weightViewModel.dayList.collectAsState()
+//    val weekList by weightViewModel.weekList.collectAsState()
+//    val monthList by weightViewModel.monthList.collectAsState()
+//    LaunchedEffect(selectedDate) {
+//        weightViewModel.fetchAllLists(selectedDate.toString())
+//    }
 
     val chartData: List<WeightMultiLineEntry> = when (selectedPeriod) {
         ChartPeriod.Day -> convertDayDataToChart(dayList)

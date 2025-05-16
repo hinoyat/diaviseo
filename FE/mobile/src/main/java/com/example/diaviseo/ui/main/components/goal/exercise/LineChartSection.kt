@@ -36,6 +36,13 @@ fun LineChartSection(
 ) {
     var selectedPeriod by remember { mutableStateOf(ChartPeriod.Day) }
 
+    val goalViewModel : GoalViewModel = viewModel()
+    val selectedDate by goalViewModel.selectedDate.collectAsState()
+
+    LaunchedEffect(selectedDate) {
+        selectedPeriod = ChartPeriod.Day
+    }
+
     // 데이터 변환
     val lineChartEntries = when (selectedPeriod) {
         ChartPeriod.Day -> dailyData

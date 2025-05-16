@@ -37,6 +37,10 @@ fun MealChartSection() {
         mealViewModel.fetchMealStatistic(selectedPeriod.name.toUpperCase(), selectedDate.toString())
     }
 
+    LaunchedEffect(selectedDate) {
+        selectedPeriod = ChartPeriod.Day
+    }
+
     val mealStatistic by mealViewModel.mealStatistic.collectAsState()
 
     val chartData = mealStatistic?.toChartEntries(selectedPeriod).orEmpty()

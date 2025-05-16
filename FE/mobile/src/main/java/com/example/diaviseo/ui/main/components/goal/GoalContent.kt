@@ -51,7 +51,6 @@ fun GoalContent(
     val fatRatio by mealViewModel.fatRatio.collectAsState()
     val isLoading by mealViewModel.isLoading.collectAsState()
 
-
     // 평가<->디테일 운동 관리
     val exerciseViewModel: ExerciseViewModel = viewModel()
     val dailyData by exerciseViewModel.dailyStats.collectAsState()
@@ -60,13 +59,15 @@ fun GoalContent(
     val stepData by exerciseViewModel.stepData.collectAsState()
     val exIsLoading by exerciseViewModel.isLoading.collectAsState()
 
-
     // 평가 체성분
-    val weigthViewModel : WeightViewModel = viewModel()
-    val bodyInfo by weigthViewModel.bodyInfo.collectAsState()
+    val weightViewModel : WeightViewModel = viewModel()
+    val bodyInfo by weightViewModel.bodyInfo.collectAsState()
+    val dayList by weightViewModel.dayList.collectAsState()
+    val weekList by weightViewModel.weekList.collectAsState()
+    val monthList by weightViewModel.monthList.collectAsState()
 
     LaunchedEffect(selectedDate) {
-        weigthViewModel.loadBodyData(selectedDate.toString())
+        weightViewModel.loadBodyData(selectedDate.toString())
     }
 
     val isToday = remember(selectedDate) {
@@ -88,7 +89,7 @@ fun GoalContent(
         // 순서 중요 (아래는 동기)
         mealViewModel.fetchDailyNutrition(selectedDate.toString())
         exerciseViewModel.fetchDailyExercise(selectedDate.toString())
-
+        weightViewModel.fetchAllLists(selectedDate.toString())
     }
 
 //    LoadingOverlay(isLoading || exIsLoading)
@@ -209,7 +210,11 @@ fun GoalContent(
                 )
                 Spacer(modifier = Modifier.height(24.dp))
 
-                WeightChartSection()
+                WeightChartSection(
+                    dayList = dayList,
+                    weekList = weekList,
+                    monthList = monthList
+                )
             }
         }
 
