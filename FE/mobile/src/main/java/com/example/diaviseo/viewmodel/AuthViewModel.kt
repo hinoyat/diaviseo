@@ -295,6 +295,16 @@ class AuthViewModel (application: Application) : AndroidViewModel(application) {
                     TokenDataStore.saveAccessToken(context, responseGoogle.data?.accessToken ?: "")
                     TokenDataStore.saveRefreshToken(context, responseGoogle.data?.refreshToken ?: "")
                     _idToken.value = ""   // 성공하면 구글 idtoken 삭제
+
+                    // 로그인 후 FCM 토큰 서버 전송
+                    val fcmToken = com.example.diaviseo.datastore.FcmTokenManager.getToken(context)
+                    if (!fcmToken.isNullOrBlank()) {
+                        com.example.diaviseo.utils.FcmTokenSender.sendTokenToServer(fcmToken)
+                        Log.d("FCM", "✅ 로그인 후 FCM 토큰 서버 전송 시도")
+                    } else {
+                        Log.d("FCM", "⚠️ FCM 토큰이 비어 있어 서버 전송 생략")
+                    }
+
                 }
 
             } catch (e: HttpException) {
