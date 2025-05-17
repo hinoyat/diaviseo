@@ -1,5 +1,6 @@
 package com.example.diaviseo.ui.splash
 
+import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.EaseOutCubic
 import androidx.compose.animation.core.animateFloatAsState
@@ -27,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,8 +38,11 @@ import com.example.diaviseo.R
 import com.example.diaviseo.ui.theme.DiaViseoColors
 import com.example.diaviseo.ui.theme.bold14
 import com.example.diaviseo.ui.theme.semibold10
+import com.example.diaviseo.viewmodel.HomeViewModel
+import com.example.diaviseo.viewmodel.ProfileViewModel
 import com.example.diaviseo.viewmodel.SplashViewModel
 import kotlinx.coroutines.delay
+import java.time.LocalDate
 
 @Composable
 fun SplashScreen(
@@ -45,6 +50,15 @@ fun SplashScreen(
     splashViewModel: SplashViewModel = viewModel()
 ) {
     val isLoggedIn by splashViewModel.isLoggedIn.collectAsState()
+
+    // ✅ Activity-level ViewModel 공유
+    val context = LocalContext.current
+    val profileViewModel: ProfileViewModel = viewModel(context as ComponentActivity)
+    val homeViewModel: HomeViewModel = viewModel(context as ComponentActivity)
+
+    val today = remember { LocalDate.now().toString() }
+
+
 
     // 애니메이션 상태
     var logoAndTextVisible by remember { mutableStateOf(false) } // 로고와 텍스트 함께 제어
@@ -72,7 +86,11 @@ fun SplashScreen(
 
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn != null) {
-            delay(3500)
+            profileViewModel.fetchMyProfile()
+            homeViewModel.fetchDailyNutrition(today)
+            homeViewModel.fetchDailyExercise(today)
+
+            delay(3000)
 
             if (isLoggedIn == true) {
                 navController.navigate("main") {
