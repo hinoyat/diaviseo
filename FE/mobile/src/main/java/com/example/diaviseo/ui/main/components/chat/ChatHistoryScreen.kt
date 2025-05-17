@@ -1,4 +1,3 @@
-// ChatHistoryScreen.kt
 package com.example.diaviseo.ui.main.components.chat
 
 import androidx.compose.foundation.background
@@ -19,8 +18,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.diaviseo.ui.theme.DiaViseoColors
+import com.example.diaviseo.viewmodel.chat.ChatBotViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -33,17 +34,17 @@ data class ChatHistory(
 
 @Composable
 fun ChatHistoryScreen(navController: NavController) {
-    val mockHistories = remember {
-        listOf(
-            ChatHistory("1", ChatTopic.DIET, "오늘 뭐 먹지?", LocalDateTime.now().minusHours(1)),
-            ChatHistory("2", ChatTopic.EXERCISE, "하체 루틴 뭐할까", LocalDateTime.now().minusDays(3))
-        )
-    }
+    val viewModel: ChatBotViewModel = viewModel()
+    val histories by viewModel.histories.collectAsState()
     var selectedFilter by remember { mutableStateOf<ChatTopic?>(null) }
 
+    LaunchedEffect(Unit) {
+        viewModel.fetchHistories()
+    }
+
     val filteredHistories = selectedFilter?.let { topic ->
-        mockHistories.filter { it.topic == topic }
-    } ?: mockHistories
+        histories.filter { it.topic == topic }
+    } ?: histories
 
     ChatHistoryContent(
         histories = filteredHistories,
