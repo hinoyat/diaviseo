@@ -77,24 +77,16 @@ public class MealImageService {
             objectName = "meal/" + objectName;
         }
 
-        try {
-            String url = minioClient.getPresignedObjectUrl(
-                    GetPresignedObjectUrlArgs.builder()
-                            .bucket(bucketName)
-                            .object(objectName)
-                            .method(Method.GET)
-                            .build());
+        // 외부 엔드포인트가 설정된 경우 해당 값 사용, 아니면 기본 엔드포인트 사용
+        String baseUrl = externalEndpoint != null && !externalEndpoint.isEmpty() ? externalEndpoint : endpoint;
 
-            // 외부 엔드포인트가 설정된 경우, URL을 변환
-            if (externalEndpoint != null && !externalEndpoint.isEmpty() && url.contains(endpoint)) {
-                // 내부 엔드포인트를 외부 엔드포인트로 변경
-                url = url.replace(endpoint, externalEndpoint);
-            }
-
-            return url;
-        } catch (Exception e) {
-            throw new RuntimeException("이미지 URL 생성 중 오류가 발생했습니다: " + e.getMessage(), e);
+        // 슬래시 처리
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
+
+        // 직접 URL 생성
+        return String.format("%s/%s/%s", baseUrl, bucketName, objectName);
     }
 
 
