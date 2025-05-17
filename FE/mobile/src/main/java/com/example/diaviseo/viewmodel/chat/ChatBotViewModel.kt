@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class ChatBotViewModel : ViewModel() {
 
@@ -29,14 +30,12 @@ class ChatBotViewModel : ViewModel() {
     private val _isSessionEnded = MutableStateFlow(false)
     val isSessionEnded: StateFlow<Boolean> = _isSessionEnded
 
-    // 캐릭터 이미지 ID는 ViewModel에서 결정 가능 (chat topic에 따라 다르게)
     var currentCharacterImageRes: Int? = null
 
     fun startSession(type: String, characterImageRes: Int? = null) {
         viewModelScope.launch {
             try {
                 val response = api.startSession(StartSessionRequest(type))
-
                 _sessionId.value = response.session_id
                 _messages.value = listOf(
                     ChatMessage(
@@ -65,7 +64,7 @@ class ChatBotViewModel : ViewModel() {
             try {
                 val response = api.sendChatMessage(sid, ChatRequest(text))
                 _messages.value += ChatMessage(
-                    text = response.response,
+                    text = response.content,
                     isUser = false,
                     timestamp = LocalDateTime.parse(response.timestamp),
                     characterImageRes = currentCharacterImageRes
@@ -101,9 +100,9 @@ class ChatBotViewModel : ViewModel() {
                 _messages.value = response.map {
                     ChatMessage(
                         text = it.content,
-                        isUser = it.type == "human",
-                        timestamp = LocalDateTime.now(), // timestamp가 없다면 임시로 현재 시간
-                        characterImageRes = if (it.type == "ai") characterImageRes else null
+                        isUser = it.role == "user",
+                        timestamp = LocalDateTime.parse(it.timestamp),
+                        characterImageRes = if (it.role == "assistant") characterImageRes else null
                     )
                 }
             } catch (e: Exception) {
