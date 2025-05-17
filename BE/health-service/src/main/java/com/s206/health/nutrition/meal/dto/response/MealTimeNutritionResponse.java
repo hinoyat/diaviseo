@@ -16,6 +16,7 @@ public class MealTimeNutritionResponse {
     private LocalTime eatingTime;
     private List<MealFoodResponse> foods;
     private MealNutritionDto nutrition;
+    private String mealTimeImageUrl;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
