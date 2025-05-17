@@ -42,7 +42,7 @@ fun LabeledDateInputField(
             .padding(horizontal = 25.dp)
     ) {
         Text(
-            text = "측정일자",
+            text = "측정일자 *",
             style = bold16,
             color = Color.Black,
             modifier = Modifier.weight(1f)

@@ -61,7 +61,7 @@ fun BodyDataRegisterScreen(
 
     val bodyInputs = listOf(
         Triple("키", height, viewModel::onHeightChange),
-        Triple("체중", weight, viewModel::onWeightChange),
+        Triple("체중 *", weight, viewModel::onWeightChange),
         Triple("체지방량", fat, viewModel::onBodyFatChange),
         Triple("골격근량", muscle, viewModel::onMuscleMassChange)
     )
