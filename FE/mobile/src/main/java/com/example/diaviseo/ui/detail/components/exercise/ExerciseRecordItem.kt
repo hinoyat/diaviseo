@@ -18,11 +18,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
+import com.example.diaviseo.model.exercise.exerciseIconMap
 import com.example.diaviseo.ui.theme.DiaViseoColors
 import com.example.diaviseo.ui.theme.bold20
 import com.example.diaviseo.ui.theme.medium14
@@ -36,6 +39,7 @@ fun ExerciseRecordItem(
     title: String,
     kcal: Int,
     time: Int,
+    img: Int,
     exerciseDate: String,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
@@ -63,12 +67,18 @@ fun ExerciseRecordItem(
                     .background(Color(0xFFD3DBFF), shape = CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Image(
-                    painter = rememberAsyncImagePainter("https://img.freepik.com/free-vector/human-sprint-icon-logo-design_474888-2493.jpg"),
-                    contentDescription = "운동 아이콘",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(24.dp)
-                )
+                val iconRes = exerciseIconMap[img]
+                if (iconRes != null) {
+                    Image(
+                        painter = painterResource(id = iconRes),
+                        contentDescription = "운동 아이콘",
+                        modifier = Modifier
+                            .size(28.dp)
+                            .padding(2.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Fit
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.width(12.dp))

@@ -2,6 +2,7 @@ package com.example.diaviseo.viewmodel
 
 import android.app.Activity
 import android.app.Application
+import android.hardware.camera2.CaptureFailure
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
@@ -25,6 +26,7 @@ import com.example.diaviseo.network.user.dto.req.PhoneAuthTryRequest
 import com.example.diaviseo.network.user.dto.req.SignUpWithDiaRequest
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.firstOrNull
 import org.json.JSONObject
 import retrofit2.HttpException
 import java.io.IOException
@@ -68,15 +70,6 @@ class AuthViewModel (application: Application) : AndroidViewModel(application) {
 
     private val _goal = MutableStateFlow("") // "감량", "유지", "증량"
     val goal: StateFlow<String> = _goal
-
-    private val _consentPersonal = MutableStateFlow(true)
-    val consentPersonal: StateFlow<Boolean> = _consentPersonal
-
-    private val _locationPersonal = MutableStateFlow(true)
-    val locationPersonal: StateFlow<Boolean> = _locationPersonal
-
-    private val _isAuthenticated = MutableStateFlow(true)
-    val isAuthenticated: StateFlow<Boolean> = _isAuthenticated
 
     private val _toastMessage = MutableSharedFlow<String>()
     val toastMessage: SharedFlow<String> = _toastMessage
@@ -128,14 +121,6 @@ class AuthViewModel (application: Application) : AndroidViewModel(application) {
 
     fun setWeight(weight: String) {
         _weight.value = weight
-    }
-
-    fun setConsentPersonal(consent: Boolean) {
-        _consentPersonal.value = consent
-    }
-
-    fun setLocationPersonal(consent: Boolean) {
-        _locationPersonal.value = consent
     }
 
     fun setToastMessage(msg : String) {
@@ -327,4 +312,74 @@ class AuthViewModel (application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+    fun logout(onSuccess: () -> Unit = {}, onFailure: (String) -> Unit = {}) {
+        viewModelScope.launch {
+            isLoading = true
+            val context = getApplication<Application>().applicationContext
+
+            try {
+                val accessToken = TokenDataStore.getAccessToken(context).firstOrNull()
+                val refreshToken = TokenDataStore.getRefreshToken(context).firstOrNull()
+
+                if (accessToken.isNullOrBlank() || refreshToken.isNullOrBlank()) {
+                    val errorMsg = "토큰이 유효하지 않습니다."
+                    _toastMessage.emit(errorMsg)
+                    onFailure(errorMsg)
+                    isLoading = false
+                    return@launch
+                }
+
+                val response = RetrofitInstance.authApiService.logoutWithTokens(
+                    accessToken = "Bearer $accessToken",
+                    refreshToken = "Bearer $refreshToken"
+                )
+
+                if (response.status == "OK") {
+                    TokenDataStore.clearAccessToken(context)
+                    _toastMessage.emit("정상적으로 로그아웃되었습니다.")
+                    onSuccess()
+                } else {
+                    val errorMsg = response.message.ifBlank { "로그아웃 실패" }
+                    _toastMessage.emit(errorMsg)
+                    onFailure(errorMsg)
+                }
+            } catch (e: Exception) {
+                val errorMsg = "네트워크 오류 또는 예외 발생: ${e.localizedMessage}"
+                Log.e("LOGOUT", errorMsg)
+                _toastMessage.emit(errorMsg)
+                onFailure(errorMsg)
+            }
+
+            isLoading = false
+        }
+    }
+    fun deleteUser(onSuccess: () -> Unit = {}, onFailure: (String) -> Unit = {}) {
+        viewModelScope.launch {
+            isLoading = true
+            val context = getApplication<Application>().applicationContext
+
+            try {
+                val response = RetrofitInstance.userApiService.deleteUser()
+
+                if (response.status == "OK") {
+                    TokenDataStore.clearAccessToken(context)
+                    _toastMessage.emit("회원 탈퇴가 완료되었습니다.")
+                    onSuccess()
+                } else {
+                    val errorMsg = response.message.ifBlank { "회원 탈퇴 실패" }
+                    _toastMessage.emit(errorMsg)
+                    onFailure(errorMsg)
+                }
+            } catch (e: Exception) {
+                val errorMsg = "네트워크 오류 또는 예외 발생: ${e.localizedMessage}"
+                Log.e("DELETE_USER", errorMsg)
+                _toastMessage.emit(errorMsg)
+                onFailure(errorMsg)
+            }
+
+            isLoading = false
+        }
+    }
+
 }

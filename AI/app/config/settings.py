@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     mongo_uri: str
     mongo_db_name: str
     mongo_db_chat_collection_name: str
+    mongo_db_chat_history_collection_name: str
     # Eureka
     eureka_server: str
     eureka_app_name: str

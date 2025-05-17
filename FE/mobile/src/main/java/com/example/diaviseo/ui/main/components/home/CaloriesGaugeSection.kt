@@ -184,6 +184,7 @@ fun GradientGaugeBar(
         ) {
             Text(
                 text = valueText,
+                maxLines = 1,
                 style = medium14,
                 color = textColor,
                 modifier = Modifier.padding(end = 12.dp, start = 12.dp)

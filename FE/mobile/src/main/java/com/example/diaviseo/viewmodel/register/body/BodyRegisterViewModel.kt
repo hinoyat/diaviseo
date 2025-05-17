@@ -5,9 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.diaviseo.network.RetrofitInstance
 import com.example.diaviseo.network.body.dto.req.BodyRegisterRequest
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.MultipartBody
 
 class BodyRegisterViewModel : ViewModel() {
@@ -113,25 +115,29 @@ class BodyRegisterViewModel : ViewModel() {
         onSuccess: () -> Unit,
         onError: (String) -> Unit,
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val request = BodyRegisterRequest(
                     weight = weight.value.toDouble(),
-                    bodyFat = bodyFat.value.toDouble(),
-                    muscleMass = muscleMass.value.toDouble(),
+                    bodyFat = bodyFat.value.toDoubleOrNull() ?: 0.0,
+                    muscleMass = muscleMass.value.toDoubleOrNull() ?: 0.0,
                     height = height.value.toDouble(),
                     measurementDate = measurementDate.value
                 )
                 val response = RetrofitInstance.bodyApiService.registerBodyData(request)
 
                 if (response.status == "OK" || response.status == "CREATED") {
-                    onSuccess()
+                    withContext(Dispatchers.Main) {
+                        onSuccess()
+                    }
                 } else {
                     onError("등록 실패 : ${response.message}")
                 }
             } catch (e: Exception) {
                 Log.e("BodyRegister", "등록 중 오류: ${e.message}", e)
-                onError("에러 발생: ${e.localizedMessage}")
+                withContext(Dispatchers.Main) {
+                    onError("에러 발생: ${e.localizedMessage}")
+                }
             }
         }
     }
@@ -170,5 +176,24 @@ class BodyRegisterViewModel : ViewModel() {
             }
         }
     }
-
+    fun fetchLatestBodyData() {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.bodyApiService.fetchLatestBodyData()
+                if (response.status == "OK") {
+                    val latest = response.data?.firstOrNull()
+                    latest?.let { data ->
+                        _height.value = data.height.toString()
+                        _bodyFat.value = data.bodyFat.toString()
+                        _muscleMass.value = data.muscleMass.toString()
+                    }
+                }
+                else {
+                    Log.e("BodyRegister", "체성분 조회 실패: ${response.message}")
+                }
+            } catch (e: Exception) {
+                Log.e("BodyRegister", "체성분 조회 중 오류: ${e.message}", e)
+            }
+        }
+    }
 }

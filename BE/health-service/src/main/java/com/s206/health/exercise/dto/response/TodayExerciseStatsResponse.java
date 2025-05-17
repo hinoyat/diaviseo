@@ -27,6 +27,7 @@ public class TodayExerciseStatsResponse {
         private Integer exerciseId;
         private String exerciseName;
         private String categoryName;
+        private Integer exerciseNumber;
         private LocalDateTime exerciseDate;
         private Integer exerciseTime;
         private Integer exerciseCalorie;

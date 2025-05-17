@@ -175,6 +175,13 @@ fun FinalGuideScreen(
 
                 Log.d("ExerciseProcessed", "✅ 운동 ${processedExercises.size}건")
 
+                sessionRecords.forEach { record ->
+                    val uid = record.metadata.id
+                    val startTime = record.startTime
+                    val type = record.exerciseType
+
+                    Log.d("HealthConnectUID", "🧾 UID: $uid, 시작 시간: $startTime, 운동 종류: $type")
+                }
                 processedExercises.forEach {
                     Log.d("ExerciseProcessed", it.toString())
                 }

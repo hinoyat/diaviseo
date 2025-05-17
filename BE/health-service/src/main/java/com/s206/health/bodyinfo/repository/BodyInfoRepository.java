@@ -47,4 +47,14 @@ public interface BodyInfoRepository extends JpaRepository<BodyInfo, Integer> {
 			@Param("date") LocalDate date);
 
 	List<BodyInfo> findByUserIdAndIsDeletedFalse(Integer userId);
+
+	/**
+	 * 특정 날짜 이전(해당 날짜 포함)의 가장 최근 체성분 정보를 조회합니다.
+	 */
+	@Query("SELECT b FROM BodyInfo b WHERE b.userId = :userId " +
+			"AND b.isDeleted = false " +
+			"AND b.measurementDate <= :date " +
+			"ORDER BY b.measurementDate DESC, b.createdAt DESC")
+	List<BodyInfo> findBodyInfoBeforeOrEqualDate(@Param("userId") Integer userId,
+												 @Param("date") LocalDate date);
 }

@@ -5,5 +5,6 @@ data class HealthSyncExerciseRequest(
     val exerciseNumber: Int,
     val exerciseDate: String,
     val exerciseTime: Int,
-    val exerciseCalorie: Int
+    val exerciseCalorie: Int,
+    val healthConnectUuid: String?
 )

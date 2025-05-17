@@ -163,6 +163,7 @@ fun ExerciseDetailScreen(
                     title = item.exerciseName,
                     kcal = item.exerciseCalorie,
                     time = item.exerciseTime,
+                    img = item.exerciseNumber,
                     exerciseDate = item.exerciseDate,
                     onEditClick = {
                         // abc라고 해둔 거기에 selectedExercise 넣고 time도 넣고 시작 시간도 넣고 등록 날짜도 넣고

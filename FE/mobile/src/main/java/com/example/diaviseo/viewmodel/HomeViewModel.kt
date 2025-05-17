@@ -12,12 +12,6 @@ class HomeViewModel(): ViewModel() {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    private val _todayEat = MutableStateFlow(0)
-    val todayEat: StateFlow<Int> = _todayEat
-
-    private val _todayFit = MutableStateFlow(0)
-    val todayFit: StateFlow<Int> = _todayFit
-
     private val _totalCalorie = MutableStateFlow(10)
     val totalCalorie: StateFlow<Int> = _totalCalorie
 

@@ -43,6 +43,7 @@ fun GoalExerciseSection(
                     name = it.exerciseName,
                     kcal = it.exerciseCalorie,
                     min = it.exerciseTime,
+                    imgUrl = it.exerciseNumber
                 )
             }
         } else {
@@ -138,5 +139,6 @@ fun GoalExerciseSection(
 data class ExerciseItem(
     val name: String,
     val kcal: Int,
-    val min: Int
+    val min: Int,
+    val imgUrl: Int
 )

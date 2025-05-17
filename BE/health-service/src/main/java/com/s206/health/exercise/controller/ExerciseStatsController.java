@@ -24,7 +24,7 @@ public class ExerciseStatsController {
             @RequestHeader("X-USER-ID") Integer userId,
             @RequestParam(required = false) String date) {
         TodayExerciseStatsResponse response = exerciseStatsService.getTodayStats(userId, date);
-        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK,"오늘의 운동 조회 성공",response));
+        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK,"오늘 및 해당일 운동 조회 성공",response));
     }
 
     // 일별 운동 조회 (선택된 날짜 기준 7일)

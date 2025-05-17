@@ -4,6 +4,8 @@ from py_eureka_client.eureka_client import EurekaClient
 
 from app.routes import session, chat
 from app.routes.workout import router as workout_router
+from app.routes.nutrition import router as nutrition_router
+from app.core.models import init_model
 
 from app.config.settings import get_settings
 
@@ -25,6 +27,8 @@ eureka_client = EurekaClient(
 async def lifespan(app: FastAPI):
     # 애플리케이션 시작 시 Eureka에 등록
     eureka_client.start()
+    # 식단 T5 모델 로드
+    init_model()
     yield
     # 애플리케이션 종료 시 Eureka에서 해제
     eureka_client.stop()
@@ -36,6 +40,11 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(workout_router, prefix="/api/chatbot")
 app.include_router(session.router, prefix="/api/chatbot")  # 세션 생성 등
 app.include_router(chat.router, prefix="/api/chatbot")     # 채팅 기능
+
+# 식단
+app.include_router(nutrition_router, prefix="/api/chatbot")
+
+
 # 헬스체크 엔드포인트
 @app.get("/health")
 def health():
@@ -49,3 +58,6 @@ def read_root():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+
+# 식단 챗봇

@@ -1,12 +1,16 @@
 package com.example.diaviseo.ui.main
 
+import androidx.activity.ComponentActivity
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.example.diaviseo.ui.components.BottomNavigationBar
 import com.example.diaviseo.ui.detail.ExerciseDetailScreen
@@ -27,12 +31,16 @@ import com.example.diaviseo.ui.register.exercise.ExerciseRegisterMainScreen
 import com.example.diaviseo.ui.register.diet.DietAiRegisterScreen
 import com.example.diaviseo.viewmodel.ProfileViewModel
 import com.example.diaviseo.ui.register.diet.dietGraph
+import com.example.diaviseo.viewmodel.AuthViewModel
+import com.example.diaviseo.viewmodel.SplashViewModel
 import com.example.diaviseo.viewmodel.condition.AllergyViewModel
 import com.example.diaviseo.viewmodel.condition.DiseaseViewModel
 import java.time.LocalDate
 
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    navControll: NavHostController
+) {
     // 화면 뜨자마자 회원정보 불러오기
     val profileViewModel: ProfileViewModel = viewModel()
 
@@ -42,6 +50,21 @@ fun MainScreen() {
     val navController = rememberNavController()
     val isFabMenuOpen = remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
+    val authViewModel: AuthViewModel = viewModel(
+        viewModelStoreOwner = context as ComponentActivity
+    )
+    val splashViewModel: SplashViewModel = viewModel()
+    val isLoggedIn by splashViewModel.isLoggedIn.collectAsState()
+
+    // [2] 로그아웃 감지 → 로그인 화면으로 이동
+    LaunchedEffect(isLoggedIn) {
+        if (isLoggedIn == false) {
+            navControll.navigate("signupGraph") {
+                popUpTo("main") { inclusive = true }
+            }
+        }
+    }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val hideBottomBarRoutes = listOf(
@@ -175,7 +198,10 @@ fun MainScreen() {
             }
             // 회원 정보 수정
             composable("edit_profile") {
-                UserProfileEditScreen(navController)
+                UserProfileEditScreen(
+                    navController = navController,
+                    rootNavController = navControll
+                )
             }
 
             composable("edit_physical_info") {
