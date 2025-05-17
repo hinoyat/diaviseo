@@ -1,10 +1,12 @@
-from datetime import datetime
+import datetime
+from enum import Enum
 
 from langchain_openai import ChatOpenAI
 from langchain.chains import ConversationChain
 from sqlalchemy.orm import Session
 
-from app.db.mongo import TimestampedMongoHistory, get_chat_collection
+from app.db.mongo import TimestampedMongoHistory, get_chat_collection, \
+    get_chat_history_collection
 from app.services.memory.mongo_memory import get_memory
 from app.config.settings import get_settings
 
@@ -31,37 +33,83 @@ def chat_with_session(session_id: str, message: str, user_db: Session,
         memory = get_memory(session_id)
         session_info = get_chat_collection().find_one(
             {"session_id": session_id})
+        chat_history_collection = get_chat_history_collection()
 
-        # 운동 챗봇 타입인 경우 운동 피드백 제공
+        # 사용자 메시지 저장
+        _save_user_message(chat_history_collection, message, session_id)
+
+        # 챗봇 응답 생성
         if session_info and session_info.get("chatbot_type") == "workout":
-            from app.services.workout.feedback import generate_workout_feedback
-            user_id = session_info.get("user_id")
-            feedback = generate_workout_feedback(user_id, session_id, user_db, health_db)
-            return {
-                "response": f"운동 피드백: {feedback}",
-                "timestamp": datetime.utcnow().isoformat()
-            }
+            ai_message = _handle_workout_chat(session_id, session_info, message,
+                                              user_db, health_db)
+        else:
+            ai_message = _handle_general_chat(memory, message, session_id=session_id)
 
-        # 일반 대화 처리
-        chain = ConversationChain(
-            llm=llm,
-            memory=memory,
-            verbose=False
-        )
-        reply = chain.predict(input=message)
-        return {
-            "response": reply,
-            "timestamp": datetime.utcnow().isoformat()
-        }
+        # AI 응답 저장
+        chat_history_collection.insert_one(ai_message)
+        return ai_message
     finally:
         user_db.close()
         health_db.close()
 
 
+def _save_user_message(chat_history_collection, message: str, session_id: str) -> None:
+    """사용자 메시지를 저장합니다."""
+    user_message = create_message_data(role=MessageRole.USER, content=message, session_id=session_id)
+    chat_history_collection.insert_one(user_message)
+
+
+def _handle_workout_chat(session_id: str, session_info: dict, message: str,
+    user_db: Session, health_db: Session) -> dict:
+    """운동 챗봇 대화를 처리합니다."""
+    from app.services.workout.feedback import generate_workout_feedback
+    user_id = session_info.get("user_id")
+    feedback = generate_workout_feedback(user_id, session_id, message, user_db,
+                                         health_db)
+    return create_message_data(role=MessageRole.ASSISTANT, content=feedback, session_id=session_id)
+
+
+def _handle_general_chat(memory, message: str, session_id:str) -> dict:
+    """일반 챗봇 대화를 처리합니다."""
+    chain = ConversationChain(
+        llm=llm,
+        memory=memory,
+        verbose=False
+    )
+    reply = chain.predict(input=message)
+    return create_message_data(role=MessageRole.ASSISTANT, content=reply, session_id=session_id)
+
+
 def get_chat_history(session_id: str):
     """채팅 히스토리를 가져옵니다."""
-    memory = get_memory(session_id)
+    chat_history_collection = get_chat_history_collection()
+    # session_id로 모든 채팅 메시지를 검색하고 시간순으로 정렬
+    return list(chat_history_collection.find(
+        {"session_id": session_id}
+    ).sort("timestamp", 1))
 
-    # LangChain의 Message 객체 목록을 반환합니다
-    chat_history = memory.load_memory_variables({}).get("history", "")
-    return chat_history
+
+
+class MessageRole(Enum):
+    """
+    채팅 메시지의 역할을 정의하는 열거형 클래스
+    """
+    USER = "user"
+    ASSISTANT = "assistant"
+
+
+def create_message_data(role: MessageRole, content: str, session_id: str) -> dict:
+
+    from bson import ObjectId
+    import datetime
+
+    # ObjectId 생성
+    id_obj = ObjectId()
+
+    return {
+        "role": role.value,
+        "content": content,
+        "timestamp": datetime.datetime.now(),
+        "session_id": session_id,
+        "_id": str(id_obj)  # ObjectId를 문자열로 변환하여 직렬화 가능하게 만듦
+    }
