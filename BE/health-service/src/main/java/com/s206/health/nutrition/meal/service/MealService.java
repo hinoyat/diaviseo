@@ -396,6 +396,7 @@ public class MealService {
                 .eatingTime(mealTime.getEatingTime())
                 .foods(foodResponses)
                 .nutrition(nutrition)
+                .mealTimeImageUrl(mealTime.getMealTimeImageUrl())
                 .createdAt(mealTime.getCreatedAt())
                 .updatedAt(mealTime.getUpdatedAt())
                 .build();
