@@ -51,12 +51,26 @@ public class MealImageService {
                     originalFilename.substring(originalFilename.lastIndexOf(".")) : ".jpg";
             String objectName = "meal/" + UUID.randomUUID() + extension;
 
-            // MinIO에 파일 업로드
+            // 파일 확장자에 따른 MIME 타입 결정
+            String contentType;
+            if (extension.equalsIgnoreCase(".jpg") || extension.equalsIgnoreCase(".jpeg")) {
+                contentType = "image/jpeg";
+            } else if (extension.equalsIgnoreCase(".png")) {
+                contentType = "image/png";
+            } else if (extension.equalsIgnoreCase(".gif")) {
+                contentType = "image/gif";
+            } else if (extension.equalsIgnoreCase(".webp")) {
+                contentType = "image/webp";
+            } else {
+                contentType = file.getContentType();
+            }
+
+            // MinIO에 파일 업로드 (명시적 Content-Type 설정)
             minioClient.putObject(PutObjectArgs.builder()
                     .bucket(bucketName)
                     .object(objectName)
                     .stream(file.getInputStream(), file.getSize(), -1)
-                    .contentType(file.getContentType())
+                    .contentType(contentType != null ? contentType : "image/jpeg") // 기본값 설정
                     .build());
 
             return objectName;
