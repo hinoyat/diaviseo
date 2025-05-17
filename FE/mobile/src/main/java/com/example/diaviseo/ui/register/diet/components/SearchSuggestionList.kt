@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -49,13 +50,12 @@ fun SearchSuggestionList(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 4.dp)
-                    .heightIn(max = 400.dp)
             ) {
-                items(results) { item ->
+                itemsIndexed(results) { index, item ->
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp)
+                            .padding(vertical = 6.dp)
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -100,12 +100,18 @@ fun SearchSuggestionList(
                         }
 
                         Spacer(modifier = Modifier.height(12.dp))
-                        Divider(
-                            modifier = Modifier.fillMaxWidth(),
-                            color = Color(0xFFF0F0F0),
-                            thickness = 1.dp
-                        )
+                        // 마지막 아이템이 아닌 경우만 Divider 표시
+                        if (index != results.lastIndex) {
+                            Divider(
+                                modifier = Modifier.fillMaxWidth(),
+                                color = Color(0xFFF0F0F0),
+                                thickness = 1.dp
+                            )
+                        }
                     }
+                }
+                item {
+                    Spacer(modifier = Modifier.height(180.dp))
                 }
             }
         }

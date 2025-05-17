@@ -5,6 +5,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import com.example.diaviseo.mapper.toFoodItem
 import com.example.diaviseo.network.food.dto.res.FoodItem
@@ -53,8 +54,11 @@ fun RecentFoodList(
                 selectedItems = selectedItems,
                 onToggleSelect = onToggleSelect,
                 onFoodClick = onFoodClick,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
             )
+//            Spacer(modifier = Modifier.height(200.dp))
         }
     }
 }
