@@ -44,7 +44,7 @@ fun SelectedFoodList(
                     .fillMaxWidth()
                     .padding(horizontal = 4.dp)
             ) {
-                selectedItems.forEach { item ->
+                selectedItems.forEachIndexed { index, item ->
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -92,11 +92,14 @@ fun SelectedFoodList(
                         }
 
                         Spacer(modifier = Modifier.height(12.dp))
-                        Divider(
-                            modifier = Modifier.fillMaxWidth(),
-                            color = Color(0xFFF0F0F0),
-                            thickness = 1.dp
-                        )
+                        // 마지막 항목이 아닌 경우에만 Divider 표시
+                        if (index != selectedItems.lastIndex) {
+                            Divider(
+                                modifier = Modifier.fillMaxWidth(),
+                                color = Color(0xFFF0F0F0),
+                                thickness = 1.dp
+                            )
+                        }
                     }
                 }
             }
