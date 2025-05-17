@@ -17,6 +17,15 @@ import com.example.diaviseo.ui.register.components.*
 import com.example.diaviseo.ui.register.diet.components.*
 import com.example.diaviseo.ui.theme.*
 import com.example.diaviseo.ui.components.onboarding.MainButton
+import android.app.Activity
+import android.net.Uri
+import android.widget.Toast
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.rememberAsyncImagePainter
+import com.example.diaviseo.utils.*
 
 @Composable
 fun DietAiRegisterScreen(navController: NavController) {
@@ -36,6 +45,20 @@ fun DietAiRegisterScreen(navController: NavController) {
 
     val scrollState = rememberScrollState()
 
+    val context = LocalContext.current
+    val activity = context as Activity
+    val permission = getGalleryPermission()
+
+    val selectedImageUri = remember { mutableStateOf<Uri?>(null) }
+
+    val galleryLauncher = rememberGalleryPickerLauncher {
+        selectedImageUri.value = it
+    }
+
+    val permissionLauncher = rememberGalleryPermissionLauncher {
+        galleryLauncher.launch("image/*")
+    }
+
     Scaffold(
         topBar = {
             CommonTopBar(
@@ -51,14 +74,35 @@ fun DietAiRegisterScreen(navController: NavController) {
                 .verticalScroll(scrollState)
                 .navigationBarsPadding() // 하단 소프트바 대응
         ) {
-            // 이미지 업로드 힌트 박스
-            PhotoUploadHintBox(
+            // 이미지 업로드
+            selectedImageUri.value?.let { uri ->
+                Image(
+                    painter = rememberAsyncImagePainter(uri),
+                    contentDescription = "선택된 이미지",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(220.dp)
+                        .padding(horizontal = 22.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                )
+            } ?: PhotoUploadHintBox(
                 onClick = {
-                    // TODO: 이미지 업로드 기능 연결
+                    when {
+                        isGalleryPermissionGranted(context) -> {
+                            galleryLauncher.launch("image/*")
+                        }
+                        shouldShowGalleryRationale(activity) -> {
+                            Toast.makeText(context, "사진 등록을 위해 권한이 필요해요.", Toast.LENGTH_SHORT).show()
+                            permissionLauncher.launch(permission)
+                        }
+                        else -> {
+                            Toast.makeText(context, "설정에서 권한을 허용해주세요.", Toast.LENGTH_LONG).show()
+                            openAppSettings(context)
+                        }
+                    }
                 },
                 isAiMode = true,
-                modifier = Modifier
-                    .fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(6.dp))
