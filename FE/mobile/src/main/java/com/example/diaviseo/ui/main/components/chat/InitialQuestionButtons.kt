@@ -28,8 +28,13 @@ fun InitialQuestionButtons(
 ) {
     val buttonLabels = when (topic) {
         ChatTopic.DIET -> listOf(
-            "오늘 점심 평가받기",
-            "방금 먹은 음식 분석해줘",
+            "맘모스빵 영양성분은?",
+            "돌솥비빔밥 나트륨은?",
+            "양념게장 포화지방산은 얼마야?",
+            "20대 남자의 평균 칼로리 섭취량은 얼마인가요?",
+            "10대 여성의 하루 평균 단백질 섭취량을 알려주세요.",
+            "30대 권장 나트륨 섭취량은?",
+            "65세 이상 권장 칼로리는?",
             "직접 입력할게요"
         )
         ChatTopic.EXERCISE -> listOf(
