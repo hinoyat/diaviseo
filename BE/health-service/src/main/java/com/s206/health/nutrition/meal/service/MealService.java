@@ -384,11 +384,26 @@ public class MealService {
     private MealTimeNutritionResponse convertToMealTimeNutritionResponse(MealTime mealTime) {
         // 음식 응답 생성
         List<MealFoodResponse> foodResponses = mealTime.getMealFoods().stream()
-                .map(MealFoodResponse::toDto)
+                .map(mf -> {
+                    MealFoodResponse response = MealFoodResponse.toDto(mf);
+
+                    // 음식 이미지 URL 처리
+                    if (response.getFoodImageUrl() != null && !response.getFoodImageUrl().isEmpty()) {
+                        response.setFoodImageUrl(mealImageService.getMealImageUrl(response.getFoodImageUrl()));
+                    }
+
+                    return response;
+                })
                 .collect(Collectors.toList());
 
         // 시간대별 영양소 계산
         MealNutritionDto nutrition = calculateMealTimeNutrition(mealTime);
+
+        // MealTime 이미지 URL 처리
+        String mealTimeImageUrl = mealTime.getMealTimeImageUrl();
+        if (mealTimeImageUrl != null && !mealTimeImageUrl.isEmpty()) {
+            mealTimeImageUrl = mealImageService.getMealImageUrl(mealTimeImageUrl);
+        }
 
         return MealTimeNutritionResponse.builder()
                 .mealTimeId(mealTime.getMealTimeId())
@@ -396,7 +411,7 @@ public class MealService {
                 .eatingTime(mealTime.getEatingTime())
                 .foods(foodResponses)
                 .nutrition(nutrition)
-                .mealTimeImageUrl(mealTime.getMealTimeImageUrl())
+                .mealTimeImageUrl(mealTimeImageUrl)
                 .createdAt(mealTime.getCreatedAt())
                 .updatedAt(mealTime.getUpdatedAt())
                 .build();
