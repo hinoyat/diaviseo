@@ -7,6 +7,10 @@ from sqlalchemy.orm import Session
 from app.db.mongo import TimestampedMongoHistory, get_chat_collection
 from app.services.memory.mongo_memory import get_memory
 from app.config.settings import get_settings
+from app.services.nutrition.nutrition_chat_service import generate_nutrition_response
+from app.config.log import logging_check
+import logging
+logging_check()
 
 settings = get_settings()
 
@@ -34,6 +38,7 @@ def chat_with_session(session_id: str, message: str, user_db: Session,
 
         # 운동 챗봇 타입인 경우 운동 피드백 제공
         if session_info and session_info.get("chatbot_type") == "workout":
+            logging.info("운동챗봇으로 진입함")
             from app.services.workout.feedback import generate_workout_feedback
             user_id = session_info.get("user_id")
             feedback = generate_workout_feedback(user_id, session_id, user_db, health_db)
@@ -41,6 +46,17 @@ def chat_with_session(session_id: str, message: str, user_db: Session,
                 "response": f"운동 피드백: {feedback}",
                 "timestamp": datetime.utcnow().isoformat()
             }
+
+        # 식단 챗봇 타입인 경우
+        if session_info and session_info.get("chatbot_type") == "nutrition":
+            logging.info("식단챗봇으로 진입함")
+            user_id = session_info.get("user_id")
+            response = generate_nutrition_response(message, session_id, user_db, user_id)
+            return {
+                "response": response,
+                "timestamp": datetime.utcnow().isoformat()
+            }
+
 
         # 일반 대화 처리
         chain = ConversationChain(
