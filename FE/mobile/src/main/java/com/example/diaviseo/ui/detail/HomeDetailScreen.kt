@@ -35,6 +35,8 @@ import com.example.diaviseo.viewmodel.HomeViewModel
 import com.example.diaviseo.viewmodel.ProfileViewModel
 import com.example.diaviseo.viewmodel.goal.GoalViewModel
 import com.example.diaviseo.viewmodel.goal.WeightViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -50,31 +52,34 @@ fun HomeDetailScreen(
 
     val goalViewModel: GoalViewModel = viewModel()
     val weightViewModel: WeightViewModel = viewModel()
-    val homeViewModel : HomeViewModel = viewModel(previousEntry)
-
-    // 이거 홈이랑 연동돼서 과거를 봐도 "현재" 꺼 볼러온다
-    // 날짜관리로 또 먹은거, 운동한거 불러와야할듯 웨잍 뷰모델에서
-    val totalHomeCalorie by homeViewModel.totalCalorie.collectAsState()
-    val totalHomeExerciseCalorie by homeViewModel.totalExerciseCalorie.collectAsState()
+    val homeViewModel : HomeViewModel = viewModel()
 
     val showDatePicker by goalViewModel.showDatePicker.collectAsState()
     val selectedDate by goalViewModel.selectedDate.collectAsState()
-    LoadingOverlay(isVisible = goalViewModel.isLoading.collectAsState().value)
 
     val physicalInfo by weightViewModel.physicalInfo.collectAsState()
     val bodyLatestInfo by weightViewModel.bodyLatestInfo.collectAsState()
 
     LaunchedEffect(selectedDate, bodyLatestInfo) {
-        weightViewModel.fetchPhysicalInfo(selectedDate.toString())  // 선택날 일일 권장 칼로리
-        weightViewModel.loadLatestBodyData(selectedDate.toString())   // 선택날 체성분 최근 기록
+        coroutineScope {
+            async { homeViewModel.fetchDailyNutrition(selectedDate.toString()) }
+            async { homeViewModel.fetchDailyExercise(selectedDate.toString()) }
+            async { weightViewModel.fetchPhysicalInfo(selectedDate.toString()) }
+            async { weightViewModel.loadLatestBodyData(selectedDate.toString()) }
+        }
     }
+
+    val totalHomeCalorie by homeViewModel.totalCalorie.collectAsState()
+    val totalHomeExerciseCalorie by homeViewModel.totalExerciseCalorie.collectAsState()
+
+    LoadingOverlay(isVisible = goalViewModel.isLoading.collectAsState().value)
+
     // 선택날 체정분 데이터, bodyLatestInfo.measurementDate 가 오늘이 아니라면
     // 화면에 보이는 체지방, 골격근 0
     // 수정하면 하나만 수정되긴 할텐데, weight는 bodyLatestInfo.weight, measurementDate는 selectedDate patch
     // 근데 bodyLatestInfo.bodyId 가 null이면 post로 보내야해
     // 그리고 수정하고 등록하면 다시 위에 lauch 2개 동일하게 해야 해
 
-    // 닉네임 가져오게 viewModel : profileviewmodel
     val myProfile by viewModel.myProfile.collectAsState()
     val nickname by remember(myProfile) {
         mutableStateOf(myProfile?.nickname)
