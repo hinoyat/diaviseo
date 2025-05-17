@@ -1,23 +1,25 @@
-package com.example.diaviseo.viewmodel
+package com.example.diaviseo.viewmodel.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.diaviseo.model.chat.ChatMessage
 import com.example.diaviseo.network.RetrofitInstance
 import com.example.diaviseo.network.chatbot.dto.req.*
-import com.example.diaviseo.network.chatbot.dto.res.ErrorResponse
+import com.example.diaviseo.network.chatbot.dto.res.*
+import com.example.diaviseo.ui.main.components.chat.ChatHistory
+import com.example.diaviseo.ui.main.components.chat.ChatTopic
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 class ChatBotViewModel : ViewModel() {
 
     private val api = RetrofitInstance.chatBotApiService
 
+    // 🔹 메시지 흐름
     private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val messages: StateFlow<List<ChatMessage>> = _messages
 
@@ -31,6 +33,32 @@ class ChatBotViewModel : ViewModel() {
     val isSessionEnded: StateFlow<Boolean> = _isSessionEnded
 
     var currentCharacterImageRes: Int? = null
+
+    // 🔹 히스토리 흐름
+    private val _histories = MutableStateFlow<List<ChatHistory>>(emptyList())
+    val histories: StateFlow<List<ChatHistory>> = _histories
+
+    fun fetchHistories() {
+        viewModelScope.launch {
+            try {
+                val response = api.getChatSessions()
+                _histories.value = response.map {
+                    ChatHistory(
+                        id = it.session_id,
+                        topic = when (it.chatbot_type) {
+                            "nutrition" -> ChatTopic.DIET
+                            "workout" -> ChatTopic.EXERCISE
+                            else -> error("Unknown chatbot_type: ${it.chatbot_type}")
+                        },
+                        lastMessage = "이전 대화 보기",
+                        timestamp = LocalDateTime.parse(it.started_at)
+                    )
+                }
+            } catch (e: Exception) {
+                handleError(e)
+            }
+        }
+    }
 
     fun startSession(type: String, characterImageRes: Int? = null) {
         viewModelScope.launch {
