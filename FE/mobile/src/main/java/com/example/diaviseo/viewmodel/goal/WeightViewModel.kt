@@ -102,7 +102,7 @@ class WeightViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val response = RetrofitInstance.bodyApiService.loadLatestBodyData(date).data
+                val response = RetrofitInstance.bodyApiService.fetchLatestBodyData(date).data
                 if (response != null) {
                     _bodyLatestInfo.value = response[0]
                 }

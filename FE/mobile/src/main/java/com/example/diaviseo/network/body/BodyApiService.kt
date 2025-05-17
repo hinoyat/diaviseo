@@ -52,8 +52,8 @@ interface BodyApiService {
 
     // 최신 체성분 조회
     @GET("bodies")
-    suspend fun loadLatestBodyData(
-        @Query("date") date: String
+    suspend fun fetchLatestBodyData(
+        @Query("date") date: String? = null
     ): ApiResponse<List<BodyInfoResponse>>   // 리스트이긴 한데 요소 하나만 있음
 
     // 체성분 수정
