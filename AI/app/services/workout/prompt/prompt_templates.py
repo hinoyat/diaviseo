@@ -10,7 +10,8 @@ workout_feedback_prompt = PromptTemplate(
         "remaining_calorie",
         "goal",
         "weight_trend",
-        "muscle_trend"
+        "muscle_trend",
+        "message"
     ],
     template="""
 당신은 피트니스 전문가입니다.
@@ -36,7 +37,8 @@ workout_feedback_prompt = PromptTemplate(
   2. 오늘 실천해야 할 운동의 조건 제안
   3. 자기 점검용 질문 한 가지 제시
 
-지금 위의 정보를 바탕으로 운동 피드백 3줄을 작성해주세요.
+지금 위의 정보를 바탕으로 사용자의 질문에 대답하세요 
+사용자 질문: {message}
 """
 )
 

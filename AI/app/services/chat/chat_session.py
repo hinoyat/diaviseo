@@ -32,15 +32,6 @@ def create_session(user_id: int, chatbot_type: str) -> dict:
     }
     get_chat_collection().insert_one(session_data)
 
-    # 2. LangChain 메시지 히스토리 생성 및 웰컴 메시지 기록
-    message_history = TimestampedMongoHistory(
-        connection_string=settings.mongo_uri,
-        database_name=settings.mongo_db_name,  # 설정에서 DB 이름 사용
-        collection_name=settings.mongo_db_chat_collection_name,
-        session_id=session_id,
-    )
-    message_history.add_message(AIMessage(content=welcome))
-
     return {
         "session_id": session_id,
         "welcome_message": welcome
