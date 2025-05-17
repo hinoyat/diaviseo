@@ -4,8 +4,6 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.db.mysql import get_session
-from app.schemas.workout import WorkoutResponse
-from app.services.workout.feedback import generate_workout_feedback
 
 router = APIRouter()
 

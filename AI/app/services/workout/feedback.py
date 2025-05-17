@@ -13,7 +13,7 @@ settings = get_settings()
 
 
 # GPT 운동 피드백 생성 함수 (간소화된 버전)
-def generate_workout_feedback(user_id: int, session_id:str, user_db: Session,
+def generate_workout_feedback(user_id: int, session_id:str, message:str,user_db: Session,
     health_db: Session) -> str:
   memory = get_memory(session_id)
   # LLM 초기화
@@ -40,7 +40,8 @@ def generate_workout_feedback(user_id: int, session_id:str, user_db: Session,
       remaining_calorie=user_info.get("remaining_calorie"),
       goal=user_info.get("goal"),
       weight_trend=user_info.get("weight_trend"),
-      muscle_trend=user_info.get("muscle_trend")
+      muscle_trend=user_info.get("muscle_trend"),
+      message=message
   )
 
   # LLM 호출하여 피드백 생성

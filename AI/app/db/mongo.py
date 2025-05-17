@@ -33,6 +33,11 @@ class TimestampedMongoHistory(MongoDBChatMessageHistory):
 client = MongoClient(settings.mongo_uri, authSource=settings.mongo_db_name)
 mongo_db = client[settings.mongo_db_name]
 chat_collection = mongo_db[settings.mongo_db_chat_collection_name]
+chat_history_collection = mongo_db[settings.mongo_db_chat_history_collection_name]
+
 
 def get_chat_collection():
     return chat_collection
+
+def get_chat_history_collection():
+    return chat_history_collection
