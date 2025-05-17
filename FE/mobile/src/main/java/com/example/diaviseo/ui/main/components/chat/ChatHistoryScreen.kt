@@ -29,7 +29,8 @@ data class ChatHistory(
     val id: String,
     val topic: ChatTopic,
     val lastMessage: String,
-    val timestamp: LocalDateTime
+    val timestamp: LocalDateTime,
+    val isEnded: Boolean = false
 ) : java.io.Serializable
 
 @Composable
