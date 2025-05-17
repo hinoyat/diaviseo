@@ -119,26 +119,44 @@ class ChatBotViewModel : ViewModel() {
     }
 
     fun loadMessages(sessionId: String, characterImageRes: Int? = null, isEnded: Boolean = false) {
-
         viewModelScope.launch {
             try {
                 val response = api.getChatMessages(sessionId)
                 currentCharacterImageRes = characterImageRes
                 _sessionId.value = sessionId
                 _isSessionEnded.value = isEnded
-                _messages.value = response.map {
-                    ChatMessage(
-                        text = it.content,
-                        isUser = it.role == "user",
-                        timestamp = LocalDateTime.parse(it.timestamp),
-                        characterImageRes = if (it.role == "assistant") characterImageRes else null
+
+                if (response.isEmpty()) {
+                    // 👉 세션은 있지만 메시지가 없을 경우 인사말과 추천 질문 넣기
+                    _messages.value = listOf(
+                        ChatMessage(
+                            text = "안녕하세요! 어떤 내용이 궁금하신가요?",
+                            isUser = false,
+                            timestamp = LocalDateTime.now(),
+                            characterImageRes = characterImageRes
+                        ),
+                        ChatMessage(
+                            text = "__SHOW_INITIAL_QUESTION_BUTTONS__",
+                            isUser = false,
+                            timestamp = LocalDateTime.now()
+                        )
                     )
+                } else {
+                    _messages.value = response.map {
+                        ChatMessage(
+                            text = it.content,
+                            isUser = it.role == "user",
+                            timestamp = LocalDateTime.parse(it.timestamp),
+                            characterImageRes = if (it.role == "assistant") characterImageRes else null
+                        )
+                    }
                 }
             } catch (e: Exception) {
                 handleError(e)
             }
         }
     }
+
 
     private fun handleError(e: Exception) {
         val message = extractErrorMessage(e)
@@ -162,4 +180,9 @@ class ChatBotViewModel : ViewModel() {
             else -> e.message ?: "알 수 없는 오류 발생"
         }
     }
+
+    fun removeInitialQuestionButtons() {
+        _messages.value = _messages.value.filterNot { it.text == "__SHOW_INITIAL_QUESTION_BUTTONS__" }
+    }
+
 }
