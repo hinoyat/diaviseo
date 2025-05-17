@@ -48,4 +48,8 @@ interface BodyApiService {
     suspend fun loadBodyData(
         @Query("date") date: String
     ): ApiResponse<BodyInfoResponse>
+
+    @GET("bodies")
+    suspend fun fetchLatestBodyData(): ApiResponse<List<BodyInfoResponse>>
+
 }

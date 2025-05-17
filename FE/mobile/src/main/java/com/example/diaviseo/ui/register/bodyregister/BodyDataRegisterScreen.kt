@@ -53,13 +53,11 @@ fun BodyDataRegisterScreen(
     val year by viewModel.year.collectAsState()
     val month by viewModel.month.collectAsState()
     val day by viewModel.day.collectAsState()
+    val measurementDate by viewModel.measurementDate.collectAsState()
 
     val isManualInputValid = viewModel.isInputValid()
-    val isFormValid = when (selectedOption.value) {
-        BodyRegisterType.MANUAL -> isManualInputValid
-        BodyRegisterType.PHOTO -> true
-        else -> false
-    }
+    val isFormValid = weight.isNotBlank() && measurementDate.isNotBlank()
+
 
     val bodyInputs = listOf(
         Triple("키", height, viewModel::onHeightChange),
@@ -148,7 +146,10 @@ fun BodyDataRegisterScreen(
                 label = "직접 입력하기",
                 iconResId = R.drawable.pencil,
                 isSelected = selectedOption.value == BodyRegisterType.MANUAL,
-                onClick = { selectedOption.value = BodyRegisterType.MANUAL },
+                onClick = {
+                    selectedOption.value = BodyRegisterType.MANUAL
+                    viewModel.fetchLatestBodyData() // 최신 데이터 불러오기
+                },
                 modifier = Modifier
                     .width(150.dp)
                     .height(150.dp)
