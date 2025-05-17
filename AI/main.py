@@ -26,12 +26,12 @@ eureka_client = EurekaClient(
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 애플리케이션 시작 시 Eureka에 등록
-    eureka_client.start()
+    # eureka_client.start()
     # 식단 T5 모델 로드
     init_model()
     yield
     # 애플리케이션 종료 시 Eureka에서 해제
-    eureka_client.stop()
+    # eureka_client.stop()
 
 # FastAPI 앱 생성 (한 번만)
 app = FastAPI(lifespan=lifespan)

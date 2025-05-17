@@ -11,8 +11,8 @@ class DietModel:
 
         # 저장한 가중치 불러오기(양자화된 모델 불러오기)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model = T5ForConditionalGeneration.from_pretrained("Sseolily/pko-t5-large")
-        self.tokenizer = T5TokenizerFast.from_pretrained('Sseolily/pko-t5-large')
+        self.model = T5ForConditionalGeneration.from_pretrained("Sseolily/pko-t5-large-v2")
+        self.tokenizer = T5TokenizerFast.from_pretrained('Sseolily/pko-t5-large-v2')
         # ✅ 양자화 적용
         self.model = quantize_dynamic(
             self.model,
