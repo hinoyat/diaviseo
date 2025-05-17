@@ -176,12 +176,14 @@ private fun EmptyHistoryMessage(selectedFilter: ChatTopic?) {
 
 @Composable
 private fun ChatHistoryCard(history: ChatHistory, onClick: () -> Unit) {
+    val isEnded = history.isEnded
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(Color.White)
-            .clickable { onClick() }
+            .clickable(enabled = !isEnded) { onClick() } // 종료된 대화면 클릭 막을 수도 있음
             .padding(16.dp)
     ) {
         Text(
@@ -191,17 +193,21 @@ private fun ChatHistoryCard(history: ChatHistory, onClick: () -> Unit) {
             },
             fontWeight = FontWeight.SemiBold,
             fontSize = 15.sp,
-            color = DiaViseoColors.Basic
+            color = if (isEnded) DiaViseoColors.Placeholder else DiaViseoColors.Basic
         )
+
         Spacer(modifier = Modifier.height(4.dp))
+
         Text(
-            text = history.lastMessage,
+            text = if (isEnded) "종료된 대화입니다" else history.lastMessage,
             fontSize = 14.sp,
             color = DiaViseoColors.Placeholder,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+
         Spacer(modifier = Modifier.height(6.dp))
+
         Text(
             text = history.timestamp.format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm")),
             fontSize = 12.sp,
