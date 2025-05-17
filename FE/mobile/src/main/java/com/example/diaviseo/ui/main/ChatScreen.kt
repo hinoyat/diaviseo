@@ -1,4 +1,3 @@
-// ChatScreen.kt (ViewModel 연동 완료 리팩토링)
 package com.example.diaviseo.ui.main
 
 import androidx.compose.foundation.layout.*
@@ -65,7 +64,8 @@ fun ChatContent(
                 characterImageRes = when (history.topic) {
                     ChatTopic.DIET -> R.drawable.chat_char_diet
                     ChatTopic.EXERCISE -> R.drawable.chat_char_exercise
-                }
+                },
+                isEnded = history.isEnded // 🔥 종료 여부 반영
             )
         }
     }
@@ -133,24 +133,25 @@ fun ChatContent(
             }
 
             if (!showExitDialog && sessionId != null) {
-                ChatInputBar(
-                    inputText = inputState.value,
-                    onInputChange = { inputState.value = it },
-                    onSendClick = {
-                        if (inputState.value.isNotBlank()) {
+                key(isSessionEnded) {
+                    ChatInputBar(
+                        inputText = inputState.value,
+                        onInputChange = { inputState.value = it },
+                        onSendClick = {
                             viewModel.sendMessage(inputState.value)
                             inputState.value = ""
                             keyboardController?.hide()
                             focusManager.clearFocus()
-                        }
-                    },
-                    isSending = isTyping,
-                    enabled = !isSessionEnded,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                )
+                        },
+                        isSending = isTyping,
+                        enabled = !isSessionEnded,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    )
+                }
             }
+
 
             if (showExitDialog) {
                 ExitChatDialog(
