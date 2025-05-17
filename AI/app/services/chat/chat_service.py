@@ -31,10 +31,17 @@ def chat_with_session(session_id: str, message: str, user_db: Session,
     Returns:
         챗봇 응답과 타임스탬프를 포함한 딕셔너리
     """
+    print("[DEBUG] 셋션!:", session_id)
+    print("[DEBUG] chatbot_type:",get_chat_collection().find_one(
+            {"session_id": session_id}))
+
     try:
         memory = get_memory(session_id)
         session_info = get_chat_collection().find_one(
             {"session_id": session_id})
+
+        print("[DEBUG] session_info:", session_info)
+        print("[DEBUG] chatbot_type:", session_info.get("chatbot_type") if session_info else None)
 
         # 운동 챗봇 타입인 경우 운동 피드백 제공
         if session_info and session_info.get("chatbot_type") == "workout":
