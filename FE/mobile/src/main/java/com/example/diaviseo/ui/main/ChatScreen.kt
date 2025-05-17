@@ -65,7 +65,7 @@ fun ChatContent(
                     ChatTopic.DIET -> R.drawable.chat_char_diet
                     ChatTopic.EXERCISE -> R.drawable.chat_char_exercise
                 },
-                isEnded = history.isEnded // 🔥 종료 여부 반영
+                isEnded = history.isEnded
             )
         }
     }
@@ -118,7 +118,11 @@ fun ChatContent(
                             InitialQuestionButtons(
                                 topic = selectedTopic,
                                 onClick = { question ->
-                                    viewModel.sendMessage(question)
+                                    // 직접 입력할게요 선택 시 메시지 전송 없이 버튼만 제거
+                                    viewModel.removeInitialQuestionButtons()
+                                    if (question != "직접 입력할게요") {
+                                        viewModel.sendMessage(question)
+                                    }
                                 }
                             )
                         } else {
@@ -151,7 +155,6 @@ fun ChatContent(
                     )
                 }
             }
-
 
             if (showExitDialog) {
                 ExitChatDialog(
