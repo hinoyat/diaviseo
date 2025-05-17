@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from app.services.memory.mongo_memory import get_memory
-from app.core.T5_wrapping import get_t5_langchain_llm
+from app.core.t5_wrapping import get_t5_langchain_llm
 from langchain.prompts import PromptTemplate
 from langchain.chains.conversation.base import ConversationChain
 
