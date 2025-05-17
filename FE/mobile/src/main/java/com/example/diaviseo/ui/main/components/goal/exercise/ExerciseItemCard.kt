@@ -7,12 +7,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.*
 import coil.compose.AsyncImage
 import com.example.diaviseo.ui.theme.DiaViseoColors
 import com.example.diaviseo.ui.theme.medium12
 import com.example.diaviseo.ui.theme.medium14
+import com.example.diaviseo.R
+import com.example.diaviseo.model.exercise.exerciseIconMap
 
 @Composable
 fun ExerciseItemCard(item: ExerciseItem) {
@@ -31,13 +35,16 @@ fun ExerciseItemCard(item: ExerciseItem) {
                     .background(color = Color(0xFFD3DBFF), shape = CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-//                AsyncImage(
-//                    model = item.imageUrl,
-//                    contentDescription = null,
-//                    modifier = Modifier
-//                        .size(26.dp)
-//                        .padding(4.dp)
-//                )
+                AsyncImage(
+//                    model = item.imgUrl,
+                    model = exerciseIconMap[item.imgUrl],
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(28.dp)
+                        .padding(2.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Fit
+                )
             }
 
             Spacer(modifier = Modifier.width(12.dp))
