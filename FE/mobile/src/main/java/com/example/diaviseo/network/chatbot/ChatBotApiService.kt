@@ -4,11 +4,9 @@ import com.example.diaviseo.network.chatbot.dto.req.ChatRequest
 import com.example.diaviseo.network.chatbot.dto.req.EndSessionRequest
 import com.example.diaviseo.network.chatbot.dto.req.StartSessionRequest
 import com.example.diaviseo.network.chatbot.dto.res.ChatMessageResponse
-import com.example.diaviseo.network.chatbot.dto.res.ChatResponse
 import com.example.diaviseo.network.chatbot.dto.res.EndSessionResponse
 import com.example.diaviseo.network.chatbot.dto.res.SessionSummaryResponse
 import com.example.diaviseo.network.chatbot.dto.res.StartSessionResponse
-import com.example.diaviseo.network.common.dto.ApiResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -26,7 +24,7 @@ interface ChatBotApiService {
     suspend fun sendChatMessage(
         @Path("sessionId") sessionId: String,
         @Body request: ChatRequest
-    ): ChatResponse
+    ): ChatMessageResponse
 
     @GET("chatbot/chats")
     suspend fun getChatSessions(): List<SessionSummaryResponse>
