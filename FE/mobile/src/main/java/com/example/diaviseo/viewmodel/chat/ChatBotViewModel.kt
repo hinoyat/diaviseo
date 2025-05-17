@@ -51,7 +51,8 @@ class ChatBotViewModel : ViewModel() {
                             else -> error("Unknown chatbot_type: ${it.chatbot_type}")
                         },
                         lastMessage = "이전 대화 보기",
-                        timestamp = LocalDateTime.parse(it.started_at)
+                        timestamp = LocalDateTime.parse(it.started_at),
+                        isEnded = it.ended_at != null
                     )
                 }
             } catch (e: Exception) {
@@ -117,14 +118,14 @@ class ChatBotViewModel : ViewModel() {
         }
     }
 
-    fun loadMessages(sessionId: String, characterImageRes: Int? = null) {
+    fun loadMessages(sessionId: String, characterImageRes: Int? = null, isEnded: Boolean = false) {
+
         viewModelScope.launch {
             try {
                 val response = api.getChatMessages(sessionId)
                 currentCharacterImageRes = characterImageRes
                 _sessionId.value = sessionId
-                _isSessionEnded.value = false
-
+                _isSessionEnded.value = isEnded
                 _messages.value = response.map {
                     ChatMessage(
                         text = it.content,
