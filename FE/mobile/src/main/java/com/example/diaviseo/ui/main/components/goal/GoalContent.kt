@@ -83,17 +83,27 @@ fun GoalContent(
 
     LaunchedEffect(selectedDate) {
         // 비동기 작업
+//        coroutineScope {
+//            val job1 = async {mealViewModel.fetchPhysicalInfo(selectedDate.toString())}
+//            mealViewModel.fetchMealStatistic("DAY", selectedDate.toString())
+//            exerciseViewModel.fetchAllStats(selectedDate.toString())
+//
+//            job1.await()
+//        }
+//        // 순서 중요 (아래는 동기)
+//        mealViewModel.fetchDailyNutrition(selectedDate.toString())
+//        exerciseViewModel.fetchDailyExercise(selectedDate.toString())
+//        weightViewModel.fetchAllLists(selectedDate.toString())
+
+//      우리 언니 울어요
+        mealViewModel.fetchPhysicalInfo(selectedDate.toString())
         coroutineScope {
-            val job1 = async {mealViewModel.fetchPhysicalInfo(selectedDate.toString())}
             mealViewModel.fetchMealStatistic("DAY", selectedDate.toString())
             exerciseViewModel.fetchAllStats(selectedDate.toString())
-
-            job1.await()
+            mealViewModel.fetchDailyNutrition(selectedDate.toString())
+            exerciseViewModel.fetchDailyExercise(selectedDate.toString())
+            weightViewModel.fetchAllLists(selectedDate.toString())
         }
-        // 순서 중요 (아래는 동기)
-        mealViewModel.fetchDailyNutrition(selectedDate.toString())
-        exerciseViewModel.fetchDailyExercise(selectedDate.toString())
-        weightViewModel.fetchAllLists(selectedDate.toString())
     }
 
 //    LoadingOverlay(isLoading || exIsLoading)
@@ -135,7 +145,7 @@ fun GoalContent(
                     message = nutritionFeedback,
                     onRequestFeedback = {
                         // 피드백 요청 처리
-                        // 예: goalViewModel.requestAiFeedback()
+                         goalViewModel.createNutriFeedBack(selectedDate.toString())
                     }
                 )
                 Spacer(modifier = Modifier.height(24.dp))
