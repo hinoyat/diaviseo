@@ -1,3 +1,5 @@
+import datetime
+
 from fastapi import APIRouter, Depends, Request
 from fastapi.params import Header
 from pydantic import BaseModel
@@ -34,24 +36,13 @@ def get_remaining_calories(
 
 @router.get("/weight/trend")
 def weight_trend_feedback(
+    date: datetime.datetime = None,
     days: int = 7,
     user_id: int = Header(default=None, alias="X-USER-ID"),
     user_db: Session = Depends(get_session('user')),
     health_db: Session = Depends(get_session('health'))
 ):
-    """
-    사용자의 체중 변화 추이에 대한 피드백을 제공합니다.
-
-    Args:
-        days: 분석할 기간(일수)
-        user_id: 사용자 ID
-        user_db: 사용자 DB 세션
-        health_db: 건강 DB 세션
-
-    Returns:
-        체중 변화 추이에 대한 피드백 메시지
-    """
     from app.services.workout.feedback import generate_trend_weight_feedback
 
-    feedback = generate_trend_weight_feedback(user_id, user_db, health_db, days)
+    feedback = generate_trend_weight_feedback(user_id, user_db, health_db, days, date)
     return {"feedback": feedback}

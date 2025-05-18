@@ -1,10 +1,14 @@
+import datetime
+
 from langchain.chains.conversation.base import ConversationChain
 from langchain_openai import ChatOpenAI
 from requests import Session
 
 from app.config.settings import get_settings
 from app.repositories.body_info_repository import get_user_info_for_feedback, \
-  calculate_additional_calories_to_burn
+  calculate_additional_calories_to_burn, predict_weight_change_from_base_date, \
+  calculate_additional_calories_to_burn_someday, \
+  get_user_info_for_feedback_from_date
 from app.repositories.feedback_repository import insert_feedback, FeedbackType
 from app.services.memory.mongo_memory import get_memory
 from app.services.workout.prompt.prompt_templates import \
@@ -53,26 +57,15 @@ def generate_workout_feedback(user_id: int, session_id:str, message:str,user_db:
 
 # 체중 추이 피드백 생성 함수
 def generate_trend_weight_feedback(user_id: int, user_db: Session,
-    health_db: Session, days: int = 7) -> str:
-  """
-  사용자의 체중 변화 추이를 분석하고 피드백을 생성합니다.
+    health_db: Session, days, date:datetime.datetime) -> str:
 
-  Args:
-      user_id: 사용자 ID
-      user_db: 사용자 정보 데이터베이스 세션
-      health_db: 건강 정보 데이터베이스 세션
-      days: 분석할 기간(일)
-
-  Returns:
-      str: 체중 변화 추이에 대한 피드백
-  """
   from app.repositories.body_info_repository import predict_weight_change, \
     get_user_info_for_feedback
 
   # 사용자 정보 및 체중 변화 예측 정보 가져오기
-  user_info = get_user_info_for_feedback(health_db, user_db, user_id)
-  prediction = predict_weight_change(health_db, user_db, user_id, days)
-  remaining_calorie = calculate_additional_calories_to_burn(health_db, user_db, user_id)
+  user_info = get_user_info_for_feedback_from_date(health_db, user_db, user_id, date=date)
+  prediction = predict_weight_change_from_base_date(health_db, user_db, user_id, days, base_date=date)
+  remaining_calorie = calculate_additional_calories_to_burn_someday(health_db, user_db, user_id, date=date)
   # LLM 초기화
   llm = ChatOpenAI(
       model="gpt-4o-mini",

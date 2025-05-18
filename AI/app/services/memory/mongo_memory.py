@@ -1,13 +1,12 @@
 from langchain_community.chat_message_histories import MongoDBChatMessageHistory
 from langchain.memory import ConversationBufferMemory
 from app.config.settings import get_settings
-from app.db.mongo import TimestampedMongoHistory
 
 
 def get_memory(session_id: str):
     settings = get_settings()
 
-    message_history = TimestampedMongoHistory(
+    message_history = MongoDBChatMessageHistory(
         connection_string=settings.mongo_uri,
         session_id=session_id,
         database_name=settings.mongo_db_name,
