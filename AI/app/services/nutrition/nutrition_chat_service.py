@@ -30,7 +30,6 @@ def generate_nutrition_response(user_input:str, session_id:str, user_db:Session,
 
 def generate_nutrition_chat(user_input:str, session_id:str):
     logging.info("✅ generate_nutrition_chat 호출됨")
-    memory = get_memory(session_id)
 
     # 1) '자세히'가 들어간 질문이면 → RAG
     if "자세히" in user_input:
@@ -43,7 +42,6 @@ def generate_nutrition_chat(user_input:str, session_id:str):
 
     # 2) 아니면 일반 T5 응답
     llm = get_t5_langchain_llm()
-    conversation = ConversationChain(llm=llm, memory=memory, verbose=True)
-    response = conversation.run(user_input)
+    response = llm.invoke(input=user_input)
     logging.info("✅ 일반 T5 모델 사용")
     return response
