@@ -20,6 +20,7 @@ logging_check()
 
 settings = get_settings()
 def build_index():
+    logging.info("📣 build_index() 시작")
     # 1) 프로젝트 루트/data
     # 현재 파일 위치에서 시작
     p = Path(__file__).resolve()
@@ -36,7 +37,8 @@ def build_index():
     # 2) 이미 색인 돼 있으면 스킵
     pkl_path  = data_dir / "nutrition_split_documents.pkl"
     faiss_path = data_dir / "nutrition_faiss_index"
-    if pkl_path.exists() and faiss_path.exists():
+
+    if pkl_path.exists() and (faiss_path / "index.faiss").exists() and (faiss_path / "index.pkl").exists():
         logging.info("❗️ 인덱스 이미 존재—재생성하지 않습니다.")
         return
 
@@ -70,5 +72,5 @@ def build_index():
     vectorstore = FAISS.from_documents(split_documents, embeddings)
 
     # 6) 로컬에 저장
-    vectorstore.save_local(str(faiss_path))
+    vectorstore.save_local("/tmp/nutrition_faiss_index")
     logging.info("nutrition_faiss_index.idx 생성 완료 : {faiss_path}")
