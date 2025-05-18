@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from py_eureka_client.eureka_client import EurekaClient
 
 import asyncio
+import logging
 
 from app.routes import session, chat
 from app.routes.workout import router as workout_router
@@ -10,22 +11,24 @@ from app.routes.nutrition import router as nutrition_router
 from app.core.models import init_model
 from app.core.rag.indexer import build_index
 from app.core.rag.rag import init_rag
+from app.config.log import logging_check
 
 from app.config.settings import get_settings
 
 # 설정 가져오기
 settings = get_settings()
+logging_check()
 
 # EurekaClient 초기화
-eureka_client = EurekaClient(
-    eureka_server=settings.eureka_server,
-    app_name=settings.eureka_app_name,
-    instance_port=settings.eureka_instance_port,
-    instance_host=settings.eureka_instance_host,
-    health_check_url=settings.eureka_health_check_url,
-    renewal_interval_in_secs=settings.eureka_renewal_interval_in_secs,
-    duration_in_secs=settings.eureka_duration_in_secs
-)
+# eureka_client = EurekaClient(
+#     eureka_server=settings.eureka_server,
+#     app_name=settings.eureka_app_name,
+#     instance_port=settings.eureka_instance_port,
+#     instance_host=settings.eureka_instance_host,
+#     health_check_url=settings.eureka_health_check_url,
+#     renewal_interval_in_secs=settings.eureka_renewal_interval_in_secs,
+#     duration_in_secs=settings.eureka_duration_in_secs
+# )
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -34,8 +37,6 @@ async def lifespan(app: FastAPI):
     # 식단 T5 모델 로드
     init_model()
     init_rag()
-    loop = asyncio.get_running_loop()
-    loop.run_in_executor(None, build_index)
     yield
     # 애플리케이션 종료 시 Eureka에서 해제
     # eureka_client.stop()

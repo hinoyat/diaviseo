@@ -29,6 +29,9 @@ class Settings(BaseSettings):
 
     # minio
     pdf_url: str
+    index_pkl: str
+    index_faiss: str
+
     # 설정 파일 위치 (.env)
     model_config = {
         "env_file": ".env",
