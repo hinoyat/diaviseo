@@ -48,7 +48,7 @@ interface ChatBotApiService {
     suspend fun fetchFeedBack(
         @Path("feedbackType") feedbackType: String,
         @Query("date") date: String
-    ): Response<String>
+    ): Response<String?>
 
     // 식단 피드백 생성
     @POST("chatbot/nutrition_feedback")

@@ -61,7 +61,7 @@ class GoalViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val response = RetrofitInstance.chatBotApiService.fetchFeedBack(feedbackType, date)
-                if (response.isSuccessful && !response.body().isNullOrEmpty()) {
+                if (response.isSuccessful && response.body() != null) {
                     val message = response.body()
                     if (feedbackType == "nutrition") {
                         _nutritionFeedback.value = message.toString()
@@ -71,8 +71,8 @@ class GoalViewModel : ViewModel() {
                         _weightFeedback.value = message.toString()
                     }
                 } else {
-                    val errorJson = response.errorBody()?.string()
-                    val detail = JSONObject(errorJson ?: "").optString("detail")
+//                    val errorJson = response.errorBody()?.string()
+//                    val detail = JSONObject(errorJson ?: "").optString("detail")
 
                     if (feedbackType == "nutrition") {
                         _nutritionFeedback.value = ""
@@ -81,7 +81,7 @@ class GoalViewModel : ViewModel() {
                     } else if (feedbackType == "weight_trend") {
                         _weightFeedback.value = ""
                     }
-                    Log.d("AI feedback", "메세지 : $detail")
+//                    Log.d("AI feedback", "메세지 : $detail")
                 }
             } catch (e: Exception) {
                 // 네트워크 끊김, 타임아웃 등
@@ -96,13 +96,13 @@ class GoalViewModel : ViewModel() {
             try {
                 val response = RetrofitInstance.chatBotApiService.createNutriFeedBack(date)
                 if (response.isSuccessful && !response.body().isNullOrEmpty()) {
-                    val answer = response.body()?.get("answer")
+                    val answer = response.body()?.get("feedback")
                     Log.d("API", "답변: $answer")
                     _nutritionFeedback.value = answer.toString()
                     _isNutriLoading.value = false
                 } else {
                     val errorJson = response.errorBody()?.string()
-                    val detail = JSONObject(errorJson ?: "").optString("answer")
+                    val detail = JSONObject(errorJson ?: "").optString("feedback")
                     _nutritionFeedback.value = "오류가 발생했습니다 다시 한번 시도해주세요🥹"
                     Log.d("AI feedback", "메세지 : $detail")
                 }
