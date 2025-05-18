@@ -37,9 +37,13 @@ fun GoalContent(
     navController: NavHostController,
     gender: String?
 ) {
-    // 평가<->디테일 날짜 관리
+    // 평가<->디테일 날짜, 피드백 관리
     val goalViewModel: GoalViewModel = viewModel()
     val selectedDate by goalViewModel.selectedDate.collectAsState()
+    val nutritionFeedback by goalViewModel.nutritionFeedback.collectAsState()
+    val workoutFeedback by goalViewModel.workoutFeedback.collectAsState()
+    val isNutriLoading by goalViewModel.isNutriLoading.collectAsState()
+    val isWorkLoading by goalViewModel.isWorkLoading.collectAsState()
 
     // 평가<->디테일 식단 관리
     val mealViewModel: MealViewModel = viewModel()
@@ -68,6 +72,8 @@ fun GoalContent(
 
     LaunchedEffect(selectedDate) {
         weightViewModel.loadBodyData(selectedDate.toString())
+        goalViewModel.isThereFeedback("nutrition", selectedDate.toString())
+        goalViewModel.isThereFeedback("workout", selectedDate.toString())
     }
 
     val isToday = remember(selectedDate) {
@@ -79,17 +85,27 @@ fun GoalContent(
 
     LaunchedEffect(selectedDate) {
         // 비동기 작업
+//        coroutineScope {
+//            val job1 = async {mealViewModel.fetchPhysicalInfo(selectedDate.toString())}
+//            mealViewModel.fetchMealStatistic("DAY", selectedDate.toString())
+//            exerciseViewModel.fetchAllStats(selectedDate.toString())
+//
+//            job1.await()
+//        }
+//        // 순서 중요 (아래는 동기)
+//        mealViewModel.fetchDailyNutrition(selectedDate.toString())
+//        exerciseViewModel.fetchDailyExercise(selectedDate.toString())
+//        weightViewModel.fetchAllLists(selectedDate.toString())
+
+//      우리 언니 울어요
+        mealViewModel.fetchPhysicalInfo(selectedDate.toString())
         coroutineScope {
-            val job1 = async {mealViewModel.fetchPhysicalInfo(selectedDate.toString())}
             mealViewModel.fetchMealStatistic("DAY", selectedDate.toString())
             exerciseViewModel.fetchAllStats(selectedDate.toString())
-
-            job1.await()
+            mealViewModel.fetchDailyNutrition(selectedDate.toString())
+            exerciseViewModel.fetchDailyExercise(selectedDate.toString())
+            weightViewModel.fetchAllLists(selectedDate.toString())
         }
-        // 순서 중요 (아래는 동기)
-        mealViewModel.fetchDailyNutrition(selectedDate.toString())
-        exerciseViewModel.fetchDailyExercise(selectedDate.toString())
-        weightViewModel.fetchAllLists(selectedDate.toString())
     }
 
 //    LoadingOverlay(isLoading || exIsLoading)
@@ -121,16 +137,19 @@ fun GoalContent(
                     fatRatio = fatRatio
                 )
 
-                // 아래 메세지가 null이면 30 아니면 60
-                Spacer(modifier = Modifier.height(60.dp))
+                Spacer(
+                    modifier = Modifier.height(
+                        if (nutritionFeedback.isBlank()) 30.dp else 60.dp
+                    )
+                )
 
                 AiTipBox(
-                    message = "탄단지당 균형이 좋아요!\n" +
-                            "지금처럼만 유지해요!", // 또는 null로 빈 상태 테스트
+                    message = nutritionFeedback,
                     onRequestFeedback = {
                         // 피드백 요청 처리
-                        // 예: goalViewModel.requestAiFeedback()
-                    }
+                         goalViewModel.createNutriFeedBack(selectedDate.toString())
+                    },
+                    isLoading = isNutriLoading
                 )
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -198,15 +217,19 @@ fun GoalContent(
                     )
                 }
 
-                // 아래 메세지가 null이면 30 아니면 80
-                Spacer(modifier = Modifier.height(80.dp))
+                Spacer(
+                    modifier = Modifier.height(
+                        if (workoutFeedback.isBlank()) 30.dp else 80.dp
+                    )
+                )
 
                 AiTipBox(
-                    message = "현재 체중 대비 골격근량은 꽤 좋은 편이라 근육량은 잘 유지되고 있어요. 다만 체지방률이 약간 높은 편일 수 있으니, 유산소 운동과 함께 단백질 섭취를 늘려 체지방을 천천히 줄이는 방향이 이상적이에요. 균형 잡힌 식단과 꾸준한 활동이 핵심이에요!", // 또는 null로 빈 상태 테스트
+                    message = workoutFeedback,
                     onRequestFeedback = {
                         // 피드백 요청 처리
                         // 예: goalViewModel.requestAiFeedback()
-                    }
+                    },
+                    isLoading = isWorkLoading
                 )
                 Spacer(modifier = Modifier.height(24.dp))
 

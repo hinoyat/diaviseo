@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Header
 from sqlalchemy.orm import Session
 
 from app.db.mysql import get_session
+from app.repositories.feedback_repository import insert_feedback
 from app.services.nutrition.nutrition_chat_service import generate_nutrition_response
 from app.schemas.nutrition import ChatRequest
 from app.services.nutrition.feedback_service import generate_nutrition_feedback
@@ -26,4 +27,7 @@ def nutrition_feedback(datetime: date, user_db:Session = Depends(get_session("us
     '''
 
     response = generate_nutrition_feedback(user_db,health_db,user_id, datetime)
+    from app.schemas.chat import FeedbackType
+    insert_feedback(user_id=user_id,feedback=response,feedback_type=FeedbackType.nutrition )
+
     return {"answer": response}

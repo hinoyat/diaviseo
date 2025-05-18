@@ -2,19 +2,17 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from py_eureka_client.eureka_client import EurekaClient
 
-import asyncio
-
 from app.routes import session, chat
 from app.routes.workout import router as workout_router
 from app.routes.nutrition import router as nutrition_router
 from app.core.models import init_model
-from app.core.rag.indexer import build_index
 from app.core.rag.rag import init_rag
 
 from app.config.settings import get_settings
 
 # 설정 가져오기
 settings = get_settings()
+
 
 # EurekaClient 초기화
 eureka_client = EurekaClient(
@@ -30,15 +28,13 @@ eureka_client = EurekaClient(
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 애플리케이션 시작 시 Eureka에 등록
-    # eureka_client.start()
+    eureka_client.start()
     # 식단 T5 모델 로드
     init_model()
     init_rag()
-    loop = asyncio.get_running_loop()
-    loop.run_in_executor(None, build_index)
     yield
     # 애플리케이션 종료 시 Eureka에서 해제
-    # eureka_client.stop()
+    eureka_client.stop()
 
 # FastAPI 앱 생성 (한 번만)
 app = FastAPI(lifespan=lifespan)

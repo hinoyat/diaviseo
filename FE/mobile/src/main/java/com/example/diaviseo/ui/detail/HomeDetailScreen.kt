@@ -56,12 +56,15 @@ fun HomeDetailScreen(
 
     val showDatePicker by goalViewModel.showDatePicker.collectAsState()
     val selectedDate by goalViewModel.selectedDate.collectAsState()
+    val weightFeedback by goalViewModel.weightFeedback.collectAsState()
+    val isWeightLoading by goalViewModel.isWeightLoading.collectAsState()
 
     val physicalInfo by weightViewModel.physicalInfo.collectAsState()
     val bodyLatestInfo by weightViewModel.bodyLatestInfo.collectAsState()
 
     LaunchedEffect(selectedDate, bodyLatestInfo) {
         coroutineScope {
+            async { goalViewModel.isThereFeedback("weight_trend", selectedDate.toString()) }
             async { homeViewModel.fetchDailyNutrition(selectedDate.toString()) }
             async { homeViewModel.fetchDailyExercise(selectedDate.toString()) }
             async { weightViewModel.fetchPhysicalInfo(selectedDate.toString()) }
@@ -162,16 +165,20 @@ fun HomeDetailScreen(
                 predictValue = predictValue
             )
 
-            // 아래에 넣을 string이 null이면 30, 아니면 90
-            Spacer(modifier = Modifier.height(90.dp))
+            Spacer(
+                modifier = Modifier.height(
+                    if (weightFeedback.isBlank()) 30.dp else 84.dp
+                )
+            )
 
             Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                 AiTipBox(
-                    message = "안녕", // 또는 null로 빈 상태 테스트
+                    message = weightFeedback,
                     onRequestFeedback = {
                         // 피드백 요청 처리
-                        // 예: goalViewModel.requestAiFeedback()
-                    }
+                        goalViewModel.createHomeFeedBack(selectedDate.toString())
+                    },
+                    isLoading = isWeightLoading
                 )
             }
             Spacer(modifier = Modifier.height(30.dp))

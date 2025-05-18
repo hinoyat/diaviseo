@@ -21,19 +21,19 @@ public class UserVerificationController {
 
     private final UserVerificationService userVerificationService;
 
-//    @PostMapping("/phone")
-//    public ResponseEntity<ResponseDto<Void>> verifyPhone(@RequestBody PhoneVerificationRequest request) {
-//        log.info("인증번호 요청 - phone: {}", request.getPhone());
-//        userVerificationService.sendVerificationCode(request.getPhone());
-//        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "인증번호가 발송되었습니다."));
-//    }
-
     @PostMapping("/phone")
     public ResponseEntity<ResponseDto<Void>> verifyPhone(@RequestBody PhoneVerificationRequest request) {
         log.info("인증번호 요청 - phone: {}", request.getPhone());
-        String testCode = userVerificationService.sendVerificationCode(request.getPhone());
-        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "CoolSMS 발송 대신 인증 번호 드립니다" + testCode));
+        userVerificationService.sendVerificationCode(request.getPhone());
+        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "인증번호가 발송되었습니다."));
     }
+
+//    @PostMapping("/phone")
+//    public ResponseEntity<ResponseDto<Void>> verifyPhone(@RequestBody PhoneVerificationRequest request) {
+//        log.info("인증번호 요청 - phone: {}", request.getPhone());
+//        String testCode = userVerificationService.sendVerificationCode(request.getPhone());
+//        return ResponseEntity.ok(ResponseDto.success(HttpStatus.OK, "CoolSMS 발송 대신 인증 번호 드립니다" + testCode));
+//    }
 
     @PostMapping("/phone/confirm")
     public ResponseEntity<ResponseDto<Void>> confirmPhoneCode(@RequestBody PhoneCodeConfirmRequest request) {

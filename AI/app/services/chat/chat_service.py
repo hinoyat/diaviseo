@@ -9,7 +9,8 @@ from app.db.mongo import get_chat_collection, \
     get_chat_history_collection
 from app.services.memory.mongo_memory import get_memory
 from app.config.settings import get_settings
-from app.services.nutrition.nutrition_chat_service import generate_nutrition_response
+from app.services.nutrition.nutrition_chat_service import \
+  generate_nutrition_response, generate_nutrition_chat
 from app.config.log import logging_check
 import logging
 logging_check()
@@ -81,8 +82,7 @@ def _handle_workout_chat(session_id: str, session_info: dict, message: str,
 def _handle_nutrition_chat(session_id: str, session_info: dict, message: str,
     user_db: Session) -> dict:
   """식단 챗봇 대화를 처리합니다."""
-  user_id = session_info.get("user_id")
-  response = generate_nutrition_response(message, session_id, user_db, user_id)
+  response = generate_nutrition_chat(message, session_id)
   return create_message_data(role=MessageRole.ASSISTANT, content=response,
                              session_id=session_id)
 def _handle_general_chat(memory, message: str, session_id:str) -> dict:
