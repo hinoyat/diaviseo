@@ -27,30 +27,7 @@ public class UserVerificationService {
     private static final long CODE_EXPIRE_SECONDS = 180; // 3분
     private static final String REDIS_PREFIX = "phone:";
 
-//    public void sendVerificationCode(String phone) {
-//        if (userRepository.existsByPhone(phone)) {
-//            throw new BadRequestException("이미 가입된 전화번호입니다.");
-//        }
-//
-//        String code = generateRandomCode();
-//        String key = REDIS_PREFIX + phone;
-//
-//        if (Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
-//            throw new BadRequestException("이미 인증 요청이 진행 중입니다. 잠시 후 다시 시도해주세요.");
-//        }
-//
-//        redisTemplate.opsForValue().set(key, code, CODE_EXPIRE_SECONDS, TimeUnit.SECONDS);
-//        log.info("인증번호 [{}]가 Redis에 저장됨. Key = {}", code, key);
-//
-//
-//        try {
-//            smsService.sendSms(phone, code);
-//        } catch (Exception e) {
-//            redisTemplate.delete(key); // 전송 실패 시 Redis 정리
-//            throw new InternalServerErrorException("SMS 인증번호 전송에 실패했습니다."); // → 커스텀 예외 or 500 응답
-//        }
-//    }
-    public String sendVerificationCode(String phone) {
+    public void sendVerificationCode(String phone) {
         if (userRepository.existsByPhone(phone)) {
             throw new BadRequestException("이미 가입된 전화번호입니다.");
         }
@@ -65,8 +42,31 @@ public class UserVerificationService {
         redisTemplate.opsForValue().set(key, code, CODE_EXPIRE_SECONDS, TimeUnit.SECONDS);
         log.info("인증번호 [{}]가 Redis에 저장됨. Key = {}", code, key);
 
-        return code;
+
+        try {
+            smsService.sendSms(phone, code);
+        } catch (Exception e) {
+            redisTemplate.delete(key); // 전송 실패 시 Redis 정리
+            throw new InternalServerErrorException("SMS 인증번호 전송에 실패했습니다."); // → 커스텀 예외 or 500 응답
+        }
     }
+//    public String sendVerificationCode(String phone) {
+//        if (userRepository.existsByPhone(phone)) {
+//            throw new BadRequestException("이미 가입된 전화번호입니다.");
+//        }
+//
+//        String code = generateRandomCode();
+//        String key = REDIS_PREFIX + phone;
+//
+//        if (Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
+//            throw new BadRequestException("이미 인증 요청이 진행 중입니다. 잠시 후 다시 시도해주세요.");
+//        }
+//
+//        redisTemplate.opsForValue().set(key, code, CODE_EXPIRE_SECONDS, TimeUnit.SECONDS);
+//        log.info("인증번호 [{}]가 Redis에 저장됨. Key = {}", code, key);
+//
+//        return code;
+//    }
 
     public void verifyCode(String phone, String code) {
         String key = REDIS_PREFIX + phone;
