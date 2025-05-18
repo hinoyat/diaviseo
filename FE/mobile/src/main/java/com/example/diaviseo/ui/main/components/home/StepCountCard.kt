@@ -63,7 +63,7 @@ fun StepCountCard(
                     modifier = Modifier
                         .size(20.dp)
                         .clickable {
-                            stepViewModel.startListening()
+                            stepViewModel.refreshStepCount()
                             Log.d("StepCard", "새로고침 클릭됨. 현재 today: ${today}, base: [숨김], 누적 steps: [실시간 아님]")
                         }
                 )

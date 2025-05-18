@@ -81,7 +81,7 @@ class MainActivity : ComponentActivity() {
 
         // WorkManager에 자정 스케줄 예약
         scheduleMidnightWorker()
-        scheduleTestWorker()
+//        scheduleTestWorker()
 
         setContent {
             DiaViseoTheme {
@@ -151,18 +151,18 @@ class MainActivity : ComponentActivity() {
         Log.d("reset", "✅ 자정 리셋 예약됨 (delay: $initialDelay 분 후 실행)")
     }
 
-    private fun scheduleTestWorker() {
-        val work = PeriodicWorkRequestBuilder<StepResetWorker>(1, TimeUnit.MINUTES)
-            .setInitialDelay(0, TimeUnit.MINUTES)
-            .build()
-
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "StepReset",
-            ExistingPeriodicWorkPolicy.UPDATE,
-            work
-        )
-        Log.d("reset", "✅ 테스트용 걸음 수 리셋 등록 (1분 주기)")
-    }
+//    private fun scheduleTestWorker() {
+//        val work = PeriodicWorkRequestBuilder<StepResetWorker>(1, TimeUnit.MINUTES)
+//            .setInitialDelay(0, TimeUnit.MINUTES)
+//            .build()
+//
+//        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+//            "StepReset",
+//            ExistingPeriodicWorkPolicy.UPDATE,
+//            work
+//        )
+//        Log.d("reset", "✅ 테스트용 걸음 수 리셋 등록 (1분 주기)")
+//    }
 
 
     private fun checkAndRequestPermission() {
