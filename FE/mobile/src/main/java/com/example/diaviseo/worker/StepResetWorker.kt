@@ -10,8 +10,10 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.diaviseo.datastore.StepDataStore
 import com.example.diaviseo.network.RetrofitInstance
+import com.example.diaviseo.network.exercise.dto.req.StepRecordRequest
 import kotlinx.coroutines.suspendCancellableCoroutine
 import retrofit2.HttpException
+import java.time.LocalDate
 import kotlin.coroutines.resume
 
 class StepResetWorker(
@@ -36,7 +38,7 @@ class StepResetWorker(
         Log.d("StepWorker", "✅ 자정 기준값 저장 완료: base=$totalSteps, yesterday=$yesterdaySteps")
 
         // 5. 오늘 걸음 수 백엔드 전송
-//        sendStepsToBackend(yesterdaySteps)
+        sendStepsToBackend(yesterdaySteps)
 
         Result.success()
     }.getOrElse { e ->
@@ -70,18 +72,25 @@ class StepResetWorker(
     /**
      * 백엔드 API 호출하여 걸음 수 전송
      */
-//    private suspend fun sendStepsToBackend(stepCount: Int) {
-//        try {
-//            val response = RetrofitInstance.exerciseApiService.uploadStepRecords(stepCount)
-//            if (response.isSuccessful) {
-//                Log.d("StepWorker", "✅ 걸음 수 백엔드 전송 성공: $stepCount")
-//            } else {
-//                Log.e("StepWorker", "❌ 걸음 수 전송 실패: ${response.code()}")
-//            }
-//        } catch (e: HttpException) {
-//            Log.e("StepWorker", "❌ 네트워크 오류", e)
-//        } catch (e: Exception) {
-//            Log.e("StepWorker", "❌ 알 수 없는 오류", e)
-//        }
-//    }
+    private suspend fun sendStepsToBackend(stepCount: Int) {
+        try {
+            val stepDate = LocalDate.now().minusDays(1).toString() // 어제 날짜
+            val step = StepRecordRequest(
+                stepDate = stepDate,
+                stepCount = stepCount
+            )
+            val response = RetrofitInstance.exerciseApiService.uploadStepRecords(listOf(step))
+
+            if (response.status == "OK") {
+                Log.d("StepWorker", "✅ 걸음 수 백엔드 전송 성공: $stepCount")
+            } else {
+                Log.e("StepWorker", "❌ 걸음 수 전송 실패: ${response.message}")
+            }
+
+        } catch (e: HttpException) {
+            Log.e("StepWorker", "❌ 네트워크 오류", e)
+        } catch (e: Exception) {
+            Log.e("StepWorker", "❌ 알 수 없는 오류", e)
+        }
+    }
 }
