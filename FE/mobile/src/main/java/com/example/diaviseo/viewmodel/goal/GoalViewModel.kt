@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import org.json.JSONObject
+import kotlin.collections.isNullOrEmpty
 
 
 class GoalViewModel : ViewModel() {
@@ -60,12 +61,14 @@ class GoalViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val response = RetrofitInstance.chatBotApiService.fetchFeedBack(feedbackType, date)
-                if (response.isSuccessful) {
+                if (response.isSuccessful && !response.body().isNullOrEmpty()) {
                     val message = response.body()
                     if (feedbackType == "nutrition") {
                         _nutritionFeedback.value = message.toString()
                     } else if (feedbackType == "workout") {
                         _workoutFeedback.value = message.toString()
+                    } else if (feedbackType == "weight_trend") {
+                        _weightFeedback.value = message.toString()
                     }
                 } else {
                     val errorJson = response.errorBody()?.string()
@@ -75,6 +78,8 @@ class GoalViewModel : ViewModel() {
                         _nutritionFeedback.value = ""
                     } else if (feedbackType == "workout") {
                         _workoutFeedback.value = ""
+                    } else if (feedbackType == "weight_trend") {
+                        _weightFeedback.value = ""
                     }
                     Log.d("AI feedback", "메세지 : $detail")
                 }
@@ -90,7 +95,7 @@ class GoalViewModel : ViewModel() {
             _isNutriLoading.value = true
             try {
                 val response = RetrofitInstance.chatBotApiService.createNutriFeedBack(date)
-                if (response.isSuccessful) {
+                if (response.isSuccessful && !response.body().isNullOrEmpty()) {
                     val answer = response.body()?.get("answer")
                     Log.d("API", "답변: $answer")
                     _nutritionFeedback.value = answer.toString()
