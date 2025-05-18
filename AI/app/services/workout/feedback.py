@@ -5,6 +5,7 @@ from requests import Session
 from app.config.settings import get_settings
 from app.repositories.body_info_repository import get_user_info_for_feedback, \
   calculate_additional_calories_to_burn
+from app.repositories.feedback_repository import insert_feedback, FeedbackType
 from app.services.memory.mongo_memory import get_memory
 from app.services.workout.prompt.prompt_templates import \
   workout_feedback_prompt, weight_trend_feedback_prompt
@@ -95,5 +96,6 @@ def generate_trend_weight_feedback(user_id: int, user_db: Session,
   # LLM 호출하여 피드백 생성
   response = llm.invoke(formatted_prompt)
 
+  insert_feedback(user_id, response.content, FeedbackType.WEIGHT_TREND)
   # 결과 반환
   return response.content

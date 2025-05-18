@@ -8,7 +8,9 @@ import com.example.diaviseo.network.chatbot.dto.res.EndSessionResponse
 import com.example.diaviseo.network.chatbot.dto.res.SessionSummaryResponse
 import com.example.diaviseo.network.chatbot.dto.res.StartSessionResponse
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.HTTP
 import retrofit2.http.POST
 import retrofit2.http.Path
 
@@ -34,7 +36,7 @@ interface ChatBotApiService {
         @Path("sessionId") sessionId: String
     ): List<ChatMessageResponse>
 
-    @POST("chatbot/end-session")
+    @HTTP(method = "DELETE", path = "chatbot/end-session", hasBody = true)
     suspend fun endSession(
         @Body request: EndSessionRequest
     ): EndSessionResponse

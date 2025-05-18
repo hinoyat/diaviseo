@@ -28,7 +28,7 @@ fun DietSuggestionScreen(
     val nickname = profileState?.nickname ?: "사용자"
 
     var selectedCategory by remember { mutableStateOf(0) }
-    val categories = listOf("최근", "세트", "음식")
+    val categories = listOf("최근", "세트")
 
     // 서버에서 받아온 상세 음식 정보
     val selectedFood = remember { mutableStateOf<FoodDetailResponse?>(null) }
@@ -89,7 +89,6 @@ fun DietSuggestionScreen(
                     navController.navigate("diet_confirm") // 등록 화면으로 이동
                 }
             )
-            2 -> DefaultCategoryContent("음식")
         }
     }
 
@@ -120,18 +119,4 @@ fun DietSuggestionScreen(
         )
     }
 
-}
-
-@Composable
-fun DefaultCategoryContent(name: String) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "선택된 카테고리: $name")
-            Spacer(modifier = Modifier.height(10.dp))
-            Text(text = "인기 음식 추가 예정")
-        }
-    }
 }

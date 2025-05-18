@@ -1,9 +1,5 @@
-// 리팩토링: ChatInputBar 위치 개선 버전
 package com.example.diaviseo.ui.main
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -16,22 +12,25 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.diaviseo.R
+import com.example.diaviseo.model.chat.ChatMessage
 import com.example.diaviseo.ui.main.components.chat.*
 import com.example.diaviseo.ui.theme.DiaViseoColors
-import kotlinx.coroutines.delay
+import com.example.diaviseo.viewmodel.chat.ChatBotViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Composable
 fun ChatScreen(navController: NavController) {
+    val viewModel: ChatBotViewModel = viewModel()
     val history = navController.previousBackStackEntry?.savedStateHandle?.get<ChatHistory>("selectedHistory")
 
     ChatContent(
         history = history,
+        viewModel = viewModel,
         onBackClick = { navController.popBackStack() },
         onExitClick = { navController.navigate("chat_history") }
     )
@@ -40,32 +39,34 @@ fun ChatScreen(navController: NavController) {
 @Composable
 fun ChatContent(
     history: ChatHistory?,
+    viewModel: ChatBotViewModel,
     onBackClick: () -> Unit,
     onExitClick: () -> Unit
 ) {
-    var input by remember { mutableStateOf("") }
-    var isTyping by remember { mutableStateOf(false) }
-    var showExitDialog by remember { mutableStateOf(false) }
-
-    val coroutineScope = rememberCoroutineScope()
+    val inputState = remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
+    val messages by viewModel.messages.collectAsState()
+    val isTyping by viewModel.isTyping.collectAsState()
+    val isSessionEnded by viewModel.isSessionEnded.collectAsState()
+    val sessionId by viewModel.sessionId.collectAsState()
 
     var selectedTopic by remember { mutableStateOf<ChatTopic?>(history?.topic) }
-    var hasAskedFirstQuestion by remember { mutableStateOf(history != null) }
+    var showExitDialog by remember { mutableStateOf(false) }
 
-    val messages = remember {
-        mutableStateListOf<ChatMessage>().apply {
-            history?.let {
-                add(ChatMessage(it.lastMessage, true, it.timestamp))
-            }
-        }
-    }
-
-    LaunchedEffect(messages.size) {
-        if (messages.isNotEmpty()) {
-            listState.animateScrollToItem(messages.size - 1)
+    LaunchedEffect(Unit) {
+        if (history != null) {
+            viewModel.loadMessages(
+                sessionId = history.id,
+                characterImageRes = when (history.topic) {
+                    ChatTopic.DIET -> R.drawable.chat_char_diet
+                    ChatTopic.EXERCISE -> R.drawable.chat_char_exercise
+                },
+                isEnded = history.isEnded
+            )
         }
     }
 
@@ -90,30 +91,19 @@ fun ChatContent(
                     .padding(top = 12.dp),
                 reverseLayout = false
             ) {
-                if (selectedTopic == null) {
+                if (sessionId == null && selectedTopic == null) {
                     item {
                         FixedIntroScenario(onSelectTopic = { topic ->
                             selectedTopic = topic
-                            messages.add(
-                                ChatMessage(
-                                    text = when (topic) {
-                                        ChatTopic.DIET -> "식단이🥗를 골라주셨어요! 어떤 질문으로 시작해볼까요?"
-                                        ChatTopic.EXERCISE -> "운동이💪를 골라주셨어요! 어떤 질문으로 시작해볼까요?"
-                                    },
-                                    isUser = false,
-                                    timestamp = LocalDateTime.now(),
-                                    characterImageRes = when (topic) {
-                                        ChatTopic.DIET -> R.drawable.chat_char_diet
-                                        ChatTopic.EXERCISE -> R.drawable.chat_char_exercise
-                                    }
-                                )
-                            )
-                            messages.add(
-                                ChatMessage(
-                                    text = "__SHOW_INITIAL_QUESTION_BUTTONS__",
-                                    isUser = false,
-                                    timestamp = LocalDateTime.now()
-                                )
+                            viewModel.startSession(
+                                type = when (topic) {
+                                    ChatTopic.DIET -> "nutrition"
+                                    ChatTopic.EXERCISE -> "workout"
+                                },
+                                characterImageRes = when (topic) {
+                                    ChatTopic.DIET -> R.drawable.chat_char_diet
+                                    ChatTopic.EXERCISE -> R.drawable.chat_char_exercise
+                                }
                             )
                         })
                     }
@@ -124,32 +114,14 @@ fun ChatContent(
                         if (index == 0 || isNewDay(messages[index - 1], msg)) {
                             ChatDateDivider(date = msg.timestamp.toLocalDate())
                         }
-
                         if (msg.text == "__SHOW_INITIAL_QUESTION_BUTTONS__") {
                             InitialQuestionButtons(
                                 topic = selectedTopic,
                                 onClick = { question ->
-                                    messages.removeAll { it.text == "__SHOW_INITIAL_QUESTION_BUTTONS__" }
-                                    hasAskedFirstQuestion = true
-
-                                    messages.add(ChatMessage(question, true, LocalDateTime.now()))
-                                    isTyping = true
-
-                                    coroutineScope.launch {
-                                        delay(5000)
-                                        messages.add(
-                                            ChatMessage(
-                                                text = "이건 $question 에 대한 답변입니다! 😄",
-                                                isUser = false,
-                                                timestamp = LocalDateTime.now(),
-                                                characterImageRes = when (selectedTopic) {
-                                                    ChatTopic.DIET -> R.drawable.chat_char_diet
-                                                    ChatTopic.EXERCISE -> R.drawable.chat_char_exercise
-                                                    else -> null
-                                                }
-                                            )
-                                        )
-                                        isTyping = false
+                                    // 직접 입력할게요 선택 시 메시지 전송 없이 버튼만 제거
+                                    viewModel.removeInitialQuestionButtons()
+                                    if (question != "직접 입력할게요") {
+                                        viewModel.sendMessage(question)
                                     }
                                 }
                             )
@@ -160,61 +132,36 @@ fun ChatContent(
                 }
 
                 if (isTyping) {
-                    item {
-                        TypingIndicator()
-                    }
+                    item { TypingIndicator() }
                 }
             }
 
-            if (!showExitDialog && selectedTopic != null) {
-                ChatInputBar(
-                    inputText = input,
-                    onInputChange = { input = it },
-                    onSendClick = {
-                        if (input.isNotBlank()) {
-                            messages.removeAll { it.text == "__SHOW_INITIAL_QUESTION_BUTTONS__" }
-                            hasAskedFirstQuestion = true
-
-                            messages.add(ChatMessage(input, true, LocalDateTime.now()))
-                            input = ""
-                            isTyping = true
+            if (!showExitDialog && sessionId != null) {
+                key(isSessionEnded) {
+                    ChatInputBar(
+                        inputText = inputState.value,
+                        onInputChange = { inputState.value = it },
+                        onSendClick = {
+                            viewModel.sendMessage(inputState.value)
+                            inputState.value = ""
                             keyboardController?.hide()
                             focusManager.clearFocus()
-
-                            coroutineScope.launch {
-                                delay(5000)
-                                messages.add(
-                                    ChatMessage(
-                                        text = "이건 예시 챗봇 응답이에요 🍱",
-                                        isUser = false,
-                                        timestamp = LocalDateTime.now(),
-                                        characterImageRes = when (selectedTopic) {
-                                            ChatTopic.DIET -> R.drawable.chat_char_diet
-                                            ChatTopic.EXERCISE -> R.drawable.chat_char_exercise
-                                            else -> null
-                                        }
-                                    )
-                                )
-                                isTyping = false
-                            }
-                        }
-                    },
-                    isSending = isTyping,
-                    enabled = true,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                )
+                        },
+                        isSending = isTyping,
+                        enabled = !isSessionEnded,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    )
+                }
             }
 
             if (showExitDialog) {
                 ExitChatDialog(
                     onConfirm = {
+                        viewModel.endSession()
                         showExitDialog = false
-                        input = ""
-                        messages.clear()
-                        selectedTopic = null
-                        hasAskedFirstQuestion = false
+                        inputState.value = ""
                         onExitClick()
                     },
                     onDismiss = { showExitDialog = false }

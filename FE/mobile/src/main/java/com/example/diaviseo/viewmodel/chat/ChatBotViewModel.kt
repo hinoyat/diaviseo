@@ -1,23 +1,25 @@
-package com.example.diaviseo.viewmodel
+package com.example.diaviseo.viewmodel.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.diaviseo.model.chat.ChatMessage
 import com.example.diaviseo.network.RetrofitInstance
 import com.example.diaviseo.network.chatbot.dto.req.*
-import com.example.diaviseo.network.chatbot.dto.res.ErrorResponse
+import com.example.diaviseo.network.chatbot.dto.res.*
+import com.example.diaviseo.ui.main.components.chat.ChatHistory
+import com.example.diaviseo.ui.main.components.chat.ChatTopic
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 class ChatBotViewModel : ViewModel() {
 
     private val api = RetrofitInstance.chatBotApiService
 
+    // 🔹 메시지 흐름
     private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val messages: StateFlow<List<ChatMessage>> = _messages
 
@@ -31,6 +33,33 @@ class ChatBotViewModel : ViewModel() {
     val isSessionEnded: StateFlow<Boolean> = _isSessionEnded
 
     var currentCharacterImageRes: Int? = null
+
+    // 🔹 히스토리 흐름
+    private val _histories = MutableStateFlow<List<ChatHistory>>(emptyList())
+    val histories: StateFlow<List<ChatHistory>> = _histories
+
+    fun fetchHistories() {
+        viewModelScope.launch {
+            try {
+                val response = api.getChatSessions()
+                _histories.value = response.map {
+                    ChatHistory(
+                        id = it.session_id,
+                        topic = when (it.chatbot_type) {
+                            "nutrition" -> ChatTopic.DIET
+                            "workout" -> ChatTopic.EXERCISE
+                            else -> error("Unknown chatbot_type: ${it.chatbot_type}")
+                        },
+                        lastMessage = "이전 대화 보기",
+                        timestamp = LocalDateTime.parse(it.started_at),
+                        isEnded = it.ended_at != null
+                    )
+                }
+            } catch (e: Exception) {
+                handleError(e)
+            }
+        }
+    }
 
     fun startSession(type: String, characterImageRes: Int? = null) {
         viewModelScope.launch {
@@ -89,27 +118,45 @@ class ChatBotViewModel : ViewModel() {
         }
     }
 
-    fun loadMessages(sessionId: String, characterImageRes: Int? = null) {
+    fun loadMessages(sessionId: String, characterImageRes: Int? = null, isEnded: Boolean = false) {
         viewModelScope.launch {
             try {
                 val response = api.getChatMessages(sessionId)
                 currentCharacterImageRes = characterImageRes
                 _sessionId.value = sessionId
-                _isSessionEnded.value = false
+                _isSessionEnded.value = isEnded
 
-                _messages.value = response.map {
-                    ChatMessage(
-                        text = it.content,
-                        isUser = it.role == "user",
-                        timestamp = LocalDateTime.parse(it.timestamp),
-                        characterImageRes = if (it.role == "assistant") characterImageRes else null
+                if (response.isEmpty()) {
+                    // 👉 세션은 있지만 메시지가 없을 경우 인사말과 추천 질문 넣기
+                    _messages.value = listOf(
+                        ChatMessage(
+                            text = "안녕하세요! 어떤 내용이 궁금하신가요?",
+                            isUser = false,
+                            timestamp = LocalDateTime.now(),
+                            characterImageRes = characterImageRes
+                        ),
+                        ChatMessage(
+                            text = "__SHOW_INITIAL_QUESTION_BUTTONS__",
+                            isUser = false,
+                            timestamp = LocalDateTime.now()
+                        )
                     )
+                } else {
+                    _messages.value = response.map {
+                        ChatMessage(
+                            text = it.content,
+                            isUser = it.role == "user",
+                            timestamp = LocalDateTime.parse(it.timestamp),
+                            characterImageRes = if (it.role == "assistant") characterImageRes else null
+                        )
+                    }
                 }
             } catch (e: Exception) {
                 handleError(e)
             }
         }
     }
+
 
     private fun handleError(e: Exception) {
         val message = extractErrorMessage(e)
@@ -133,4 +180,9 @@ class ChatBotViewModel : ViewModel() {
             else -> e.message ?: "알 수 없는 오류 발생"
         }
     }
+
+    fun removeInitialQuestionButtons() {
+        _messages.value = _messages.value.filterNot { it.text == "__SHOW_INITIAL_QUESTION_BUTTONS__" }
+    }
+
 }
