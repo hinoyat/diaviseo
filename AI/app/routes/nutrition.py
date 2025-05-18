@@ -31,4 +31,4 @@ def nutrition_feedback(feedback_date: date, user_db:Session = Depends(get_sessio
     from app.schemas.chat import FeedbackType
     insert_feedback(user_id=user_id,feedback=response,feedback_type=FeedbackType.nutrition, feedback_date=datetime.datetime.combine(feedback_date, datetime.time()))
 
-    return {"answer": response}
+    return {"feedback": response}
