@@ -34,6 +34,9 @@ import com.example.diaviseo.utils.rememberGalleryPickerLauncher
 import com.example.diaviseo.utils.shouldShowGalleryRationale
 import android.app.Activity
 import android.Manifest
+import androidx.compose.foundation.background
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import com.example.diaviseo.network.RetrofitInstance
 import com.example.diaviseo.network.food.dto.res.FoodDetailResponse
 import com.example.diaviseo.utils.getGalleryPermission
@@ -98,15 +101,43 @@ fun DietConfirmScreen(
         ) {
             // 이미지 선택
             selectedImageUri.value?.let { uri ->
-                Image(
-                    painter = rememberAsyncImagePainter(uri),
-                    contentDescription = "선택된 이미지",
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(220.dp)
                         .clip(RoundedCornerShape(12.dp))
-                )
-            } ?: PhotoUploadHintBox(
+                        .clickable {
+                            // 이미지 다시 선택
+                            galleryLauncher.launch("image/*")
+                        }
+                ) {
+                    // 배경 이미지
+                    Image(
+                        painter = rememberAsyncImagePainter(uri),
+                        contentDescription = "선택된 이미지",
+                        modifier = Modifier.fillMaxSize()
+                    )
+
+                    // 우측 상단 수정 아이콘 오버레이
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp)
+                            .size(32.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(Color.Black.copy(alpha = 0.5f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "사진 다시 선택",
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+            }
+                ?: PhotoUploadHintBox(
                 isAiMode = false,
                 onClick = {
                     val permission = getGalleryPermission()

@@ -19,6 +19,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Icon
 import androidx.navigation.NavController
+import com.example.diaviseo.ui.theme.medium14
+import com.example.diaviseo.ui.theme.regular14
+import com.example.diaviseo.ui.theme.semibold16
 
 @Composable
 fun MySyncSection(
@@ -27,9 +30,7 @@ fun MySyncSection(
     Column {
         Text(
             text = "건강 데이터 연동",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
-            color = DiaViseoColors.Basic,
+            style = semibold16,
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
@@ -50,7 +51,7 @@ fun MySyncSection(
             ) {
                 Text(
                     text = "헬스 커넥트",
-                    fontSize = 14.sp,
+                    style = medium14,
                     color = DiaViseoColors.Unimportant
                 )
                 Icon(

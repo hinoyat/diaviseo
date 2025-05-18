@@ -15,6 +15,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.diaviseo.ui.theme.DiaViseoColors
+import com.example.diaviseo.ui.theme.medium14
+import com.example.diaviseo.ui.theme.regular14
 
 @Composable
 fun MyFaqCard(onClick: () -> Unit) {
@@ -34,9 +36,8 @@ fun MyFaqCard(onClick: () -> Unit) {
         ) {
             Text(
                 text = "자주 묻는 질문 (FAQ)",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = DiaViseoColors.Basic
+                style = medium14,
+                color = DiaViseoColors.Unimportant
             )
         }
     }

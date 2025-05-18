@@ -47,11 +47,10 @@ fun MyPhysicalInfoCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "키", fontSize = 14.sp, color = DiaViseoColors.Unimportant)
+                    Text(text = "키", style = medium14, color = DiaViseoColors.Unimportant)
                     Text(
                         text = String.format("%.1f cm", height),
-                        fontSize = 16.sp,
-                        color = DiaViseoColors.Basic
+                        style = regular16
                     )
                 }
 
@@ -66,11 +65,11 @@ fun MyPhysicalInfoCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "몸무게", fontSize = 14.sp, color = DiaViseoColors.Unimportant)
+                    Text(
+                        text = "몸무게",style = medium14, color = DiaViseoColors.Unimportant)
                     Text(
                         text = String.format("%.1f kg", weight),
-                        fontSize = 16.sp,
-                        color = DiaViseoColors.Basic
+                        style = regular16
                     )
                 }
             }

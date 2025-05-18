@@ -12,6 +12,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.diaviseo.ui.theme.DiaViseoColors
+import com.example.diaviseo.ui.theme.medium14
+import com.example.diaviseo.ui.theme.regular14
 
 @Composable
 fun MyAlarmSettingCard(
@@ -33,9 +35,8 @@ fun MyAlarmSettingCard(
         ) {
             Text(
                 text = "알림 설정",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                color = DiaViseoColors.Basic
+                style = medium14,
+                color = DiaViseoColors.Unimportant
             )
             Switch(
                 checked = isEnabled,
