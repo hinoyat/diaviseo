@@ -1,17 +1,15 @@
 import pickle
 import logging
 import requests, tempfile
-import os
-from dotenv import load_dotenv
 from pathlib import Path
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from app.config.log import logging_check
+from app.config.settings import get_settings
 
 logging_check()
-load_dotenv()
 
 '''
 1단계 : 문서 로드(Load Documents)
@@ -20,7 +18,7 @@ load_dotenv()
 4단계 : DB 생성 및 저장
 '''
 
-
+settings = get_settings()
 def build_index():
     # 1) 프로젝트 루트/data
     # 현재 파일 위치에서 시작
@@ -42,8 +40,7 @@ def build_index():
         logging.info("❗️ 인덱스 이미 존재—재생성하지 않습니다.")
         return
 
-
-    pdf_url = os.getenv("PDF_URL")
+    pdf_url = settings.pdf_url
     # 1) PDF 다운로드해서 임시 파일로 저장
     resp = requests.get(pdf_url)
     resp.raise_for_status()
