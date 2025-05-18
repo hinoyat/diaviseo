@@ -34,6 +34,12 @@ class GoalViewModel : ViewModel() {
     private val _isWorkLoading = MutableStateFlow(false)
     val isWorkLoading: StateFlow<Boolean> = _isWorkLoading
 
+    private val _weightFeedback = MutableStateFlow("")
+    val weightFeedback: StateFlow<String> = _weightFeedback
+
+    private val _isWeightLoading = MutableStateFlow(false)
+    val isWeightLoading: StateFlow<Boolean> = _isWeightLoading
+
     fun loadDataForDate(date: LocalDate) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -81,12 +87,14 @@ class GoalViewModel : ViewModel() {
 
     fun createNutriFeedBack(date: String) {
         viewModelScope.launch {
+            _isNutriLoading.value = true
             try {
                 val response = RetrofitInstance.chatBotApiService.createNutriFeedBack(date)
                 if (response.isSuccessful) {
                     val answer = response.body()?.get("answer")
                     Log.d("API", "답변: $answer")
                     _nutritionFeedback.value = answer.toString()
+                    _isNutriLoading.value = false
                 } else {
                     val errorJson = response.errorBody()?.string()
                     val detail = JSONObject(errorJson ?: "").optString("answer")
@@ -97,6 +105,33 @@ class GoalViewModel : ViewModel() {
                 // 네트워크 끊김, 타임아웃 등
                 Log.e("AI feedback", "❌ 네트워크 오류: ${e.localizedMessage}")
             }
+
+            _isNutriLoading.value = false
+        }
+    }
+
+    fun createHomeFeedBack(date: String) {
+        viewModelScope.launch {
+            _isWeightLoading.value = true
+            try {
+                val response = RetrofitInstance.chatBotApiService.createHomeFeedBack(date)
+                if (response.isSuccessful) {
+                    val answer = response.body()?.get("feedback")
+                    Log.d("API", "답변: $answer")
+                    _weightFeedback.value = answer.toString()
+                    _isWeightLoading.value = false
+                } else {
+                    val errorJson = response.errorBody()?.string()
+                    val detail = JSONObject(errorJson ?: "").optString("feedback")
+                    _weightFeedback.value = "오류가 발생했습니다 다시 한번 시도해주세요🥹"
+                    Log.d("AI feedback", "메세지 : $detail")
+                }
+            } catch (e: Exception) {
+                // 네트워크 끊김, 타임아웃 등
+                Log.e("AI feedback", "❌ 네트워크 오류: ${e.localizedMessage}")
+            }
+
+            _isWeightLoading.value = false
         }
     }
 

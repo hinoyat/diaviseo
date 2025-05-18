@@ -55,4 +55,10 @@ interface ChatBotApiService {
     suspend fun createNutriFeedBack(
         @Query("date") date: String
     ): Response<Map<String, String>>
+
+    // 홈 - 피드백 생성
+    @GET("chatbot/weight/trend")
+    suspend fun createHomeFeedBack(
+        @Query("date") date: String
+    ): Response<Map<String, String>>
 }
