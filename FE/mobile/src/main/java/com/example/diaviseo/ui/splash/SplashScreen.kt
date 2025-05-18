@@ -86,17 +86,19 @@ fun SplashScreen(
 
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn != null) {
-            profileViewModel.fetchMyProfile()
-            homeViewModel.fetchDailyNutrition(today)
-            homeViewModel.fetchDailyExercise(today)
-
-            delay(3000)
-
             if (isLoggedIn == true) {
+                profileViewModel.fetchMyProfile()
+                homeViewModel.fetchDailyNutrition(today)
+                homeViewModel.fetchDailyExercise(today)
+
+                delay(3000)
+
                 navController.navigate("main") {
                     popUpTo(0)
                 }
             } else {
+                delay(3000)
+
                 navController.navigate("signup") {
                     popUpTo(0)
                 }
