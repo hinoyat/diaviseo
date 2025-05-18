@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.diaviseo.datastore.StepDataStore
+import com.example.diaviseo.network.RetrofitInstance
 import kotlinx.coroutines.suspendCancellableCoroutine
 import retrofit2.HttpException
 import kotlin.coroutines.resume
@@ -71,7 +72,7 @@ class StepResetWorker(
      */
 //    private suspend fun sendStepsToBackend(stepCount: Int) {
 //        try {
-//            val response = ApiClient.stepApi.sendDailySteps(stepCount)
+//            val response = RetrofitInstance.exerciseApiService.uploadStepRecords(stepCount)
 //            if (response.isSuccessful) {
 //                Log.d("StepWorker", "✅ 걸음 수 백엔드 전송 성공: $stepCount")
 //            } else {
