@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     eureka_renewal_interval_in_secs: int
     eureka_duration_in_secs: int
 
+    # minio
+    pdf_url: str
     # 설정 파일 위치 (.env)
     model_config = {
         "env_file": ".env",
