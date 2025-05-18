@@ -11,12 +11,12 @@ class FeedbackType(Enum):
   NUTRITION = "nutrition"
   GENERAL = "general"
 
-def insert_feedback(user_id: int, feedback: str, feedback_type: FeedbackType):
+def insert_feedback(user_id: int, feedback: str, feedback_type: FeedbackType, feedback_date:datetime.datetime):
   feedback_collection = get_feedback_collection()
   doc = {
     "user_id": user_id,
     "feedback_text": feedback,
-    "feedback_date": datetime.datetime.today(),
+    "feedback_date": feedback_date,
     "feedback_type": feedback_type.value
   }
   feedback_collection.insert_one(doc)
