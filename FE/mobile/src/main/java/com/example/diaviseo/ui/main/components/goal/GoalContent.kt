@@ -53,7 +53,6 @@ fun GoalContent(
     val sugarRatio by mealViewModel.sugarRatio.collectAsState()
     val proteinRatio by mealViewModel.proteinRatio.collectAsState()
     val fatRatio by mealViewModel.fatRatio.collectAsState()
-    val isLoading by mealViewModel.isLoading.collectAsState()
 
     // 평가<->디테일 운동 관리
     val exerciseViewModel: ExerciseViewModel = viewModel()
@@ -61,7 +60,6 @@ fun GoalContent(
     val weeklyData by exerciseViewModel.weeklyStats.collectAsState()
     val monthlyData by exerciseViewModel.monthlyStats.collectAsState()
     val stepData by exerciseViewModel.stepData.collectAsState()
-    val exIsLoading by exerciseViewModel.isLoading.collectAsState()
 
     // 평가 체성분
     val weightViewModel : WeightViewModel = viewModel()
@@ -80,7 +78,6 @@ fun GoalContent(
         selectedDate == LocalDate.now()
     }
 
-    // 16일 할일, 성별 불러오고 체성분 불러오기
     val isMale = if (gender != null) {gender == "M"} else false
 
     LaunchedEffect(selectedDate) {
@@ -97,7 +94,6 @@ fun GoalContent(
 //        exerciseViewModel.fetchDailyExercise(selectedDate.toString())
 //        weightViewModel.fetchAllLists(selectedDate.toString())
 
-//      우리 언니 울어요
         mealViewModel.fetchPhysicalInfo(selectedDate.toString())
         coroutineScope {
             mealViewModel.fetchMealStatistic("DAY", selectedDate.toString())
@@ -107,8 +103,6 @@ fun GoalContent(
             weightViewModel.fetchAllLists(selectedDate.toString())
         }
     }
-
-//    LoadingOverlay(isLoading || exIsLoading)
 
     Column(
         modifier = Modifier
@@ -146,7 +140,6 @@ fun GoalContent(
                 AiTipBox(
                     message = nutritionFeedback,
                     onRequestFeedback = {
-                        // 피드백 요청 처리
                          goalViewModel.createNutriFeedBack(selectedDate.toString())
                     },
                     isLoading = isNutriLoading
@@ -226,8 +219,7 @@ fun GoalContent(
                 AiTipBox(
                     message = workoutFeedback,
                     onRequestFeedback = {
-                        // 피드백 요청 처리
-                        // 예: goalViewModel.requestAiFeedback()
+                        goalViewModel.createWorkFeedBack(selectedDate.toString())
                     },
                     isLoading = isWorkLoading
                 )

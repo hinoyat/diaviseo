@@ -48,7 +48,7 @@ interface ChatBotApiService {
     suspend fun fetchFeedBack(
         @Path("feedbackType") feedbackType: String,
         @Query("date") date: String
-    ): Response<String>
+    ): Response<String?>
 
     // 식단 피드백 생성
     @POST("chatbot/nutrition_feedback")
@@ -59,6 +59,12 @@ interface ChatBotApiService {
     // 홈 - 피드백 생성
     @GET("chatbot/weight/trend")
     suspend fun createHomeFeedBack(
+        @Query("date") date: String
+    ): Response<Map<String, String>>
+
+    // 체중 피드백 생성
+    @GET("ai/bodies/predict-weight")
+    suspend fun createWorkFeedBack(
         @Query("date") date: String
     ): Response<Map<String, String>>
 }
