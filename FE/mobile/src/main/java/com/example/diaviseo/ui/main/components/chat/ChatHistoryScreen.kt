@@ -1,4 +1,3 @@
-// ChatHistoryScreen.kt
 package com.example.diaviseo.ui.main.components.chat
 
 import androidx.compose.foundation.background
@@ -19,8 +18,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.diaviseo.ui.theme.DiaViseoColors
+import com.example.diaviseo.viewmodel.chat.ChatBotViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -28,22 +29,23 @@ data class ChatHistory(
     val id: String,
     val topic: ChatTopic,
     val lastMessage: String,
-    val timestamp: LocalDateTime
+    val timestamp: LocalDateTime,
+    val isEnded: Boolean = false
 ) : java.io.Serializable
 
 @Composable
 fun ChatHistoryScreen(navController: NavController) {
-    val mockHistories = remember {
-        listOf(
-            ChatHistory("1", ChatTopic.DIET, "오늘 뭐 먹지?", LocalDateTime.now().minusHours(1)),
-            ChatHistory("2", ChatTopic.EXERCISE, "하체 루틴 뭐할까", LocalDateTime.now().minusDays(3))
-        )
-    }
+    val viewModel: ChatBotViewModel = viewModel()
+    val histories by viewModel.histories.collectAsState()
     var selectedFilter by remember { mutableStateOf<ChatTopic?>(null) }
 
+    LaunchedEffect(Unit) {
+        viewModel.fetchHistories()
+    }
+
     val filteredHistories = selectedFilter?.let { topic ->
-        mockHistories.filter { it.topic == topic }
-    } ?: mockHistories
+        histories.filter { it.topic == topic }
+    } ?: histories
 
     ChatHistoryContent(
         histories = filteredHistories,
@@ -174,12 +176,14 @@ private fun EmptyHistoryMessage(selectedFilter: ChatTopic?) {
 
 @Composable
 private fun ChatHistoryCard(history: ChatHistory, onClick: () -> Unit) {
+    val isEnded = history.isEnded
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(Color.White)
-            .clickable { onClick() }
+            .clickable(enabled = !isEnded) { onClick() } // 종료된 대화면 클릭 막을 수도 있음
             .padding(16.dp)
     ) {
         Text(
@@ -189,17 +193,21 @@ private fun ChatHistoryCard(history: ChatHistory, onClick: () -> Unit) {
             },
             fontWeight = FontWeight.SemiBold,
             fontSize = 15.sp,
-            color = DiaViseoColors.Basic
+            color = if (isEnded) DiaViseoColors.Placeholder else DiaViseoColors.Basic
         )
+
         Spacer(modifier = Modifier.height(4.dp))
+
         Text(
-            text = history.lastMessage,
+            text = if (isEnded) "종료된 대화입니다" else history.lastMessage,
             fontSize = 14.sp,
             color = DiaViseoColors.Placeholder,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+
         Spacer(modifier = Modifier.height(6.dp))
+
         Text(
             text = history.timestamp.format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm")),
             fontSize = 12.sp,

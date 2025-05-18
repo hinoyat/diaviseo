@@ -46,11 +46,11 @@ fun FixedIntroScenario(
         ) {
             CharacterCard(
                 imageRes = R.drawable.chat_char_exercise,
-                onClick = { onSelectTopic(ChatTopic.DIET) }
+                onClick = { onSelectTopic(ChatTopic.EXERCISE) }
             )
             CharacterCard(
                 imageRes = R.drawable.chat_char_diet,
-                onClick = { onSelectTopic(ChatTopic.EXERCISE) }
+                onClick = { onSelectTopic(ChatTopic.DIET) }
             )
         }
     }

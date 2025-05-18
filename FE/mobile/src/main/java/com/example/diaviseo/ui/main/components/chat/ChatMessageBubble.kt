@@ -22,17 +22,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.diaviseo.R
+import com.example.diaviseo.model.chat.ChatMessage
 import com.example.diaviseo.ui.theme.DiaViseoColors
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
-/** ChatMessage 데이터 클래스 */
-data class ChatMessage(
-    val text: String,
-    val isUser: Boolean,
-    val timestamp: LocalDateTime,
-    val characterImageRes: Int? = null
-)
 
 @Composable
 fun ChatMessageBubble(
