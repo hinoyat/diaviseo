@@ -15,6 +15,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.diaviseo.ui.theme.DiaViseoColors
+import com.example.diaviseo.ui.theme.medium14
+import com.example.diaviseo.ui.theme.regular14
+import com.example.diaviseo.ui.theme.semibold16
 
 @Composable
 fun MyHealthDataList(
@@ -24,9 +27,7 @@ fun MyHealthDataList(
     Column {
         Text(
             text = "나의 건강 데이터",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
-            color = DiaViseoColors.Basic,
+            style = semibold16,
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
@@ -46,10 +47,10 @@ fun MyHealthDataList(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "알러지", fontSize = 14.sp, color = DiaViseoColors.Unimportant)
+                Text(text = "알러지", style = medium14, color = DiaViseoColors.Unimportant)
                 Text(
                     text = "수정",
-                    fontSize = 14.sp,
+                    style = regular14,
                     color = DiaViseoColors.Unimportant,
                     modifier = Modifier.clickable { onEditAllergy() }
                 )
@@ -70,10 +71,10 @@ fun MyHealthDataList(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "기저질환", fontSize = 14.sp, color = DiaViseoColors.Unimportant)
+                Text(text = "기저질환",style = medium14, color = DiaViseoColors.Unimportant)
                 Text(
                     text = "수정",
-                    fontSize = 14.sp,
+                    style = regular14,
                     color = DiaViseoColors.Unimportant,
                     modifier = Modifier.clickable { onEditDisease() }
                 )

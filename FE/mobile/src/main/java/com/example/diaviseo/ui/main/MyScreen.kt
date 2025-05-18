@@ -17,6 +17,7 @@ import com.example.diaviseo.network.user.dto.res.FetchProfileResponse
 import com.example.diaviseo.ui.components.CommonTopBar
 import com.example.diaviseo.ui.components.my.*
 import com.example.diaviseo.ui.theme.DiaViseoColors
+import com.example.diaviseo.ui.theme.semibold16
 import com.example.diaviseo.viewmodel.ProfileViewModel
 
 @Composable
@@ -75,10 +76,13 @@ fun MyScreen(navController: NavHostController) {
                             UserUpdateRequest(notificationEnabled = it)
                         )
                     },
+                )
+            }
+            item {
+                CustomerSection(
                     onFaqClick = { navController.navigate("faq") }
                 )
             }
-
             item {
                 Spacer(modifier = Modifier.height(55.dp))
             }
@@ -117,9 +121,10 @@ private fun HealthSection(navController: NavHostController) {
             onEditAllergy = { navController.navigate("edit_allergy") },
             onEditDisease = { navController.navigate("edit_disease") }
         )
-        MyExtraDataList(
-            onEditExercise = { navController.navigate("edit_exercise") }
-        )
+        // 선호하는 운동 제거 (운동 - 즐겨찾기 기능으로 대체)
+//        MyExtraDataList(
+//            onEditExercise = { navController.navigate("edit_exercise") }
+//        )
     }
 }
 
@@ -137,12 +142,10 @@ private fun SyncSection(navController: NavHostController) {
 private fun SettingSection(
     isAlarmEnabled: Boolean,
     onToggle: (Boolean) -> Unit,
-    onFaqClick: () -> Unit
 ) {
     Text(
-        text = "설정관리",
-        fontSize = 16.sp,
-        color = DiaViseoColors.Basic,
+        text = "설정 관리",
+        style = semibold16,
         modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
     )
 
@@ -151,10 +154,23 @@ private fun SettingSection(
             isEnabled = isAlarmEnabled,
             onToggle = onToggle
         )
-
-        MyFaqCard(onClick = onFaqClick)
     }
 }
+
+@Composable
+fun CustomerSection (
+    onFaqClick: () -> Unit
+) {
+    Text(
+        text = "고객 관리",
+        style = semibold16,
+        modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
+    )
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    MyFaqCard(onClick = onFaqClick)
+    }
+}
+
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
