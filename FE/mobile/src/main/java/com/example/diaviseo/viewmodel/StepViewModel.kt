@@ -105,15 +105,19 @@ class StepViewModel(application: Application) : AndroidViewModel(application), S
 
 //    센서 값이 변경될 때마다 호출
     override fun onSensorChanged(event: SensorEvent?) {
-        if (event?.sensor?.type == Sensor.TYPE_STEP_COUNTER) {
+    Log.d("StepViewModel", "📊 오늘 걸음 수 업데이트됨 → ${_todaySteps.value}")
+
+
+    if (event?.sensor?.type == Sensor.TYPE_STEP_COUNTER) {
             val total = event.values[0].toInt() // 부팅 후 누적 걸음 수
             Log.d("step view", "부팅 후 누적 걸음수: $total")
 
-            // ❗ baseSteps가 아직 안 불러졌으면 무시
-            if (baseSteps != 0) {
+            if (baseSteps > 0) {
                 _todaySteps.value = total - baseSteps
             } else {
-                Log.w("StepViewModel", "baseSteps가 아직 설정되지 않음 → 걸음 수 무시")
+                // ✅ baseSteps가 아직 없을 경우에도 일단 total 보여줌
+                _todaySteps.value = total
+                Log.w("StepViewModel", "⚠️ baseSteps 없음, 임시로 total 사용 → todaySteps = $total")
             }
         }
     }

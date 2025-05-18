@@ -31,8 +31,6 @@ fun StepCountCard(
 ) {
     val activity = LocalContext.current as ComponentActivity
     val stepViewModel = viewModel<StepViewModel>(activity)
-//    val stepViewModel: StepViewModel = viewModel()
-
 
     // ViewModel의 오늘/어제 걸음 수 StateFlow 구독
     val today by stepViewModel.todaySteps.collectAsState()
