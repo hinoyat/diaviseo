@@ -38,19 +38,16 @@ import androidx.lifecycle.ViewModelProvider
 
 import androidx.activity.compose.setContent
 import androidx.work.*
-import com.example.diaviseo.ui.theme.DiaViseoTheme
 import com.example.diaviseo.utils.FcmTokenSender
 import com.example.diaviseo.worker.StepResetWorker
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.CoroutineScope   // 테스트용 지우지 말기
 import kotlinx.coroutines.Dispatchers   // 테스트용 지우지 말기
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.delay
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.util.concurrent.TimeUnit
-
 
 class MainActivity : ComponentActivity() {
     val testViewModel = TestViewModel()
@@ -81,6 +78,7 @@ class MainActivity : ComponentActivity() {
 
         // WorkManager에 자정 스케줄 예약
         scheduleMidnightWorker()
+//        scheduleOneTimeStepWorkerEveryMinute()
 
         setContent {
             DiaViseoTheme {
@@ -135,11 +133,16 @@ class MainActivity : ComponentActivity() {
     // 자정 직후에 한 번, 그리고 24시간 주기로 실행되도록 설정
     private fun scheduleMidnightWorker() {
         val now = LocalDateTime.now()
-        val tomorrowMidnight = now.toLocalDate().atTime(LocalTime.MIDNIGHT).plusDays(1)
-        val initialDelay = Duration.between(now, tomorrowMidnight).toMinutes()
+        val midnight = now.toLocalDate().plusDays(1).atStartOfDay()
+        val initialDelay = Duration.between(now, midnight).toMinutes()
 
         val work = PeriodicWorkRequestBuilder<StepResetWorker>(24, TimeUnit.HOURS)
             .setInitialDelay(initialDelay, TimeUnit.MINUTES)
+            .setBackoffCriteria(
+                BackoffPolicy.LINEAR,
+                WorkRequest.MIN_BACKOFF_MILLIS,
+                TimeUnit.MILLISECONDS
+            )
             .build()
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
@@ -147,7 +150,20 @@ class MainActivity : ComponentActivity() {
             ExistingPeriodicWorkPolicy.UPDATE,
             work
         )
+        Log.d("reset", "✅ 자정 리셋 예약됨 (delay: $initialDelay 분 후 실행)")
     }
+
+//    private fun scheduleOneTimeStepWorkerEveryMinute() {
+//        CoroutineScope(Dispatchers.Default).launch {
+//            while (true) {
+//                val request = OneTimeWorkRequestBuilder<StepResetWorker>().build()
+//                WorkManager.getInstance(applicationContext).enqueue(request)
+//                Log.d("TestWorker", "✅ 테스트용 StepResetWorker 1회 실행")
+//
+//                delay(60_000) // 1분 대기
+//            }
+//        }
+//    }
 
     private fun checkAndRequestPermission() {
         when {

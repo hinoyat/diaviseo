@@ -33,12 +33,12 @@ fun HomeScreen(
         viewModel.fetchMyProfile()
     }
 
-    val homeViewModel: HomeViewModel = viewModel()
-
     // 현재 이 composable의 BackStackEntry를 State로 구독
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     // 그 엔트리에서 route만 꺼내기
     val currentRoute: String? = navBackStackEntry?.destination?.route
+
+    val homeViewModel: HomeViewModel = viewModel()
 
     // route가 이 화면일 때만 호출
     val today = remember { LocalDate.now() }

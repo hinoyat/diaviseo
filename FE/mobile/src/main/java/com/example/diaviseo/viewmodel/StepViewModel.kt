@@ -35,12 +35,29 @@ class StepViewModel(application: Application) : AndroidViewModel(application), S
     private var isListenerRegistered = false
 
     init {
-        checkStepStatus()
-        // 1) DataStore에서 지난 자정 데이터 불러오기
+//        checkStepStatus()
         viewModelScope.launch {
-            baseSteps = dataStore.getBaseSteps()
-            _yesterdaySteps.value = dataStore.getYesterdaySteps()
+            // baseSteps가 바뀔 때마다 자동 갱신
+            dataStore.baseStepsFlow.collect { newBase ->
+                if (newBase != baseSteps) {
+                    baseSteps = newBase
+                    Log.d("StepViewModel", "🕛 baseSteps가 변경됨 → $baseSteps")
+
+                    // 오늘 걸음 수 다시 계산 요청
+                    refreshStepCountOnce()
+                }
+            }
         }
+
+        viewModelScope.launch {
+            dataStore.yesterdayStepsFlow.collect {
+                _yesterdaySteps.value = it
+            }
+        }
+
+        // 센서 리스너는 한 번만 시작
+        startListening()
+        initializeStepCountOnce() // 초기화
     }
 
     fun startListening() {
@@ -68,22 +85,40 @@ class StepViewModel(application: Application) : AndroidViewModel(application), S
     }
 
     fun refreshStepCount() {
-        // 센서 값은 실시간 반영되므로 여기선 별도 로직 불필요
+        // 현재 누적 센서 값만 한번 가져와서 상태 업데이트 해줌 (모의 동작)
+        val lastSensor = stepSensor
+        if (lastSensor == null) {
+            Log.e("step view", "Sensor not available")
+            return
+        }
+
+        val event = lastSensor
+        Log.d("step view", "강제 새로고침 요청됨, baseSteps: $baseSteps")
     }
 
-    private fun checkStepStatus() {
-        viewModelScope.launch {
-            Log.d("step view", "뷰 모델 처음 뜨고, $stepSensor")
-            startListening()
-        }
-    }
+//    private fun checkStepStatus() {
+//        viewModelScope.launch {
+//            Log.d("step view", "뷰 모델 처음 뜨고, $stepSensor")
+//            startListening()
+//        }
+//    }
 
 //    센서 값이 변경될 때마다 호출
     override fun onSensorChanged(event: SensorEvent?) {
-        if (event?.sensor?.type == Sensor.TYPE_STEP_COUNTER) {
-            val total = event.values[0].toInt()       // 부팅 이후 누적 걸음 수
-            Log.d("view model", "부팅 후 누적 걸음수 : $total")
-            _todaySteps.value = total - baseSteps     // 오늘 걸음 수 계산
+    Log.d("StepViewModel", "📊 오늘 걸음 수 업데이트됨 → ${_todaySteps.value}")
+
+
+    if (event?.sensor?.type == Sensor.TYPE_STEP_COUNTER) {
+            val total = event.values[0].toInt() // 부팅 후 누적 걸음 수
+            Log.d("step view", "부팅 후 누적 걸음수: $total")
+
+            if (baseSteps > 0) {
+                _todaySteps.value = total - baseSteps
+            } else {
+                // ✅ baseSteps가 아직 없을 경우에도 일단 total 보여줌
+                _todaySteps.value = total
+                Log.w("StepViewModel", "⚠️ baseSteps 없음, 임시로 total 사용 → todaySteps = $total")
+            }
         }
     }
 
@@ -95,4 +130,52 @@ class StepViewModel(application: Application) : AndroidViewModel(application), S
         stopListening()
         Log.d("step view", "StepViewModel cleared, listener unregistered.")
     }
+
+    fun initializeStepCountOnce() {
+        val context = getApplication<Application>().applicationContext
+        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+
+        val listener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent?) {
+                val total = event?.values?.get(0)?.toInt() ?: 0
+                if (baseSteps != 0) {
+                    _todaySteps.value = total - baseSteps
+                    Log.d("StepViewModel", "초기 센서 수신 완료: todaySteps = ${_todaySteps.value}")
+                }
+                sensorManager.unregisterListener(this)
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+        }
+
+        if (sensor != null) {
+            sensorManager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+        } else {
+            Log.e("StepViewModel", "TYPE_STEP_COUNTER 센서를 사용할 수 없음.")
+        }
+    }
+
+    private fun refreshStepCountOnce() {
+        // 센서 이벤트를 기다리지 않고 현재 센서 값을 한번 직접 불러오기
+        val sensor = stepSensor ?: return
+        val sensorManager = getApplication<Application>().getSystemService(Context.SENSOR_SERVICE) as SensorManager
+
+        val listener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent?) {
+                val total = event?.values?.get(0)?.toInt() ?: return
+                if (baseSteps > 0) {
+                    _todaySteps.value = total - baseSteps
+                    Log.d("StepViewModel", "📲 자정 이후 todaySteps 재계산: ${_todaySteps.value}")
+                }
+                sensorManager.unregisterListener(this)
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+        }
+
+        sensorManager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+
 }
