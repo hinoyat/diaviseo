@@ -42,6 +42,8 @@ fun GoalContent(
     val selectedDate by goalViewModel.selectedDate.collectAsState()
     val nutritionFeedback by goalViewModel.nutritionFeedback.collectAsState()
     val workoutFeedback by goalViewModel.workoutFeedback.collectAsState()
+    val isNutriLoading by goalViewModel.isNutriLoading.collectAsState()
+    val isWorkLoading by goalViewModel.isWorkLoading.collectAsState()
 
     // 평가<->디테일 식단 관리
     val mealViewModel: MealViewModel = viewModel()
@@ -146,7 +148,8 @@ fun GoalContent(
                     onRequestFeedback = {
                         // 피드백 요청 처리
                          goalViewModel.createNutriFeedBack(selectedDate.toString())
-                    }
+                    },
+                    isLoading = isNutriLoading
                 )
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -225,7 +228,8 @@ fun GoalContent(
                     onRequestFeedback = {
                         // 피드백 요청 처리
                         // 예: goalViewModel.requestAiFeedback()
-                    }
+                    },
+                    isLoading = isWorkLoading
                 )
                 Spacer(modifier = Modifier.height(24.dp))
 
