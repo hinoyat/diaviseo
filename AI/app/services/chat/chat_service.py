@@ -5,10 +5,14 @@ from langchain_openai import ChatOpenAI
 from langchain.chains import ConversationChain
 from sqlalchemy.orm import Session
 
-from app.db.mongo import TimestampedMongoHistory, get_chat_collection, \
+from app.db.mongo import get_chat_collection, \
     get_chat_history_collection
 from app.services.memory.mongo_memory import get_memory
 from app.config.settings import get_settings
+from app.services.nutrition.nutrition_chat_service import generate_nutrition_response
+from app.config.log import logging_check
+import logging
+logging_check()
 
 settings = get_settings()
 
@@ -40,14 +44,19 @@ def chat_with_session(session_id: str, message: str, user_db: Session,
 
         # 챗봇 응답 생성
         if session_info and session_info.get("chatbot_type") == "workout":
-            ai_message = _handle_workout_chat(session_id, session_info, message,
-                                              user_db, health_db)
+          ai_message = _handle_workout_chat(session_id, session_info, message,
+                                            user_db, health_db)
+        elif session_info and session_info.get("chatbot_type") == "nutrition":
+          ai_message = _handle_nutrition_chat(session_id, session_info, message,
+                                              user_db)
         else:
-            ai_message = _handle_general_chat(memory, message, session_id=session_id)
+          ai_message = _handle_general_chat(memory, message,
+                                            session_id=session_id)
 
         # AI 응답 저장
         chat_history_collection.insert_one(ai_message)
         return ai_message
+
     finally:
         user_db.close()
         health_db.close()
@@ -69,6 +78,13 @@ def _handle_workout_chat(session_id: str, session_info: dict, message: str,
     return create_message_data(role=MessageRole.ASSISTANT, content=feedback, session_id=session_id)
 
 
+def _handle_nutrition_chat(session_id: str, session_info: dict, message: str,
+    user_db: Session) -> dict:
+  """식단 챗봇 대화를 처리합니다."""
+  user_id = session_info.get("user_id")
+  response = generate_nutrition_response(message, session_id, user_db, user_id)
+  return create_message_data(role=MessageRole.ASSISTANT, content=response,
+                             session_id=session_id)
 def _handle_general_chat(memory, message: str, session_id:str) -> dict:
     """일반 챗봇 대화를 처리합니다."""
     chain = ConversationChain(
