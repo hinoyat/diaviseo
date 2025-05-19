@@ -32,8 +32,18 @@ android {
         buildConfigField("String", "BASE_URL", "\"${baseUrl}\"")
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("../diaviseo_release.jks")
+            storePassword = "diaviseo12!"
+            keyAlias = "diaviseo_release_key"
+            keyPassword = "diaviseo12!"
+        }
+    }
+
     buildTypes {
-        release {
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -41,6 +51,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
