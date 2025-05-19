@@ -20,7 +20,6 @@ settings = get_settings()
 # GPT 운동 피드백 생성 함수 (간소화된 버전)
 def generate_workout_feedback(user_id: int, session_id:str, message:str,user_db: Session,
     health_db: Session) -> str:
-  memory = get_memory(session_id)
   # LLM 초기화
   llm = ChatOpenAI(
       model="gpt-4o-mini",
@@ -29,12 +28,15 @@ def generate_workout_feedback(user_id: int, session_id:str, message:str,user_db:
   )
   chain = ConversationChain(
       llm = llm,
-      memory = memory,
   )
 
   # 사용자 정보 가져오기
-  user_info = get_user_info_for_feedback(health_db, user_db, user_id)
-
+  try:
+    user_info = get_user_info_for_feedback(health_db, user_db, user_id)
+  except Exception as e:
+    # 사용자 정보 조회 실패 시 일반 챗봇 응답
+    return chain.predict(
+    input=f"다음 질문에 대해 운동 코치로서 일반적인 조언을 200자 이내로 간략하게 제공해주세요: {message}") + " 체성분 정보를 등록하면 사용자에게 맞춤형 조언을 받을 수 있어요!"
   # 프롬프트 준비
   formatted_prompt = workout_feedback_prompt.template.format(
       gender=user_info.get("gender"),
