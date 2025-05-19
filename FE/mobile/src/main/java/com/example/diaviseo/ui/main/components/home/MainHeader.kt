@@ -89,16 +89,16 @@ fun MainHeader(
         }
 
         // 알림 버튼
-        Icon(
-            imageVector = Icons.Default.Notifications,
-            contentDescription = "알림",
-            tint = Color(0xFF1673FF),
-            modifier = Modifier
-                .size(28.dp)
-                .padding(top = 4.dp)
-                .clickable {
-//                    navController.navigate("notification")
-                }
-        )
+//        Icon(
+//            imageVector = Icons.Default.Notifications,
+//            contentDescription = "알림",
+//            tint = Color(0xFF1673FF),
+//            modifier = Modifier
+//                .size(28.dp)
+//                .padding(top = 4.dp)
+//                .clickable {
+////                    navController.navigate("notification")
+//                }
+//        )
     }
 }
