@@ -1,3 +1,4 @@
+import datetime
 from datetime import date
 
 from fastapi import APIRouter, Depends, Header
@@ -16,7 +17,7 @@ def start_nutrition_chat(user_input: ChatRequest, user_db:Session = Depends(get_
     return {"answer": response}
 
 @router.post("/nutrition_feedback")
-def nutrition_feedback(datetime: date, user_db:Session = Depends(get_session("user")), health_db:Session = Depends(get_session("health")), user_id: int = Header(default="default_user", alias="X-USER-ID")):
+def nutrition_feedback(feedback_date: date, user_db:Session = Depends(get_session("user")), health_db:Session = Depends(get_session("health")), user_id: int = Header(default="default_user", alias="X-USER-ID")):
     '''
     1. 프롬프트 만들기
         a. advice 호출
@@ -26,8 +27,8 @@ def nutrition_feedback(datetime: date, user_db:Session = Depends(get_session("us
 
     '''
 
-    response = generate_nutrition_feedback(user_db,health_db,user_id, datetime)
+    response = generate_nutrition_feedback(user_db,health_db,user_id, feedback_date)
     from app.schemas.chat import FeedbackType
-    insert_feedback(user_id=user_id,feedback=response,feedback_type=FeedbackType.nutrition )
+    insert_feedback(user_id=user_id,feedback=response,feedback_type=FeedbackType.nutrition, feedback_date=datetime.datetime.combine(feedback_date, datetime.time()))
 
-    return {"answer": response}
+    return {"feedback": response}

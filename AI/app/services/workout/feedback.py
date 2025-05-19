@@ -89,6 +89,6 @@ def generate_trend_weight_feedback(user_id: int, user_db: Session,
   # LLM 호출하여 피드백 생성
   response = llm.invoke(formatted_prompt)
 
-  insert_feedback(user_id, response.content, FeedbackType.WEIGHT_TREND)
+  insert_feedback(user_id, response.content, FeedbackType.WEIGHT_TREND, date)
   # 결과 반환
   return response.content

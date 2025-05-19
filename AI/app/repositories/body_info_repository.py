@@ -152,48 +152,58 @@ def get_bmr(user_db: Session, health_db: Session, user_id: int) -> float:
 
   return round(bmr, 2)
 
-def predict_weight_change_from_base_date(health_db: Session, user_db: Session, user_id: int,
-      days: int, base_date=datetime.datetime):
 
-    """
-    사용자의 체중 변화를 예측합니다.
+def predict_weight_change_from_base_date(health_db: Session, user_db: Session,
+    user_id: int,
+    days: int, base_date=datetime.datetime):
+  """
+  사용자의 체중 변화를 예측합니다.
 
-    Args:
-        health_db: 건강 정보 데이터베이스 세션
-        user_db: 사용자 정보 데이터베이스 세션
-        user_id: 사용자 ID
-        days: 분석할 기간(일)
-        base_date: 기준 날짜 (기본값: 오늘)
+  Args:
+      health_db: 건강 정보 데이터베이스 세션
+      user_db: 사용자 정보 데이터베이스 세션
+      user_id: 사용자 ID
+      days: 분석할 기간(일)
+      base_date: 기준 날짜 (기본값: 오늘)
 
-    Returns:
-        dict: 예측된 체중 변화 정보
-    """
-    bmr = get_bmr(user_db, health_db, user_id)
-    target = get_tdee(bmr, activity_level='light')
-    if base_date is None:
-      base_date = datetime.date.today()
-    elif isinstance(base_date, datetime.datetime):
-      base_date = base_date.date()
+  Returns:
+      dict: 예측된 체중 변화 정보
+  """
+  bmr = get_bmr(user_db, health_db, user_id)
+  tdee = get_tdee(bmr, activity_level='light')
 
-    total_gap = 0.0
-    for i in range(days):
-      day = base_date - datetime.timedelta(days=i)
+  if base_date is None:
+    base_date = datetime.date.today()
+  elif isinstance(base_date, datetime.datetime):
+    base_date = base_date.date()
 
-      intake = float(
+  total_calorie_balance = 0.0
+  for i in range(days):
+    day = base_date - datetime.timedelta(days=i)
+
+    # 섭취한 칼로리
+    intake = float(
         get_today_calories_intake(health_db, user_id, meal_date=day))
-      burned = float(get_someday_calories_burned(health_db, user_id, exercise_date=day))
 
-      net = intake - bmr - burned
-      gap = target - net
-      total_gap += gap
+    # 운동으로 소모한 칼로리
+    burned = float(
+      get_someday_calories_burned(health_db, user_id, exercise_date=day))
 
-    weight_change_kg = round(total_gap / 7700, 2)
+    # 총 소모 칼로리 = 기초대사량 + 활동 칼로리(TDEE-BMR) + 운동 칼로리
+    total_expenditure = tdee + burned
 
-    return {
-      "projected_change": weight_change_kg,
-      "days_tracked": days,
-      "status": "감량 예상" if weight_change_kg < 0 else "증량 예상"
-    }
+    # 칼로리 수지(양수: 잉여 칼로리, 음수: 부족 칼로리)
+    daily_balance = intake - total_expenditure
+    total_calorie_balance += daily_balance
+
+  # 7700 칼로리가 약 1kg의 체지방과 동일
+  weight_change_kg = round(total_calorie_balance / 7700, 2)
+
+  return {
+    "projected_change": weight_change_kg,
+    "days_tracked": days,
+    "status": "증량 예상" if weight_change_kg > 0 else "감량 예상"
+  }
 
 def predict_weight_change(health_db: Session, user_db: Session, user_id: int, days:int):
   bmr = get_bmr(user_db, health_db, user_id)
@@ -298,3 +308,53 @@ def calculate_additional_calories_to_burn_someday(health_db: Session, user_db: S
   # 목표 칼로리 + 소모한 칼로리 - 섭취한 칼로리 = 남은 칼로리
   remaining = intake - target - burned
   return round(remaining, 2)
+
+
+def fetch_user_training_data(user_id: int, db: Session):
+  """
+  사용자의 60일간 체성분 정보와 운동 칼로리 데이터를 가져옵니다.
+
+  Args:
+      user_id: 사용자 ID
+      db: 데이터베이스 세션
+
+  Returns:
+      pd.DataFrame: 사용자의 체성분 정보와 운동 칼로리 데이터
+  """
+  from sqlalchemy import select
+  import pandas as pd
+  from datetime import datetime, timedelta
+
+  # 오늘 날짜로부터 60일 전 날짜 계산
+  end_date = datetime.now().date()
+  start_date = end_date - timedelta(days=60)
+
+  # 60일간의 체성분 정보 불러오기
+  query = select(BodyInfo).where(
+      BodyInfo.user_id == user_id,
+      BodyInfo.measurement_date >= start_date,
+      BodyInfo.measurement_date <= end_date
+  ).order_by(BodyInfo.measurement_date.asc())
+
+  records = db.execute(query).scalars().all()
+
+  if len(records) < 10:  # 최소 데이터 요구사항
+    return None  # 학습에 필요한 데이터가 부족함
+
+  # 데이터 변환
+  data = []
+  for r in records:
+    # 각 날짜별 소모 칼로리 계산
+    exercise_calories = float(get_someday_calories_burned(db, user_id,
+                                                          exercise_date=r.measurement_date))
+
+    data.append({
+      "measurement_date": r.measurement_date,
+      "height": r.height,
+      "body_fat": r.body_fat,
+      "muscle_mass": r.muscle_mass,
+      "weight": r.weight,
+      "exercise_calories": exercise_calories  # 계산된 소모 칼로리 사용
+    })
+
+  return pd.DataFrame(data)
