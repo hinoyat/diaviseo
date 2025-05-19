@@ -8,6 +8,12 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+val localProperties = Properties().apply {
+    load(FileInputStream(rootProject.file("local.properties")))
+}
+val releasePassword = localProperties.getProperty("RELEASE_PASSWORD") ?: ""
+
+
 android {
     namespace = "com.example.diaviseo"
     compileSdk = 36 // 35 -> 36
@@ -30,10 +36,22 @@ android {
         // BuildConfig에 추가
         buildConfigField("String", "GOOGLE_SERVER_CLIENT_ID", serverClientId)
         buildConfigField("String", "BASE_URL", "\"${baseUrl}\"")
+
+
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file("../diaviseo_release.jks")
+            storePassword = releasePassword
+            keyAlias = "diaviseo_release_key"
+            keyPassword = releasePassword
+        }
     }
 
     buildTypes {
-        release {
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -41,6 +59,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
