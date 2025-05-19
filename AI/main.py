@@ -45,7 +45,7 @@ app.include_router(session.router, prefix="/api/chatbot")  # 세션 생성 등
 app.include_router(chat.router, prefix="/api/chatbot")     # 채팅 기능
 
 # 식단
-app.include_router(nutrition_router, prefix="/api/chatbot")
+app.include_router(nutrition_router, prefix="/api/nutrition")
 
 
 # 헬스체크 엔드포인트
