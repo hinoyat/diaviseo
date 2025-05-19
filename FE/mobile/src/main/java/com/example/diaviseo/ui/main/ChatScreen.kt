@@ -82,7 +82,11 @@ fun ChatContent(
             )
         }
     }
-
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            listState.animateScrollToItem(messages.lastIndex)
+        }
+    }
     Scaffold(
         topBar = {
             ChatTopBar(
