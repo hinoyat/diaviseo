@@ -1,6 +1,7 @@
 package com.example.diaviseo.ui.main.components.goal
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,10 +9,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import com.example.diaviseo.ui.theme.DiaViseoColors
 import java.time.LocalDate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.diaviseo.ui.components.LoadingOverlay
@@ -23,6 +27,7 @@ import com.example.diaviseo.ui.main.components.goal.exercise.LineChartSection
 import com.example.diaviseo.ui.main.components.goal.exercise.StepBarChart
 import com.example.diaviseo.ui.main.components.goal.meal.DonutChartWithLegend
 import com.example.diaviseo.ui.main.components.goal.meal.MealChartSection
+import com.example.diaviseo.ui.theme.medium16
 import com.example.diaviseo.ui.theme.semibold16
 import com.example.diaviseo.viewmodel.goal.ExerciseViewModel
 import com.example.diaviseo.viewmodel.goal.GoalViewModel
@@ -140,13 +145,34 @@ fun GoalContent(
                     )
                 )
 
-                AiTipBox(
-                    message = nutritionFeedback,
-                    onRequestFeedback = {
-                         goalViewModel.createNutriFeedBack(selectedDate.toString())
-                    },
-                    isLoading = isNutriLoading
-                )
+                if (dailyNutrition?.totalCalorie != 0) {
+                    AiTipBox(
+                        message = nutritionFeedback,
+                        onRequestFeedback = {
+                             goalViewModel.createNutriFeedBack(selectedDate.toString())
+                        },
+                        isLoading = isNutriLoading
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(Color(0xFFD3EAFA), Color(0xFFC7D2FF))
+                                ),
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            .padding(vertical = 20.dp, horizontal = 24.dp)
+                    ) {
+                        Text(
+                            text = "✨ AI 코멘트를 받고 싶으시다면 식단을 입력해주세요!",
+                            style = medium16,
+                            color = DiaViseoColors.Basic
+                        )
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(24.dp))
 
                 MealChartSection()
@@ -219,13 +245,34 @@ fun GoalContent(
                     )
                 )
 
-                AiTipBox(
-                    message = weightFeedback,
-                    onRequestFeedback = {
-                        goalViewModel.createWeightFeedBack(selectedDate.toString())
-                    },
-                    isLoading = isWeightLoading
-                )
+                if ( bodyInfo != null && bodyInfo!!.weight != 0.0 && bodyInfo!!.muscleMass != 0.0 && bodyInfo!!.bodyFat != 0.0) {
+                    AiTipBox(
+                        message = weightFeedback,
+                        onRequestFeedback = {
+                            goalViewModel.createWeightFeedBack(selectedDate.toString())
+                        },
+                        isLoading = isWeightLoading
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(Color(0xFFD3EAFA), Color(0xFFC7D2FF))
+                                ),
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            .padding(vertical = 20.dp, horizontal = 24.dp)
+                    ) {
+                        Text(
+                            text = "✨ AI 코멘트를 받고 싶으시다면 체성분 정보를 모두 기입해주세요!",
+                            style = medium16,
+                            color = DiaViseoColors.Basic
+                        )
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(24.dp))
 
                 WeightChartSection(

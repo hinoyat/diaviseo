@@ -119,13 +119,13 @@ fun MealChartSection() {
                 ) {
                     Text("섭취량 상세", style = semibold18)
                     Spacer(Modifier.height(12.dp))
-                    Text("탄수화물: ${entry.carbs} kcal", style = medium14)
+                    Text("탄수화물: ${entry.carbs * 4} kcal", style = medium14)
                     Spacer(Modifier.height(6.dp))
-                    Text("단백질:   ${entry.protein} kcal", style = medium14)
+                    Text("단백질:   ${entry.protein * 4} kcal", style = medium14)
                     Spacer(Modifier.height(6.dp))
-                    Text("지방:     ${entry.fat} kcal", style = medium14)
+                    Text("지방:     ${entry.fat * 9} kcal", style = medium14)
                     Spacer(Modifier.height(6.dp))
-                    Text("당류:     ${entry.sugar} kcal", style = medium14)
+                    Text("당류:     ${entry.sugar * 4} kcal", style = medium14)
                 }
             }
         }
