@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -94,7 +93,8 @@ public class BodyInfoController {
 
 		BodyInfoResponse response = bodyInfoService.create(userId, request);
 		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(ResponseDto.success(HttpStatus.CREATED, "OCR 데이터 확인 후 체성분 데이터 등록 성공", response));
+				.body(ResponseDto.success(HttpStatus.CREATED, "OCR 데이터 확인 후 체성분 데이터 등록 성공",
+						response));
 	}
 
 	@GetMapping
@@ -137,18 +137,36 @@ public class BodyInfoController {
 	public ResponseEntity<ResponseDto<BodyInfoResponse>> findByDate(
 			@RequestHeader("X-USER-ID") Integer userId,
 			@RequestParam @DateTimeFormat(iso = ISO.DATE) LocalDate date) {
+		try {
+			// 현재 날짜 체크
+			LocalDate today = LocalDate.now();
+			if (date.isAfter(today)) {
+				return ResponseEntity.badRequest()
+						.body(ResponseDto.error(HttpStatus.BAD_REQUEST, "미래 날짜는 입력할 수 없습니다."));
+			}
 
-		if (date.isAfter(LocalDate.now())) {
-			throw new IllegalArgumentException("미래 날짜는 입력할 수 없습니다.");
+			// 너무 오래된 날짜 체크
+			if (date.isBefore(LocalDate.of(2000, 1, 1))) {
+				return ResponseEntity.badRequest()
+						.body(ResponseDto.error(HttpStatus.BAD_REQUEST,
+								"2000년 1월 1일 이전 날짜는 입력할 수 없습니다."));
+			}
+
+			BodyInfoResponse response = bodyInfoService.findByUserIdAndDate(userId, date);
+			// 데이터가 없을 경우 처리
+			if (response == null) {
+				return ResponseEntity.ok(
+						ResponseDto.success(HttpStatus.OK, "해당 날짜의 체성분 정보가 없습니다.", null));
+			}
+
+			return ResponseEntity.ok(
+					ResponseDto.success(HttpStatus.OK, "유저 체성분 정보 조회가 성공적으로 처리됐습니다.", response));
+		} catch (Exception e) {
+			log.error("체성분 정보 조회 중 오류 발생: {}", e.getMessage(), e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(ResponseDto.error(HttpStatus.INTERNAL_SERVER_ERROR,
+							"서버 처리 중 오류가 발생했습니다."));
 		}
-
-		if (date.isBefore(LocalDate.of(2000, 1, 1))) {
-			throw new IllegalArgumentException("2000년 1월 1일 이전 날짜는 입력할 수 없습니다.");
-		}
-
-		BodyInfoResponse response = bodyInfoService.findByUserIdAndDate(userId, date);
-		return ResponseEntity.ok(
-				ResponseDto.success(HttpStatus.OK, "유저 체성분 정보 조회가 성공적으로 처리됐습니다.", response));
 	}
 
 	@GetMapping("/weekly")

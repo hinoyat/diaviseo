@@ -70,12 +70,14 @@ public class BodyInfoService {
 			int age = Period.between(userDetailResponse.getBirthday(), LocalDate.now()).getYears();
 
 			// 해당 날짜 이전의 체성분 정보 목록 조회 (최신순)
-			List<BodyInfo> bodyInfoList = bodyInfoRepository.findBodyInfoBeforeOrEqualDate(userId, date);
+			List<BodyInfo> bodyInfoList = bodyInfoRepository.findBodyInfoBeforeOrEqualDate(userId,
+					date);
 
 			if (bodyInfoList.isEmpty()) {
 				log.info("사용자 ID: {}의 {} 이전 체성분 정보가 없습니다. 초기 응답 생성", userId, date);
 				// 데이터가 없는 경우, 회원 가입 시 정보로 초기 응답 생성
-				BodyInfoResponse initialResponse = bodyMapper.createInitialResponse(userId, userDetailResponse);
+				BodyInfoResponse initialResponse = bodyMapper.createInitialResponse(userId,
+						userDetailResponse);
 				return List.of(initialResponse);
 			}
 
@@ -132,7 +134,6 @@ public class BodyInfoService {
 
 		log.info("사용자 ID: {}의 체성분 정보(ID: {}) 업데이트 완료", userId, bodyId);
 
-
 		UserDetailResponse userDetailResponse = userClient.getUserByUserId(userId).getData();
 
 		BigDecimal bmi = HealthCalculator.calculateBMI(bodyInfo.getWeight(),
@@ -168,7 +169,8 @@ public class BodyInfoService {
 		log.info("사용자 ID: {}의 {} 날짜 신체 정보 조회", userId, date);
 
 		// Optional을 사용하여 체성분 정보 조회
-		Optional<BodyInfo> bodyInfoOpt = bodyInfoRepository.findLatestBodyInfoByMeasurementDate(userId, date);
+		Optional<BodyInfo> bodyInfoOpt = bodyInfoRepository.findTop1ByUserIdAndMeasurementDateAndIsDeletedFalseOrderByCreatedAtDesc(
+				userId, date);
 
 		// 데이터가 없는 경우 NotFoundException 발생
 		if (bodyInfoOpt.isEmpty()) {
