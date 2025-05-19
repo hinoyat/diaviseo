@@ -1,5 +1,6 @@
 package com.example.diaviseo.ui.main.components.chat
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -43,6 +44,12 @@ fun ChatHistoryScreen(navController: NavController) {
         viewModel.fetchHistories()
     }
 
+    BackHandler {
+        navController.navigate("home") {
+            popUpTo("home") { inclusive = true }
+        }
+    }
+
     val filteredHistories = selectedFilter?.let { topic ->
         histories.filter { it.topic == topic }
     } ?: histories
@@ -51,7 +58,7 @@ fun ChatHistoryScreen(navController: NavController) {
         histories = filteredHistories,
         selectedFilter = selectedFilter,
         onFilterSelected = { selectedFilter = it },
-        onBackClick = { navController.popBackStack() },
+        onBackClick = { navController.navigate("home") },
         onChatClick = { selected ->
             navController.currentBackStackEntry?.savedStateHandle?.set("selectedHistory", selected)
             navController.navigate("chat")
@@ -183,7 +190,7 @@ private fun ChatHistoryCard(history: ChatHistory, onClick: () -> Unit) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(Color.White)
-            .clickable(enabled = !isEnded) { onClick() } // 종료된 대화면 클릭 막을 수도 있음
+            .clickable { onClick() }
             .padding(16.dp)
     ) {
         Text(

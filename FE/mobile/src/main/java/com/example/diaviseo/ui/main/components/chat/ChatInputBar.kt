@@ -18,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.diaviseo.ui.theme.DiaViseoColors
+import androidx.compose.ui.focus.onFocusChanged
 
 @Composable
 fun ChatInputBar(
@@ -26,7 +27,8 @@ fun ChatInputBar(
     onSendClick: () -> Unit,
     isSending: Boolean = false,
     enabled: Boolean = true,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onFocusChanged: ((androidx.compose.ui.focus.FocusState) -> Unit)? = null
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -49,7 +51,8 @@ fun ChatInputBar(
             onValueChange = onInputChange,
             modifier = Modifier
                 .weight(1f)
-                .padding(end = 8.dp),
+                .padding(end = 8.dp)
+                .onFocusChanged { focusState -> onFocusChanged?.invoke(focusState) },
             placeholder = {
                 Text(
                     text = "메시지를 입력하세요",

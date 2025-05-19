@@ -72,6 +72,11 @@ class ChatBotViewModel : ViewModel() {
                         isUser = false,
                         timestamp = LocalDateTime.now(),
                         characterImageRes = characterImageRes
+                    ),
+                    ChatMessage(
+                        text = "__SHOW_INITIAL_QUESTION_BUTTONS__",
+                        isUser = false,
+                        timestamp = LocalDateTime.now()
                     )
                 )
             } catch (e: Exception) {
@@ -79,6 +84,7 @@ class ChatBotViewModel : ViewModel() {
             }
         }
     }
+
 
     fun sendMessage(text: String) {
         val sid = _sessionId.value ?: return
@@ -127,20 +133,30 @@ class ChatBotViewModel : ViewModel() {
                 _isSessionEnded.value = isEnded
 
                 if (response.isEmpty()) {
-                    // 👉 세션은 있지만 메시지가 없을 경우 인사말과 추천 질문 넣기
-                    _messages.value = listOf(
-                        ChatMessage(
-                            text = "안녕하세요! 어떤 내용이 궁금하신가요?",
-                            isUser = false,
-                            timestamp = LocalDateTime.now(),
-                            characterImageRes = characterImageRes
-                        ),
-                        ChatMessage(
-                            text = "__SHOW_INITIAL_QUESTION_BUTTONS__",
-                            isUser = false,
-                            timestamp = LocalDateTime.now()
+                    if (!isEnded) {
+                        _messages.value = listOf(
+                            ChatMessage(
+                                text = "안녕하세요! 어떤 내용이 궁금하신가요?",
+                                isUser = false,
+                                timestamp = LocalDateTime.now(),
+                                characterImageRes = characterImageRes
+                            ),
+                            ChatMessage(
+                                text = "__SHOW_INITIAL_QUESTION_BUTTONS__",
+                                isUser = false,
+                                timestamp = LocalDateTime.now()
+                            )
                         )
-                    )
+                    } else {
+                        _messages.value = listOf(
+                            ChatMessage(
+                                text = "\"안녕하세요! 어떤 내용이 궁금하신가요?",
+                                isUser = false,
+                                timestamp = LocalDateTime.now(),
+                                characterImageRes = characterImageRes
+                            )
+                        )
+                    }
                 } else {
                     _messages.value = response.map {
                         ChatMessage(
