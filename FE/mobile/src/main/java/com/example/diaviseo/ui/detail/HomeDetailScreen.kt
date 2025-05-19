@@ -188,7 +188,7 @@ fun HomeDetailScreen(
                         message = workoutFeedback,
                         onRequestFeedback = {
                             // 피드백 요청 처리
-                            goalViewModel.createHomeFeedBack(selectedDate.toString())
+                            goalViewModel.createHomeFeedBack()
                         },
                         isLoading = isWorkLoading
                     )

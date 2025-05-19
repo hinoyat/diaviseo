@@ -145,7 +145,7 @@ class GoalViewModel : ViewModel() {
         }
     }
 
-    fun createHomeFeedBack(date: String) {
+    fun createHomeFeedBack() {
         viewModelScope.launch {
             _isWorkLoading.value = true
             try {
