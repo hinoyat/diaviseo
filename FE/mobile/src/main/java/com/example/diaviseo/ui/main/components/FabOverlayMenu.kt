@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.sp
 import com.example.diaviseo.R
 import androidx.navigation.NavHostController
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.remember
 
 @Composable
 fun FabOverlayMenu(
@@ -25,6 +27,12 @@ fun FabOverlayMenu(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black.copy(alpha = 0.6f))
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ){
+
+            }
     ) {
         // FAB 메뉴 버튼들
         Column(
