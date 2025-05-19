@@ -100,8 +100,3 @@ async def api_train_model(
             status_code=500,
             detail=f"모델 학습 중 오류 발생: {str(e)}"
         )
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8100, reload=True)
-
