@@ -54,7 +54,7 @@ interface ChatBotApiService {
     // 식단 피드백 생성
     @POST("chatbot/nutrition_feedback")
     suspend fun createNutriFeedBack(
-        @Query("datetime") date: String
+        @Query("feedback_date") date: String
     ): Response<Map<String, String>>
 
     // 체중 피드백 생성
