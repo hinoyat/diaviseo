@@ -1,5 +1,6 @@
 package com.example.diaviseo.ui.main
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -65,8 +66,8 @@ fun ChatContent(
     var selectedTopic by remember { mutableStateOf<ChatTopic?>(history?.topic) }
     var showExitDialog by remember { mutableStateOf(false) }
     val isInputFocused = remember { mutableStateOf(false) }
-
-    val snackbarHostState = remember { SnackbarHostState() }
+    var showDetailTooltip by remember { mutableStateOf(false) }
+    var shouldHideTooltip by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
@@ -83,15 +84,6 @@ fun ChatContent(
     }
 
     Scaffold(
-        snackbarHost = {
-            SnackbarHost(
-                hostState = snackbarHostState,
-                modifier = Modifier
-                    .padding(bottom = 80.dp)
-                    .fillMaxWidth(),
-                snackbar = { Snackbar(it) }
-            )
-        },
         topBar = {
             ChatTopBar(
                 onBackClick = onBackClick,
@@ -169,47 +161,77 @@ fun ChatContent(
 
                 ) {
                     if (isInputFocused.value) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 4.dp),
-                            horizontalArrangement = Arrangement.Center
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Surface(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(20.dp))
-                                    .clickable {
-                                        isDetailMode = !isDetailMode
-                                        if (isDetailMode) {
-                                            coroutineScope.launch {
-                                                snackbarHostState.showSnackbar(
-                                                    message = "자세히 모드는 더 깊이 있는 답변을 받을 수 있도록 도와줘요.",
-                                                    duration = SnackbarDuration.Short
-                                                )
-                                            }
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
+                                AnimatedVisibility(
+                                    visible = showDetailTooltip,
+                                    enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
+                                    exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 })
+                                ) {
+                                    LaunchedEffect(shouldHideTooltip) {
+                                        if (shouldHideTooltip) {
+                                            kotlinx.coroutines.delay(300) // exit 애니메이션 시간
+                                            showDetailTooltip = false
+                                            shouldHideTooltip = false
                                         }
                                     }
-                                    .border(
-                                        width = 1.dp,
-                                        color = if (isDetailMode) DiaViseoColors.Main1 else DiaViseoColors.Placeholder,
-                                        shape = RoundedCornerShape(20.dp)
-                                    ),
-                                color = Color.White, // ✅ 내부 전체 흰 배경
-                                shape = RoundedCornerShape(20.dp)
-                            ) {
-                                Text(
-                                    text = "자세히 모드",
-                                    color = if (isDetailMode) DiaViseoColors.Main1 else DiaViseoColors.Placeholder,
-                                    fontSize = 13.sp,
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp) // ✅ 패딩은 여기!
-                                )
-                            }
 
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Box(
+                                            modifier = Modifier
+                                                .background(Color.Black.copy(alpha = 0.8f), RoundedCornerShape(8.dp))
+                                                .padding(horizontal = 12.dp, vertical = 8.dp)
+                                        ) {
+                                            Text(
+                                                text = "자세히 모드는 더 깊이 있는 답변을 받을 수 있도록 도와줘요.",
+                                                color = Color.White,
+                                                fontSize = 12.sp
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                    }
+                                }
+
+
+                                // ✅ 자세히 모드 버튼
+                                Surface(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(20.dp))
+                                        .clickable {
+                                            isDetailMode = !isDetailMode
+                                            if (isDetailMode) {
+                                                showDetailTooltip = true
+                                                coroutineScope.launch {
+                                                    kotlinx.coroutines.delay(3000)
+                                                    shouldHideTooltip = true
+                                                }
+                                            } else {
+                                                shouldHideTooltip = true
+                                            }
+                                        }
+                                        .border(
+                                            width = 1.dp,
+                                            color = if (isDetailMode) DiaViseoColors.Main1 else DiaViseoColors.Placeholder,
+                                            shape = RoundedCornerShape(20.dp)
+                                        ),
+                                    color = Color.White,
+                                    shape = RoundedCornerShape(20.dp)
+                                ) {
+                                    Text(
+                                        text = "자세히 모드",
+                                        color = if (isDetailMode) DiaViseoColors.Main1 else DiaViseoColors.Placeholder,
+                                        fontSize = 13.sp,
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                    )
+                                }
+                            }
                         }
 
                     }
-
-
                     ChatInputBar(
                         inputText = inputState.value,
                         onInputChange = { inputState.value = it },
@@ -218,6 +240,7 @@ fun ChatContent(
                             val finalMessage = if (isDetailMode) "자세히 $userMessage" else userMessage
 
                             viewModel.sendMessage(finalMessage)
+                            viewModel.removeInitialQuestionButtons()
 
                             inputState.value = ""
                             isDetailMode = false
@@ -233,6 +256,7 @@ fun ChatContent(
                     )
                 }
             }
+        }
 
             if (showExitDialog) {
                 ExitChatDialog(
@@ -247,7 +271,7 @@ fun ChatContent(
             }
         }
     }
-}
+
 
 @Composable
 fun ChatDateDivider(date: LocalDate) {
