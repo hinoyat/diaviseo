@@ -15,9 +15,8 @@ public interface BodyInfoRepository extends JpaRepository<BodyInfo, Integer> {
 
 	Optional<BodyInfo> findByBodyIdAndIsDeletedFalse(Integer bodyId);
 
-	@Query("SELECT b FROM BodyInfo b WHERE b.userId = :userId AND b.measurementDate = :date AND b.isDeleted = false ORDER BY b.createdAt DESC")
-	Optional<BodyInfo> findLatestBodyInfoByMeasurementDate(@Param("userId") Integer userId,
-														   @Param("date") LocalDate date);
+	Optional<BodyInfo> findTop1ByUserIdAndMeasurementDateAndIsDeletedFalseOrderByCreatedAtDesc(
+			Integer userId, LocalDate date);
 
 
 	@Query("SELECT b.measurementDate AS measurementDate, " +
