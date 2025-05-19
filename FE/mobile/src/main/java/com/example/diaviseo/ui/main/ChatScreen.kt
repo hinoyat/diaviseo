@@ -1,12 +1,20 @@
 package com.example.diaviseo.ui.main
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.style.TextAlign
@@ -47,7 +55,7 @@ fun ChatContent(
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val listState = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
+    var isDetailMode by remember { mutableStateOf(false) }
 
     val messages by viewModel.messages.collectAsState()
     val isTyping by viewModel.isTyping.collectAsState()
@@ -56,6 +64,10 @@ fun ChatContent(
 
     var selectedTopic by remember { mutableStateOf<ChatTopic?>(history?.topic) }
     var showExitDialog by remember { mutableStateOf(false) }
+    val isInputFocused = remember { mutableStateOf(false) }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         if (history != null) {
@@ -71,6 +83,15 @@ fun ChatContent(
     }
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .padding(bottom = 80.dp)
+                    .fillMaxWidth(),
+                snackbar = { Snackbar(it) }
+            )
+        },
         topBar = {
             ChatTopBar(
                 onBackClick = onBackClick,
@@ -78,17 +99,22 @@ fun ChatContent(
             )
         }
     ) { padding ->
-        Column(
+        Box(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) {
+                    focusManager.clearFocus()
+                }
         ) {
             LazyColumn(
                 state = listState,
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(top = 12.dp),
+                    .fillMaxSize()
+                    .padding(bottom = 90.dp),
                 reverseLayout = false
             ) {
                 if (sessionId == null && selectedTopic == null) {
@@ -118,7 +144,6 @@ fun ChatContent(
                             InitialQuestionButtons(
                                 topic = selectedTopic,
                                 onClick = { question ->
-                                    // 직접 입력할게요 선택 시 메시지 전송 없이 버튼만 제거
                                     viewModel.removeInitialQuestionButtons()
                                     if (question != "직접 입력할게요") {
                                         viewModel.sendMessage(question)
@@ -137,13 +162,65 @@ fun ChatContent(
             }
 
             if (!showExitDialog && sessionId != null) {
-                key(isSessionEnded) {
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+
+                ) {
+                    if (isInputFocused.value) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 4.dp),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Surface(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .clickable {
+                                        isDetailMode = !isDetailMode
+                                        if (isDetailMode) {
+                                            coroutineScope.launch {
+                                                snackbarHostState.showSnackbar(
+                                                    message = "자세히 모드는 더 깊이 있는 답변을 받을 수 있도록 도와줘요.",
+                                                    duration = SnackbarDuration.Short
+                                                )
+                                            }
+                                        }
+                                    }
+                                    .border(
+                                        width = 1.dp,
+                                        color = if (isDetailMode) DiaViseoColors.Main1 else DiaViseoColors.Placeholder,
+                                        shape = RoundedCornerShape(20.dp)
+                                    ),
+                                color = Color.White, // ✅ 내부 전체 흰 배경
+                                shape = RoundedCornerShape(20.dp)
+                            ) {
+                                Text(
+                                    text = "자세히 모드",
+                                    color = if (isDetailMode) DiaViseoColors.Main1 else DiaViseoColors.Placeholder,
+                                    fontSize = 13.sp,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp) // ✅ 패딩은 여기!
+                                )
+                            }
+
+                        }
+
+                    }
+
+
                     ChatInputBar(
                         inputText = inputState.value,
                         onInputChange = { inputState.value = it },
                         onSendClick = {
-                            viewModel.sendMessage(inputState.value)
+                            val userMessage = inputState.value
+                            val finalMessage = if (isDetailMode) "자세히 $userMessage" else userMessage
+
+                            viewModel.sendMessage(finalMessage)
+
                             inputState.value = ""
+                            isDetailMode = false
                             keyboardController?.hide()
                             focusManager.clearFocus()
                         },
@@ -151,7 +228,8 @@ fun ChatContent(
                         enabled = !isSessionEnded,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(8.dp)
+                            .padding(8.dp),
+                        onFocusChanged = { focusState -> isInputFocused.value = focusState.isFocused }
                     )
                 }
             }
