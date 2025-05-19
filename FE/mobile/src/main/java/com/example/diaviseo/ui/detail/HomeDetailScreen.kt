@@ -37,6 +37,7 @@ import com.example.diaviseo.viewmodel.goal.GoalViewModel
 import com.example.diaviseo.viewmodel.goal.WeightViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -56,19 +57,29 @@ fun HomeDetailScreen(
 
     val showDatePicker by goalViewModel.showDatePicker.collectAsState()
     val selectedDate by goalViewModel.selectedDate.collectAsState()
-    val weightFeedback by goalViewModel.weightFeedback.collectAsState()
-    val isWeightLoading by goalViewModel.isWeightLoading.collectAsState()
+    val workoutFeedback by goalViewModel.workoutFeedback.collectAsState()
+    val isWorkLoading by goalViewModel.isWorkLoading.collectAsState()
 
     val physicalInfo by weightViewModel.physicalInfo.collectAsState()
     val bodyLatestInfo by weightViewModel.bodyLatestInfo.collectAsState()
 
+    val isToday = remember(selectedDate) {
+        selectedDate == LocalDate.now()
+    }
+
     LaunchedEffect(selectedDate, bodyLatestInfo) {
         coroutineScope {
-            async { goalViewModel.isThereFeedback("weight_trend", selectedDate.toString()) }
             async { homeViewModel.fetchDailyNutrition(selectedDate.toString()) }
             async { homeViewModel.fetchDailyExercise(selectedDate.toString()) }
             async { weightViewModel.fetchPhysicalInfo(selectedDate.toString()) }
             async { weightViewModel.loadLatestBodyData(selectedDate.toString()) }
+            // 오늘 조회일 때만 체중 예측 코멘트가 보여요
+            if (isToday) {
+                async { goalViewModel.isThereFeedback("workout", selectedDate.toString()) }
+            } else {
+                // 오늘이 아니면 체중 피드백 "" 로 바꾸기 == 팁 박스 안 뜸
+                async { goalViewModel.setWorkoutFeedback() }
+            }
         }
     }
 
@@ -167,21 +178,23 @@ fun HomeDetailScreen(
 
             Spacer(
                 modifier = Modifier.height(
-                    if (weightFeedback.isBlank()) 30.dp else 84.dp
+                    if (workoutFeedback.isBlank()) 30.dp else 84.dp
                 )
             )
 
-            Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-                AiTipBox(
-                    message = weightFeedback,
-                    onRequestFeedback = {
-                        // 피드백 요청 처리
-                        goalViewModel.createHomeFeedBack(selectedDate.toString())
-                    },
-                    isLoading = isWeightLoading
-                )
+            if(isToday) {
+                Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+                    AiTipBox(
+                        message = workoutFeedback,
+                        onRequestFeedback = {
+                            // 피드백 요청 처리
+                            goalViewModel.createHomeFeedBack(selectedDate.toString())
+                        },
+                        isLoading = isWorkLoading
+                    )
+                }
+                Spacer(modifier = Modifier.height(30.dp))
             }
-            Spacer(modifier = Modifier.height(30.dp))
         }
 
 
