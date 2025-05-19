@@ -8,6 +8,21 @@ from app.services.bodyinfo.bodyinfo_service import get_tdee
 from app.models.user import User, GenderEnum, GoalEnum
 
 
+def get_user_body_info(health_db: Session, user_db: Session, user_id: int):
+
+  body_info = (
+    health_db.query(BodyInfo)
+    .filter(BodyInfo.user_id == user_id)
+    .order_by(BodyInfo.measurement_date.desc())
+    .first()
+  )
+  if not body_info:
+    return None
+  exercise_calories = calculate_additional_calories_to_burn(health_db, user_db,
+                                                          user_id)
+  body_info.exercise_calories = exercise_calories
+  return body_info
+
 def get_user_info_for_feedback_from_date(health_db: Session, user_db: Session, user_id: int, date=datetime.date) -> dict:
   if date is None:
     date = datetime.datetime.now().date()
