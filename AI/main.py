@@ -15,26 +15,26 @@ settings = get_settings()
 
 
 # EurekaClient 초기화
-# eureka_client = EurekaClient(
-#     eureka_server=settings.eureka_server,
-#     app_name=settings.eureka_app_name,
-#     instance_port=settings.eureka_instance_port,
-#     instance_host=settings.eureka_instance_host,
-#     health_check_url=settings.eureka_health_check_url,
-#     renewal_interval_in_secs=settings.eureka_renewal_interval_in_secs,
-#     duration_in_secs=settings.eureka_duration_in_secs
-# )
+eureka_client = EurekaClient(
+    eureka_server=settings.eureka_server,
+    app_name=settings.eureka_app_name,
+    instance_port=settings.eureka_instance_port,
+    instance_host=settings.eureka_instance_host,
+    health_check_url=settings.eureka_health_check_url,
+    renewal_interval_in_secs=settings.eureka_renewal_interval_in_secs,
+    duration_in_secs=settings.eureka_duration_in_secs
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 애플리케이션 시작 시 Eureka에 등록
-    # eureka_client.start()
+    eureka_client.start()
     # 식단 T5 모델 로드
     init_model()
     init_rag()
     yield
     # 애플리케이션 종료 시 Eureka에서 해제
-    # eureka_client.stop()
+    eureka_client.stop()
 
 # FastAPI 앱 생성 (한 번만)
 app = FastAPI(lifespan=lifespan)
