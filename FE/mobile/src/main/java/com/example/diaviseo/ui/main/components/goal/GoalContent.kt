@@ -1,6 +1,7 @@
 package com.example.diaviseo.ui.main.components.goal
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,10 +9,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import com.example.diaviseo.ui.theme.DiaViseoColors
 import java.time.LocalDate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.diaviseo.ui.components.LoadingOverlay
@@ -23,6 +27,7 @@ import com.example.diaviseo.ui.main.components.goal.exercise.LineChartSection
 import com.example.diaviseo.ui.main.components.goal.exercise.StepBarChart
 import com.example.diaviseo.ui.main.components.goal.meal.DonutChartWithLegend
 import com.example.diaviseo.ui.main.components.goal.meal.MealChartSection
+import com.example.diaviseo.ui.theme.medium16
 import com.example.diaviseo.ui.theme.semibold16
 import com.example.diaviseo.viewmodel.goal.ExerciseViewModel
 import com.example.diaviseo.viewmodel.goal.GoalViewModel
@@ -41,9 +46,10 @@ fun GoalContent(
     val goalViewModel: GoalViewModel = viewModel()
     val selectedDate by goalViewModel.selectedDate.collectAsState()
     val nutritionFeedback by goalViewModel.nutritionFeedback.collectAsState()
-    val workoutFeedback by goalViewModel.workoutFeedback.collectAsState()
     val isNutriLoading by goalViewModel.isNutriLoading.collectAsState()
-    val isWorkLoading by goalViewModel.isWorkLoading.collectAsState()
+    val weightFeedback by goalViewModel.weightFeedback.collectAsState()
+    val isWeightLoading by goalViewModel.isWeightLoading.collectAsState()
+
 
     // 평가<->디테일 식단 관리
     val mealViewModel: MealViewModel = viewModel()
@@ -53,7 +59,6 @@ fun GoalContent(
     val sugarRatio by mealViewModel.sugarRatio.collectAsState()
     val proteinRatio by mealViewModel.proteinRatio.collectAsState()
     val fatRatio by mealViewModel.fatRatio.collectAsState()
-    val isLoading by mealViewModel.isLoading.collectAsState()
 
     // 평가<->디테일 운동 관리
     val exerciseViewModel: ExerciseViewModel = viewModel()
@@ -61,7 +66,6 @@ fun GoalContent(
     val weeklyData by exerciseViewModel.weeklyStats.collectAsState()
     val monthlyData by exerciseViewModel.monthlyStats.collectAsState()
     val stepData by exerciseViewModel.stepData.collectAsState()
-    val exIsLoading by exerciseViewModel.isLoading.collectAsState()
 
     // 평가 체성분
     val weightViewModel : WeightViewModel = viewModel()
@@ -72,15 +76,16 @@ fun GoalContent(
 
     LaunchedEffect(selectedDate) {
         weightViewModel.loadBodyData(selectedDate.toString())
-        goalViewModel.isThereFeedback("nutrition", selectedDate.toString())
-        goalViewModel.isThereFeedback("workout", selectedDate.toString())
+        coroutineScope {
+            goalViewModel.isThereFeedback("nutrition", selectedDate.toString())
+            goalViewModel.isThereFeedback("weight_trend", selectedDate.toString())
+        }
     }
 
     val isToday = remember(selectedDate) {
         selectedDate == LocalDate.now()
     }
 
-    // 16일 할일, 성별 불러오고 체성분 불러오기
     val isMale = if (gender != null) {gender == "M"} else false
 
     LaunchedEffect(selectedDate) {
@@ -97,7 +102,6 @@ fun GoalContent(
 //        exerciseViewModel.fetchDailyExercise(selectedDate.toString())
 //        weightViewModel.fetchAllLists(selectedDate.toString())
 
-//      우리 언니 울어요
         mealViewModel.fetchPhysicalInfo(selectedDate.toString())
         coroutineScope {
             mealViewModel.fetchMealStatistic("DAY", selectedDate.toString())
@@ -107,8 +111,6 @@ fun GoalContent(
             weightViewModel.fetchAllLists(selectedDate.toString())
         }
     }
-
-//    LoadingOverlay(isLoading || exIsLoading)
 
     Column(
         modifier = Modifier
@@ -143,14 +145,34 @@ fun GoalContent(
                     )
                 )
 
-                AiTipBox(
-                    message = nutritionFeedback,
-                    onRequestFeedback = {
-                        // 피드백 요청 처리
-                         goalViewModel.createNutriFeedBack(selectedDate.toString())
-                    },
-                    isLoading = isNutriLoading
-                )
+                if (dailyNutrition?.totalCalorie != 0) {
+                    AiTipBox(
+                        message = nutritionFeedback,
+                        onRequestFeedback = {
+                             goalViewModel.createNutriFeedBack(selectedDate.toString())
+                        },
+                        isLoading = isNutriLoading
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(Color(0xFFD3EAFA), Color(0xFFC7D2FF))
+                                ),
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            .padding(vertical = 20.dp, horizontal = 24.dp)
+                    ) {
+                        Text(
+                            text = "✨ AI 코멘트를 받고 싶으시다면 식단을 입력해주세요!",
+                            style = medium16,
+                            color = DiaViseoColors.Basic
+                        )
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(24.dp))
 
                 MealChartSection()
@@ -219,18 +241,38 @@ fun GoalContent(
 
                 Spacer(
                     modifier = Modifier.height(
-                        if (workoutFeedback.isBlank()) 30.dp else 80.dp
+                        if (weightFeedback.isBlank()) 30.dp else 80.dp
                     )
                 )
 
-                AiTipBox(
-                    message = workoutFeedback,
-                    onRequestFeedback = {
-                        // 피드백 요청 처리
-                        // 예: goalViewModel.requestAiFeedback()
-                    },
-                    isLoading = isWorkLoading
-                )
+                if ( bodyInfo != null && bodyInfo!!.weight != 0.0 && bodyInfo!!.muscleMass != 0.0 && bodyInfo!!.bodyFat != 0.0) {
+                    AiTipBox(
+                        message = weightFeedback,
+                        onRequestFeedback = {
+                            goalViewModel.createWeightFeedBack(selectedDate.toString())
+                        },
+                        isLoading = isWeightLoading
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(Color(0xFFD3EAFA), Color(0xFFC7D2FF))
+                                ),
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            .padding(vertical = 20.dp, horizontal = 24.dp)
+                    ) {
+                        Text(
+                            text = "✨ AI 코멘트를 받고 싶으시다면 체성분 정보를 모두 기입해주세요!",
+                            style = medium16,
+                            color = DiaViseoColors.Basic
+                        )
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(24.dp))
 
                 WeightChartSection(

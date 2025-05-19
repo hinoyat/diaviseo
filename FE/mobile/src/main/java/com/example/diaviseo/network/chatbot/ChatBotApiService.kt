@@ -7,6 +7,7 @@ import com.example.diaviseo.network.chatbot.dto.res.ChatMessageResponse
 import com.example.diaviseo.network.chatbot.dto.res.EndSessionResponse
 import com.example.diaviseo.network.chatbot.dto.res.SessionSummaryResponse
 import com.example.diaviseo.network.chatbot.dto.res.StartSessionResponse
+import com.example.diaviseo.network.chatbot.dto.res.WeightPredictionResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -53,12 +54,17 @@ interface ChatBotApiService {
     // 식단 피드백 생성
     @POST("chatbot/nutrition_feedback")
     suspend fun createNutriFeedBack(
-        @Query("datetime") date: String
+        @Query("feedback_date") date: String
     ): Response<Map<String, String>>
 
-    // 홈 - 피드백 생성
+    // 체중 피드백 생성
     @GET("chatbot/weight/trend")
     suspend fun createHomeFeedBack(
         @Query("date") date: String
     ): Response<Map<String, String>>
+
+    // 홈 - 피드백 생성
+    @GET("chatbot/weight/predict")
+    suspend fun createWorkFeedBack(
+    ): Response<WeightPredictionResponse>
 }
