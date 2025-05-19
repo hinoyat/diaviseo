@@ -41,9 +41,10 @@ fun GoalContent(
     val goalViewModel: GoalViewModel = viewModel()
     val selectedDate by goalViewModel.selectedDate.collectAsState()
     val nutritionFeedback by goalViewModel.nutritionFeedback.collectAsState()
-    val workoutFeedback by goalViewModel.workoutFeedback.collectAsState()
     val isNutriLoading by goalViewModel.isNutriLoading.collectAsState()
-    val isWorkLoading by goalViewModel.isWorkLoading.collectAsState()
+    val weightFeedback by goalViewModel.weightFeedback.collectAsState()
+    val isWeightLoading by goalViewModel.isWeightLoading.collectAsState()
+
 
     // 평가<->디테일 식단 관리
     val mealViewModel: MealViewModel = viewModel()
@@ -70,8 +71,10 @@ fun GoalContent(
 
     LaunchedEffect(selectedDate) {
         weightViewModel.loadBodyData(selectedDate.toString())
-        goalViewModel.isThereFeedback("nutrition", selectedDate.toString())
-        goalViewModel.isThereFeedback("workout", selectedDate.toString())
+        coroutineScope {
+            goalViewModel.isThereFeedback("nutrition", selectedDate.toString())
+            goalViewModel.isThereFeedback("weight_trend", selectedDate.toString())
+        }
     }
 
     val isToday = remember(selectedDate) {
@@ -212,16 +215,16 @@ fun GoalContent(
 
                 Spacer(
                     modifier = Modifier.height(
-                        if (workoutFeedback.isBlank()) 30.dp else 80.dp
+                        if (weightFeedback.isBlank()) 30.dp else 80.dp
                     )
                 )
 
                 AiTipBox(
-                    message = workoutFeedback,
+                    message = weightFeedback,
                     onRequestFeedback = {
-                        goalViewModel.createWorkFeedBack(selectedDate.toString())
+                        goalViewModel.createWeightFeedBack(selectedDate.toString())
                     },
-                    isLoading = isWorkLoading
+                    isLoading = isWeightLoading
                 )
                 Spacer(modifier = Modifier.height(24.dp))
 
