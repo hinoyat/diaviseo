@@ -33,6 +33,8 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import com.example.diaviseo.healthconnect.HealthConnectManualSync
+import com.example.diaviseo.healthconnect.HealthConnectPermissionHandler
+import com.example.diaviseo.healthconnect.HealthConnectManager
 
 
 @Composable
@@ -46,6 +48,7 @@ fun HealthConnectManageScreen(
 
     val isConnected by viewModel.isConnected.collectAsState()
     val lastSyncedAt by viewModel.lastSyncedAt.collectAsState()
+    val healthConnectManager = remember { HealthConnectManager.createIfAvailable(context) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = PermissionController.createRequestPermissionResultContract()
@@ -126,7 +129,16 @@ fun HealthConnectManageScreen(
                             if (isConnected) {
                                 showUnlinkDialog = true
                             } else {
-                                HealthConnectSyncExecutor.requestPermissions(permissionLauncher)
+                                healthConnectManager?.let {
+                                    HealthConnectPermissionHandler.requestPermissionsIfAvailable(
+                                        context = context,
+                                        scope = coroutineScope,
+                                        manager = it,
+                                        launcher = permissionLauncher
+                                    )
+                                } ?: run {
+                                    HealthConnectPermissionHandler.redirectToPlayStore(context)
+                                }
                             }
                         }
                     )
