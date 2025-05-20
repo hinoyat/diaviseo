@@ -9,7 +9,6 @@ from app.core.models import init_model
 from app.core.rag.rag import init_rag
 
 from app.config.settings import get_settings
-from app.scheduler.exercise_scheduler import start_scheduler
 
 # 설정 가져오기
 settings = get_settings()
@@ -34,16 +33,11 @@ async def lifespan(app: FastAPI):
     init_model()
     init_rag()
     # 스케줄러 시작
-    scheduler = start_scheduler()
-    app.state.scheduler = scheduler
 
     yield
 
-    # 애플리케이션 종료 시 Eureka에서 해제
+
     eureka_client.stop()
-    # 스케줄러 종료
-    if hasattr(app.state, "scheduler"):
-        app.state.scheduler.shutdown()
 # FastAPI 앱 생성 (한 번만)
 app = FastAPI(lifespan=lifespan)
 
@@ -64,4 +58,9 @@ def health():
 @app.get("/")
 def read_root():
     return {"message": "Hello from FastAPI!"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
 
