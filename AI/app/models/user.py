@@ -30,3 +30,4 @@ class User(Base):
     consent_personal = Column(Integer, nullable=False, default=0)
     location_personal = Column(Integer, nullable=False, default=0)
     created_at = Column(DATETIME, nullable=False)
+    is_deleted = Column(Integer, nullable=False, default=False)
