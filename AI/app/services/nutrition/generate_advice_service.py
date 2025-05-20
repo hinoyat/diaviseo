@@ -42,119 +42,119 @@ templates = {
     ]
 }
 
-# def generate_advice(data: dict, tdee: float) -> str:
-#     """
-#     data: {
-#       "calorie": float,
-#       "carbohydrate": float,
-#       "protein": float,
-#       "fat": float,
-#       "cholesterol": float,
-#       "sugar": float,
-#     }
-#     tdee: 목표 일일 에너지 소비량 (kcal)
-#     """
-#     total_cal = float(data.get("calorie", 0))
-#     carb_g    = float(data.get("carbohydrate", 0))
-#     prot_g    = float(data.get("protein", 0))
-#     fat_g     = float(data.get("fat", 0))
-#     chol_mg   = float(data.get("cholesterol", 0))
-#     sugar_g   = float(data.get("sugar", 0))
-#
-#     msgs = []
-#
-#     # 1) 칼로리 피드백
-#     if total_cal == 0:
-#         return random.choice(templates["no_data"])
-#     if total_cal > tdee:
-#         msgs.append(
-#             random.choice(templates["calorie_over"])
-#                   .format(total_cal=total_cal, tdee=tdee)
-#         )
-#     else:
-#         msgs.append(
-#             random.choice(templates["calorie_under"])
-#                   .format(total_cal=total_cal, tdee=tdee)
-#         )
-#
-#     # 2) 탄단지 비율 계산 (칼로리 기준)
-#     cal_from_carb = carb_g * 4
-#     cal_from_prot = prot_g * 4
-#     cal_from_fat  = fat_g  * 9
-#     cal_sum_macro = cal_from_carb + cal_from_prot + cal_from_fat or 1  # 0 방지
-#     if cal_sum_macro == 0:
-#         cal_sum_macro = 1
-#
-#     carb_pct = cal_from_carb / cal_sum_macro * 100
-#     prot_pct = cal_from_prot / cal_sum_macro * 100
-#     fat_pct  = cal_from_fat  / cal_sum_macro * 100
-#
-#     msgs.append(
-#         f"📊 탄단지 비율: 탄수화물 {carb_pct:.0f}%, 단백질 {prot_pct:.0f}%, 지방 {fat_pct:.0f}%"
-#     )
-#
-#     # 3) 탄단지 균형 피드백 (권장 50:30:20)
-#     tgt = {"carb":50, "prot":30, "fat":20}
-#     diffs = {
-#         "carb": abs(carb_pct - tgt["carb"]),
-#         "prot": abs(prot_pct - tgt["prot"]),
-#         "fat":  abs(fat_pct  - tgt["fat"])
-#     }
-#     if max(diffs.values()) <= 10:
-#         msgs.append("🎉 탄단지 비율이 대체로 균형을 이루고 있습니다.")
-#     else:
-#         worst = max(diffs, key=diffs.get)
-#         if worst == "carb":
-#             msgs.append(random.choice(templates["macro_carb"]))
-#         elif worst == "prot":
-#             msgs.append(random.choice(templates["macro_prot"]))
-#         else:
-#             msgs.append(random.choice(templates["macro_fat"]))
-#
-#     # 4) 당류 피드백 (권장당류 = TDEE의 10%)
-#     rec_sugar = tdee * 0.10
-#     sugar_pct = sugar_g / rec_sugar * 100 if rec_sugar else 0
-#     msgs.append(f"🍬 당류 섭취: {sugar_g:.0f}g ({sugar_pct:.0f}% of 권장 {rec_sugar:.0f}g)")
-#     if sugar_pct > 100:
-#         msgs.append(random.choice(templates["sugar_high"]))
-#     elif sugar_pct > 80:
-#         msgs.append(random.choice(templates["sugar_high"]))
-#
-#     # 5) 콜레스테롤 피드백 (권장 300mg)
-#     msgs.append(f"🥚 콜레스테롤: {chol_mg:.0f}mg")
-#     if chol_mg > 300:
-#         msgs.append(random.choice(templates["chol_high"]))
-#
-#     # 최종 조합
-#     response = " ".join(msgs)
-#     return response
+def generate_advice(data: dict, tdee: float) -> str:
+    """
+    data: {
+      "calorie": float,
+      "carbohydrate": float,
+      "protein": float,
+      "fat": float,
+      "cholesterol": float,
+      "sugar": float,
+    }
+    tdee: 목표 일일 에너지 소비량 (kcal)
+    """
+    total_cal = float(data.get("calorie", 0))
+    carb_g    = float(data.get("carbohydrate", 0))
+    prot_g    = float(data.get("protein", 0))
+    fat_g     = float(data.get("fat", 0))
+    chol_mg   = float(data.get("cholesterol", 0))
+    sugar_g   = float(data.get("sugar", 0))
 
+    msgs = []
 
-# 모델 호출
-def generate_advice(data:dict, tdee: float) -> str:
-    # 전체 데이터
-    total_cal = data.get("calorie", 0)
-    carb_g    = data.get("carbohydrate", 0)
-    prot_g    = data.get("protein", 0)
-    fat_g     = data.get("fat", 0)
-    chol_mg   = data.get("cholesterol", 0)
-    sugar_g   = data.get("sugar", 0)
+    # 1) 칼로리 피드백
+    if total_cal == 0:
+        return random.choice(templates["no_data"])
+    if total_cal > tdee:
+        msgs.append(
+            random.choice(templates["calorie_over"])
+                  .format(total_cal=total_cal, tdee=tdee)
+        )
+    else:
+        msgs.append(
+            random.choice(templates["calorie_under"])
+                  .format(total_cal=total_cal, tdee=tdee)
+        )
 
-    # 탄수화물 비율
+    # 2) 탄단지 비율 계산 (칼로리 기준)
     cal_from_carb = carb_g * 4
     cal_from_prot = prot_g * 4
     cal_from_fat  = fat_g  * 9
     cal_sum_macro = cal_from_carb + cal_from_prot + cal_from_fat or 1  # 0 방지
+    if cal_sum_macro == 0:
+        cal_sum_macro = 1
 
-    carb_pct = round((cal_from_carb / cal_sum_macro),3)
-    prot_pct = round((cal_from_prot / cal_sum_macro),3)
-    fat_pct  = round((cal_from_fat  / cal_sum_macro),3)
+    carb_pct = cal_from_carb / cal_sum_macro * 100
+    prot_pct = cal_from_prot / cal_sum_macro * 100
+    fat_pct  = cal_from_fat  / cal_sum_macro * 100
 
-    '''
-    권장 칼로리: 2298 kcal, 탄수화물 비율: 0.396, 단백질 비율: 0.373, 지방 비율: 0.23, 콜레스테롤: 296 mg, 당류: 433 g, 탄단지 조언
-    '''
+    msgs.append(
+        f"📊 탄단지 비율: 탄수화물 {carb_pct:.0f}%, 단백질 {prot_pct:.0f}%, 지방 {fat_pct:.0f}%"
+    )
 
+    # 3) 탄단지 균형 피드백 (권장 50:30:20)
+    tgt = {"carb":50, "prot":30, "fat":20}
+    diffs = {
+        "carb": abs(carb_pct - tgt["carb"]),
+        "prot": abs(prot_pct - tgt["prot"]),
+        "fat":  abs(fat_pct  - tgt["fat"])
+    }
+    if max(diffs.values()) <= 10:
+        msgs.append("🎉 탄단지 비율이 대체로 균형을 이루고 있습니다.")
+    else:
+        worst = max(diffs, key=diffs.get)
+        if worst == "carb":
+            msgs.append(random.choice(templates["macro_carb"]))
+        elif worst == "prot":
+            msgs.append(random.choice(templates["macro_prot"]))
+        else:
+            msgs.append(random.choice(templates["macro_fat"]))
 
-    prompt = f"권장칼로리: {total_cal} kcal, 탄수화물 비율: {carb_pct}, 단백질 비율: {prot_pct}, 지방 비율: {fat_pct}, 콜레스테롤: {chol_mg} mg, 당류: {sugar_g} g, 탄단지 조언"
-    response = models.diet_model.generate(prompt)
+    # 4) 당류 피드백 (권장당류 = TDEE의 10%)
+    rec_sugar = tdee * 0.10
+    sugar_pct = sugar_g / rec_sugar * 100 if rec_sugar else 0
+    msgs.append(f"🍬 당류 섭취: {sugar_g:.0f}g ({sugar_pct:.0f}% of 권장 {rec_sugar:.0f}g)")
+    if sugar_pct > 100:
+        msgs.append(random.choice(templates["sugar_high"]))
+    elif sugar_pct > 80:
+        msgs.append(random.choice(templates["sugar_high"]))
+
+    # 5) 콜레스테롤 피드백 (권장 300mg)
+    msgs.append(f"🥚 콜레스테롤: {chol_mg:.0f}mg")
+    if chol_mg > 300:
+        msgs.append(random.choice(templates["chol_high"]))
+
+    # 최종 조합
+    response = " ".join(msgs)
     return response
+
+
+# # 모델 호출
+# def generate_advice(data:dict, tdee: float) -> str:
+#     # 전체 데이터
+#     total_cal = data.get("calorie", 0)
+#     carb_g    = data.get("carbohydrate", 0)
+#     prot_g    = data.get("protein", 0)
+#     fat_g     = data.get("fat", 0)
+#     chol_mg   = data.get("cholesterol", 0)
+#     sugar_g   = data.get("sugar", 0)
+#
+#     # 탄수화물 비율
+#     cal_from_carb = carb_g * 4
+#     cal_from_prot = prot_g * 4
+#     cal_from_fat  = fat_g  * 9
+#     cal_sum_macro = cal_from_carb + cal_from_prot + cal_from_fat or 1  # 0 방지
+#
+#     carb_pct = round((cal_from_carb / cal_sum_macro),3)
+#     prot_pct = round((cal_from_prot / cal_sum_macro),3)
+#     fat_pct  = round((cal_from_fat  / cal_sum_macro),3)
+#
+#     '''
+#     권장 칼로리: 2298 kcal, 탄수화물 비율: 0.396, 단백질 비율: 0.373, 지방 비율: 0.23, 콜레스테롤: 296 mg, 당류: 433 g, 탄단지 조언
+#     '''
+#
+#
+#     prompt = f"권장칼로리: {total_cal} kcal, 탄수화물 비율: {carb_pct}, 단백질 비율: {prot_pct}, 지방 비율: {fat_pct}, 콜레스테롤: {chol_mg} mg, 당류: {sugar_g} g, 탄단지 조언"
+#     response = models.diet_model.generate(prompt)
+#     return response
