@@ -36,6 +36,15 @@ class Settings(BaseSettings):
     predict_model_path: str
     train_model_path: str
 
+    # RabbitMQ 설정
+    rabbitmq_host: str
+    rabbitmq_port: int
+    rabbitmq_username: str
+    rabbitmq_password: str
+    rabbitmq_exchange: str = "alert_exchange"
+    rabbitmq_queue: str = "notification-queue"
+    rabbitmq_routing_key: str = "alert.push.notification"
+
     # 설정 파일 위치 (.env)
     model_config = {
         "env_file": ".env",
