@@ -59,3 +59,17 @@ def get_bmr(user_db: Session, user_id: int) -> float:
     bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age)
 
   return bmr
+
+def get_all_users(user_db: Session):
+  """
+  모든 사용자 정보를 조회합니다.
+
+  Args:
+      user_db: 사용자 정보 데이터베이스 세션
+
+  Returns:
+      list: 모든 사용자 객체 목록
+  """
+  from app.models.user import User
+  return user_db.query(User).filter(
+      User.is_deleted == False).with_entities(User.user_id, User.nickname).all()
