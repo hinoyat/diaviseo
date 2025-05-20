@@ -310,7 +310,7 @@ fun DietConfirmScreen(
                             }
                         },
                         onError = { message ->
-                            Toast.makeText(context, "등록 실패: $message", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "$message", Toast.LENGTH_SHORT).show()
                         }
                     )
                 },
