@@ -21,6 +21,7 @@ import com.example.diaviseo.network.exercise.ExerciseApiService
 import com.example.diaviseo.network.meal.MealApiService
 import com.example.diaviseo.network.food.FoodApiService
 import com.example.diaviseo.network.foodset.FoodSetApiService
+import java.util.concurrent.TimeUnit
 
 object RetrofitInstance {
     // 재발급 동기화를 위한 lock 객체
@@ -86,6 +87,9 @@ object RetrofitInstance {
 
     // 3. OkHttpClient 구성
     val client = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS) // ⏱ 연결 시도 제한 시간
+        .readTimeout(30, TimeUnit.SECONDS)    // ⏱ 서버 응답 대기 시간
+        .writeTimeout(30, TimeUnit.SECONDS)   // ⏱ 요청 전송 제한 시간
         .addInterceptor(authInterceptor)
         .addInterceptor(logging) // 이 순서도 중요함!
         .build()
