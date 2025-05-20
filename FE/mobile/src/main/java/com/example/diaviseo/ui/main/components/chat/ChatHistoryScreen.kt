@@ -210,8 +210,8 @@ private fun ChatHistoryCard(history: ChatHistory, onClick: () -> Unit) {
         ) {
             Text(
                 text = when (history.topic) {
-                    ChatTopic.DIET -> "🥗 식단이와의 대화"
-                    ChatTopic.EXERCISE -> "🏋 운동이와의 대화"
+                    ChatTopic.DIET -> "식단이와의 대화"
+                    ChatTopic.EXERCISE -> "운동이와의 대화"
                 },
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 18.sp,
