@@ -176,15 +176,15 @@ fun DietRegisterMainScreen(
         }
 
         // ➕ 플로팅 버튼
-        CameraFloatingIconButton(
-            onClick = {
-                navController.navigate("diet_ai_register")
-            },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 16.dp, bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 77.dp)
-                .zIndex(15f)
-        )
+//        CameraFloatingIconButton(
+//            onClick = {
+//                navController.navigate("diet_ai_register")
+//            },
+//            modifier = Modifier
+//                .align(Alignment.BottomEnd)
+//                .padding(end = 16.dp, bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 77.dp)
+//                .zIndex(15f)
+//        )
 
         if (showMealSheet) {
             MealSelectBottomSheet(

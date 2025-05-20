@@ -116,7 +116,7 @@ class StepViewModel(application: Application) : AndroidViewModel(application), S
                 _todaySteps.value = total - baseSteps
             } else {
                 // ✅ baseSteps가 아직 없을 경우에도 일단 total 보여줌
-                _todaySteps.value = 0
+                _todaySteps.value = total
                 Log.w("StepViewModel", "⚠️ baseSteps 없음, 임시로 total 사용 → todaySteps = 0")
             }
         }
