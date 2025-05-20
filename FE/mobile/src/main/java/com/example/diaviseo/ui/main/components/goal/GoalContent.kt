@@ -86,8 +86,6 @@ fun GoalContent(
         selectedDate == LocalDate.now()
     }
 
-    val isMale = if (gender != null) {gender == "M"} else false
-
     LaunchedEffect(selectedDate) {
         mealViewModel.fetchPhysicalInfo(selectedDate.toString())
         coroutineScope {
@@ -212,7 +210,6 @@ fun GoalContent(
             "체중" -> {
                 WeightOverviewSection(
                     isToday = isToday,
-                    isMale = isMale,
                     weight = if (bodyInfo != null) bodyInfo!!.weight else null,
                     muscleMass = if (bodyInfo != null) bodyInfo!!.muscleMass else null,
                     fatMass = if (bodyInfo != null) bodyInfo!!.bodyFat else null,
