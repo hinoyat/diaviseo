@@ -212,22 +212,22 @@ fun LegendItem(label: String, color: Color) {
 
 fun List<NutritionStatsEntry>.toChartEntries(period: ChartPeriod): List<StakedBarChartData.Entry> {
     return this.map {
-        val date = LocalDate.parse(it.label)
+        val date = LocalDate.parse(it.label, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         val label = when (period) {
-            ChartPeriod.Day -> "${date.monthValue}/${date.dayOfMonth}" // 예: 4/1
+            ChartPeriod.Day -> "${date.monthValue}/${date.dayOfMonth}"
             ChartPeriod.Week -> {
                 val weekOfMonth = date.get(WeekFields.of(Locale.KOREA).weekOfMonth())
-                "${date.monthValue}월${weekOfMonth}주" // 예: 5월1주
+                "${date.monthValue}월${weekOfMonth}주"
             }
-            ChartPeriod.Month -> "${date.monthValue}월" // 예: 5월
+            ChartPeriod.Month -> "${date.monthValue}월"
         }
 
         StakedBarChartData.Entry(
             label = label,
-            carbs = it.carbs,
-            protein = it.protein,
-            fat = it.fat,
-            sugar = it.sugar
+            carbs = it.carbs * 4,    // kcal로 변환
+            protein = it.protein * 4,
+            fat = it.fat * 9,
+            sugar = it.sugar * 4
         )
     }
 }

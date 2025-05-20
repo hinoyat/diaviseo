@@ -1,6 +1,7 @@
 package com.example.diaviseo.ui.main.components.chat
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,12 +16,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.diaviseo.R
 import com.example.diaviseo.ui.theme.DiaViseoColors
 import com.example.diaviseo.viewmodel.chat.ChatBotViewModel
 import java.time.LocalDateTime
@@ -181,44 +184,73 @@ private fun EmptyHistoryMessage(selectedFilter: ChatTopic?) {
     }
 }
 
+
 @Composable
 private fun ChatHistoryCard(history: ChatHistory, onClick: () -> Unit) {
     val isEnded = history.isEnded
+    val characterImageRes = when (history.topic) {
+        ChatTopic.DIET -> R.drawable.chat_char_diet_history
+        ChatTopic.EXERCISE -> R.drawable.chat_char_diet_exercise
+    }
 
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(120.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(Color.White)
             .clickable { onClick() }
-            .padding(16.dp)
+            .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
-        Text(
-            text = when (history.topic) {
-                ChatTopic.DIET -> "🥗 식단이와의 대화"
-                ChatTopic.EXERCISE -> "🏋 운동이와의 대화"
-            },
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 15.sp,
-            color = if (isEnded) DiaViseoColors.Placeholder else DiaViseoColors.Basic
-        )
+        Column(
+            modifier = Modifier
+                .weight(2f)
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = when (history.topic) {
+                    ChatTopic.DIET -> "식단이와의 대화"
+                    ChatTopic.EXERCISE -> "운동이와의 대화"
+                },
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp,
+                color = if (isEnded) DiaViseoColors.Placeholder else DiaViseoColors.Basic
+            )
 
-        Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
-        Text(
-            text = if (isEnded) "종료된 대화입니다" else history.lastMessage,
-            fontSize = 14.sp,
-            color = DiaViseoColors.Placeholder,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+            Text(
+                text = if (isEnded) "종료된 대화입니다" else history.lastMessage,
+                fontSize = 14.sp,
+                color = DiaViseoColors.Placeholder,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
 
-        Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
-        Text(
-            text = history.timestamp.format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm")),
-            fontSize = 12.sp,
-            color = DiaViseoColors.Placeholder
-        )
+            Text(
+                text = history.timestamp.format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm")),
+                fontSize = 12.sp,
+                color = DiaViseoColors.Placeholder
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(id = characterImageRes),
+                contentDescription = "캐릭터 이미지",
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .aspectRatio(1f)
+                    .clip(RoundedCornerShape(12.dp))
+            )
+        }
     }
 }

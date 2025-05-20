@@ -127,9 +127,10 @@ fun ChatContent(
                                     ChatTopic.EXERCISE -> R.drawable.chat_char_exercise
                                 }
                             )
-                        })
-                    }
+                        }
+                    )
                 }
+            }
 
                 itemsIndexed(messages) { index, msg ->
                     Column {
@@ -262,19 +263,19 @@ fun ChatContent(
             }
         }
 
-            if (showExitDialog) {
-                ExitChatDialog(
-                    onConfirm = {
-                        viewModel.endSession()
-                        showExitDialog = false
-                        inputState.value = ""
-                        onExitClick()
-                    },
-                    onDismiss = { showExitDialog = false }
-                )
-            }
+        if (showExitDialog) {
+            ExitChatDialog(
+                onConfirm = {
+                    viewModel.endSession()
+                    showExitDialog = false
+                    inputState.value = ""
+                    onExitClick()
+                },
+                onDismiss = { showExitDialog = false }
+            )
         }
     }
+}
 
 
 @Composable

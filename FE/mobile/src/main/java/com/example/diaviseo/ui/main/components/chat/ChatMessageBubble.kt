@@ -73,8 +73,14 @@ fun ChatMessageBubble(
                         .background(color = bubbleColor)
                         .padding(horizontal = 16.dp, vertical = 10.dp)
                 ) {
+                    val displayText = if (message.isUser && message.text.startsWith("자세히 ")) {
+                        message.text.removePrefix("자세히 ")
+                    } else {
+                        message.text
+                    }
+
                     Text(
-                        text = message.text,
+                        text = displayText,
                         color = textColor,
                         fontSize = 15.sp,
                         textAlign = if (message.isUser) TextAlign.End else TextAlign.Start
