@@ -131,8 +131,8 @@ fun GoalContent(
                 Spacer(modifier = Modifier.height(40.dp))
 
                 DonutChartWithLegend(
-                    calories = dailyNutrition?.totalCalorie,
-                    calorieGoal = nowPhysicalInfo?.recommendedIntake,
+                    calories = dailyNutrition?.totalCalorie ?: 0,
+                    calorieGoal = nowPhysicalInfo?.recommendedIntake ?: 0,
                     carbRatio = carbRatio,
                     sugarRatio = sugarRatio,
                     proteinRatio = proteinRatio,
