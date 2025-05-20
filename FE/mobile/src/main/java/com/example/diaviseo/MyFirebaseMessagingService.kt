@@ -38,6 +38,37 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
-        Log.d("FCM", "FCM 메시지 수신됨: ${remoteMessage.data}")
+
+        val title = remoteMessage.data["title"] ?: "알림"
+        val body = remoteMessage.data["body"] ?: "새 메시지 도착"
+
+        Log.d("FCM", "FCM 메시지 수신됨: $title / $body")
+
+        showNotification(title, body)
     }
+
+
+    private fun showNotification(title: String, message: String) {
+        val channelId = "default_channel_id"
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val channel = android.app.NotificationChannel(
+                channelId,
+                "Default Channel",
+                android.app.NotificationManager.IMPORTANCE_HIGH
+            )
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val notification = androidx.core.app.NotificationCompat.Builder(this, channelId)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setSmallIcon(R.drawable.logo_diaviseo)
+            .setAutoCancel(true)
+            .build()
+
+        notificationManager.notify(0, notification)
+    }
+
 }
