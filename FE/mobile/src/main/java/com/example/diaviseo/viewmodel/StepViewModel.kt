@@ -26,7 +26,7 @@ class StepViewModel(application: Application) : AndroidViewModel(application), S
     private val _todaySteps = MutableStateFlow(0)
     val todaySteps: StateFlow<Int> = _todaySteps
 
-    private val _yesterdaySteps = MutableStateFlow(0)
+    private val _yesterdaySteps = MutableStateFlow(5870)   // 시연용 원래는 0
     val yesterdaySteps: StateFlow<Int> = _yesterdaySteps
 
     // 자정 기준 누적값

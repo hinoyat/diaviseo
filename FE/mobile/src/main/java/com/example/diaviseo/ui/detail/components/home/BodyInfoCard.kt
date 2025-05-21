@@ -35,13 +35,13 @@ fun BodyInfoCard(
         InfoBox(
             modifier = Modifier.weight(1f),
             title = "골격근량",
-            value = skeletalMuscle,
+            value = skeletalMuscle?: 0.00,
             onEditClick = onSkeletalEdit
         )
         InfoBox(
             modifier = Modifier.weight(1f),
             title = "체지방량",
-            value = bodyFat,
+            value = bodyFat?: 0.00,
             onEditClick = onBodyFatEdit
         )
     }

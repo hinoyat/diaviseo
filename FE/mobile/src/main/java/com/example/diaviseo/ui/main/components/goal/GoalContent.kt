@@ -86,22 +86,7 @@ fun GoalContent(
         selectedDate == LocalDate.now()
     }
 
-    val isMale = if (gender != null) {gender == "M"} else false
-
     LaunchedEffect(selectedDate) {
-        // 비동기 작업
-//        coroutineScope {
-//            val job1 = async {mealViewModel.fetchPhysicalInfo(selectedDate.toString())}
-//            mealViewModel.fetchMealStatistic("DAY", selectedDate.toString())
-//            exerciseViewModel.fetchAllStats(selectedDate.toString())
-//
-//            job1.await()
-//        }
-//        // 순서 중요 (아래는 동기)
-//        mealViewModel.fetchDailyNutrition(selectedDate.toString())
-//        exerciseViewModel.fetchDailyExercise(selectedDate.toString())
-//        weightViewModel.fetchAllLists(selectedDate.toString())
-
         mealViewModel.fetchPhysicalInfo(selectedDate.toString())
         coroutineScope {
             mealViewModel.fetchMealStatistic("DAY", selectedDate.toString())
@@ -131,8 +116,8 @@ fun GoalContent(
                 Spacer(modifier = Modifier.height(40.dp))
 
                 DonutChartWithLegend(
-                    calories = dailyNutrition?.totalCalorie,
-                    calorieGoal = nowPhysicalInfo?.recommendedIntake,
+                    calories = dailyNutrition?.totalCalorie ?: 0,
+                    calorieGoal = nowPhysicalInfo?.recommendedIntake ?: 0,
                     carbRatio = carbRatio,
                     sugarRatio = sugarRatio,
                     proteinRatio = proteinRatio,
@@ -225,7 +210,6 @@ fun GoalContent(
             "체중" -> {
                 WeightOverviewSection(
                     isToday = isToday,
-                    isMale = isMale,
                     weight = if (bodyInfo != null) bodyInfo!!.weight else null,
                     muscleMass = if (bodyInfo != null) bodyInfo!!.muscleMass else null,
                     fatMass = if (bodyInfo != null) bodyInfo!!.bodyFat else null,

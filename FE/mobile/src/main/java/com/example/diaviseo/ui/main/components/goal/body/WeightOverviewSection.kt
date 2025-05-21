@@ -29,16 +29,10 @@ import com.example.diaviseo.viewmodel.goal.WeightViewModel
 @Composable
 fun WeightOverviewSection(
     isToday: Boolean,
-    isMale: Boolean,
     weight: Double?,
     muscleMass: Double?,
     fatMass: Double?
 ) {
-    val weightViewModel : WeightViewModel = viewModel()
-    val goalViewModel : GoalViewModel = viewModel()
-
-    val selectedDate by goalViewModel.selectedDate.collectAsState()
-
     val title = if (isToday) "오늘의 체중 정보는?" else "이 날의 체중 정보는?"
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -53,8 +47,8 @@ fun WeightOverviewSection(
         if (weight != null && muscleMass != null && fatMass != null) {
             // Float 리터럴(f) 대신 Double 리터럴(.0) 사용
             val refWeight = weight + 20.0
-            val refMuscle = if (isMale) 40.0 else 30.0
-            val refFat    = if (isMale) 25.0 else 32.0
+            val refMuscle = 30.0
+            val refFat    = 32.0
 
             WeightInfoRow(label = "체중", value = weight, maxValue = refWeight)
             Spacer(modifier = Modifier.height(10.dp))
@@ -74,7 +68,6 @@ fun WeightOverviewSection(
                     modifier = Modifier
                         .fillMaxWidth(1f),
                     shape = RoundedCornerShape(12.dp),
-//                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = DiaViseoColors.Placeholder.copy(alpha = 0.1f)
                     )
@@ -116,9 +109,8 @@ fun WeightOverviewSection(
 fun WeightInfoRow(
     label: String,
     value: Double,
-    maxValue: Double // 기준 상한값 (ex: 인바디 표준값)
+    maxValue: Double
 ) {
-    // Double 결과를 Float으로 변환한 뒤 coerceIn
     val ratio = (value / maxValue)
         .toFloat()
         .coerceIn(0f, 1.2f)
@@ -131,7 +123,7 @@ fun WeightInfoRow(
         Text(
             text = "$label (kg)",
             color = DiaViseoColors.Basic,
-            modifier = Modifier.width(78.dp),
+            modifier = Modifier.width(92.dp),
             style = regular14
         )
 
@@ -154,6 +146,8 @@ fun WeightInfoRow(
                     )
             )
         }
+
+        Spacer(modifier = Modifier.width(12.dp))
 
         Text(
             text = String.format("%.1f", value),
