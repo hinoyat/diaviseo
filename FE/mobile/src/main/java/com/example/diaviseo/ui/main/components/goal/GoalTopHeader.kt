@@ -31,6 +31,7 @@ fun GoalTopHeader(
     viewModel: GoalViewModel = viewModel()
 ) {
     val selectedDate by viewModel.selectedDate.collectAsState()
+    val month = selectedDate.month.value
     val day = selectedDate.dayOfMonth.toString()
     val dayOfWeek = selectedDate.dayOfWeek
     val isToday = selectedDate == LocalDate.now()
@@ -102,7 +103,7 @@ fun GoalTopHeader(
                 .wrapContentWidth(Alignment.CenterHorizontally)
                 .padding(horizontal = 24.dp),
             text = buildAnnotatedString {
-                val prefix = if (isToday) "오늘의 " else "${currentDate.monthValue}월 ${day}일의 "
+                val prefix = if (isToday) "오늘의 " else "${month}월 ${day}일의 "
                 append(prefix)
                 withStyle(SpanStyle(color = Color.White)) {
                     append(selectedTab)
