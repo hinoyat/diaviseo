@@ -193,7 +193,7 @@ class GoalViewModel : ViewModel() {
 
         val advice = if (isTooRapid) {
             "하지만 ${daysTracked}일 이내 급격한 체중 변화는 좋지 않아요.\n" +
-                    "조금 더 ${if (projectedChange < 0) "드시고" else "운동하고"} 건강하게 ${daysTracked}일 이내 3kg ${suggestionTarget}을 목표로 해보아요."
+                    "조금 더 ${if (projectedChange < 0) "드시고" else "운동하고"} 건강하게 ${daysTracked}일 이내 최대 7kg ${suggestionTarget}을 목표로 해보아요."
         } else {
             "아주 좋은 흐름이에요! 지금처럼만 하면 충분히 ${suggestionTarget}에 성공할 수 있어요 💪\n" +
                     "건강한 루틴을 꾸준히 이어가 볼까요?"

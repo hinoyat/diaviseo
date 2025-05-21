@@ -64,17 +64,7 @@ fun GoalSummaryCard(
             RecommendationPill(label = "권장 소비칼로리", value = recommendedExercise)
         }
 
-        // 설명 텍스트
-        Text(
-            text = when (goal) {
-                "WEIGHT_LOSS" -> "식단으로 $recommendedIntake kcal 제한, 운동으로 $recommendedExercise kcal 소모하면 적정몸무게로 감량할 수 있어요."
-                "WEIGHT_GAIN" -> "식단으로 $recommendedIntake kcal 섭취, $recommendedExercise kcal 정도 운동하면 적정몸무게로 증량할 수 있어요."
-                "WEIGHT_MAINTENANCE" -> "식단으로 $recommendedIntake kcal 섭취, $recommendedExercise kcal 정도 꾸준히 운동하면 적정몸무게를 유지할 수 있어요."
-                else -> ""
-            },
-            style = medium14,
-            color = DiaViseoColors.Basic
-        )
+        Spacer(modifier = Modifier.height(4.dp))
 
         // 예측 추이 제목
         Text(

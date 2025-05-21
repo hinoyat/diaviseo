@@ -148,7 +148,7 @@ fun HomeDetailScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             DetailInfoCard(
-                nickname = nickname.toString(),
+                nickname = nickname ?: "불러오는 중...",
                 height = userHeight,
                 weight = userWeight,
                 bmr = bmr,
@@ -166,8 +166,8 @@ fun HomeDetailScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             GoalSummaryCard(
-                nickname = nickname.toString(),
-                goal = goal.toString(),
+                nickname = nickname ?: "불러오는 중...",
+                goal = goal ?: "불러오는 중...",
                 recommendedIntake = recommendedIntake,
                 recommendedExercise = recommendedExercise,
                 totalCalorie = totalCalorie,
