@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF222222</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="main1">#1673FF</color>
+    <color name="main1_translucent_40">#661673FF</color> <!-- #66 = 40% 투명도 -->
+    <color name="text_default">#222222</color>
+
+</resources>

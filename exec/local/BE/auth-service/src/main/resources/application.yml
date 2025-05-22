@@ -1,0 +1,30 @@
+server:
+  port: 0
+spring:
+  application:
+    name: auth-service
+  config:
+    import: configserver:http://localhost:8888
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ********
+            client-secret: ********
+            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            scope: profile, email
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
+eureka:
+  instance:
+    instance-id: ${spring.cloud.client.ip-address}:${random.value}
+#    prefer-ip-address: true
+
+jwt:
+  secret: ********
+  expiration: 3600000 # 1시간 (1000ms * 60s * 60m)
