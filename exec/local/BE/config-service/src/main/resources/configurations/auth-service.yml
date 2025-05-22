@@ -1,0 +1,52 @@
+server:
+  port: 0
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ********
+            client-secret: ********
+            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            scope: profile, email
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ********
+  cloud:
+    config:
+      fail-fast: true
+
+eureka:
+  instance:
+    instance-id: ${spring.cloud.client.ip-address}:${random.value}
+#    prefer-ip-address: true
+
+jwt:
+  secret: ********
+  expiration: 3600000
+  refresh-expiration: 360000000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
