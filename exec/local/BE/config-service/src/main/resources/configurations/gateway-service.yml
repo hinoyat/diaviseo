@@ -1,0 +1,86 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/oauth2/**, /api/login/**, /api/auth/**
+
+        - id: signup-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/signup
+
+        - id: sms-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/verify/**
+
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/**
+          filters:
+            - name: JwtAuthFilter
+
+        - id: exercise-service
+          uri: lb://health-service
+          predicates:
+            - Path=/api/exercises/**
+          filters:
+            - name: JwtAuthFilter
+
+        - id: body-service
+          uri: lb://health-service
+          predicates:
+            - Path=/api/bodies/**
+          filters:
+            - name: JwtAuthFilter
+
+        - id: food-service
+          uri: lb://health-service
+          predicates:
+            - Path=/api/foods/**
+          filters:
+            - name: JwtAuthFilter
+
+        - id: meal-service
+          uri: lb://health-service
+          predicates:
+            - Path=/api/meals/**
+          filters:
+            - name: JwtAuthFilter
+
+        - id: food-set-service
+          uri: lb://health-service
+          predicates:
+            - Path=/api/food-sets/**
+          filters:
+            - name: JwtAuthFilter
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ********
+
+jwt:
+  secret: ********
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    gateway:
+      enabled: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    org.springframework.cloud.netflix: INFO

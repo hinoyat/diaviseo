@@ -1,0 +1,32 @@
+spring:
+  application:
+    # 다른 서비스에서 이 이름을 읽음
+    name: eureka-service
+server:
+  port: 8761
+
+eureka:
+  client:
+    # eureka는 다른 서버에 등록 할 필요 X
+    register-with-eureka: false
+    # 레지스트리 정보를 로컬에 캐싱
+    fetch-registry: false
+    # 클라이언트가 읽을 url
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+  server:
+    # 죽은 Service를 삭제하기 전에 얼마나 기다릴지
+    eviction-interval-timer-in-ms: 30000
+    # Eureka Client 즉 Micro Service 들이 heartbeat를 보내는데 보내지 않을 때 인스턴스 제거 X
+    # 네트워크 문제 등이 해결되었을 때 시스템 복구 가능
+
+    # 왜 둘 다 사용하냐?? 하나는 죽이고 하나는 기다리고
+    # 아래의 옵션은 보통 80~85% 이상의 서비스들이 heartbeat 를 보내지 않으면 활성화
+    # 그래서 위의 삭제하는 것이 작동되지 않고 기다리는 것
+    enable-self-preservation: true
+
+  logging:
+    level:
+      com.netflix.eureka: INFO
+      com.netflix.discovery: INFO

@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: health-service
+  config:
+    import: configserver:http://localhost:8888
+  profiles:
+    active: local
+    include: rabbitmq
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  elasticsearch:
+    uris: localhost:9200
+  minio:
+    endpoint: http://localhost:9100
+    external-endpoint: http://localhost:9100
+    accessKey: ********
+    secretKey: ********
+    bucket:
+      name: health-images
+      location: local
+---
+spring:
+  config:
+    activate:
+      on-profile: k8s
+  elasticsearch:
+    uris: elasticsearch:9200
+  minio:
+    endpoint: http://minio:9100
+    external-endpoint: http://13.124.189.230:31100
+    accessKey: ********
+    secretKey: ********
+    bucket:
+      name: health-images
+      location: k8s
