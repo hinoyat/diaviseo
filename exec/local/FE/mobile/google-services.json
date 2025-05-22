@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "554994332231",
+    "project_id": "dia-viseo",
+    "storage_bucket": "dia-viseo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:554994332231:android:d3ceb8aa280b66c82eb762",
+        "android_client_info": {
+          "package_name": "com.example.diaviseo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBiWr_i41wPJfKqIaWo-yw-YSy69mY6ZvM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
