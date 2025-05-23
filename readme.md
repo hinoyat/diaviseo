@@ -91,7 +91,7 @@
 
 <br>
 
-## Skills & Branch Strategy
+## 🚀 주요 기술 및 브랜치 전략
 
 ### Kotlin
 
@@ -305,10 +305,11 @@ FE/
 
 ### 작업 관리
 
-- **GitLab**을 사용하여 MergeRequest에 서로 코드 리뷰를 하면서 피드백을 공유 했습니다.
+- #### **GitLab**을 사용하여 MergeRequest에 서로 코드 리뷰를 하면서 피드백을 공유 했습니다.
+
   ![alt text](image.png)
 
-- **Jira**를 통해서 서로의 작업 현황을 파악하고 개발 일정을 관리했습니다.
+- #### **Jira**를 통해서 서로의 작업 현황을 파악하고 개발 일정을 관리했습니다.
   ![alt text](image-1.png)
 
 <br>
