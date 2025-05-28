@@ -128,3 +128,30 @@ Authorization: Bearer {accessToken}
 ```
 
 ---
+
+## 🥗 8. 영양 피드백 생성
+
+#### `POST /api/chatbot/nutrition_feedback?feedback_date={YYYY-MM-DD}`
+
+**Headers**
+```http
+Authorization: Bearer {accessToken}
+```
+
+**Request Body**
+- 없음
+
+**Response**
+```json
+{
+  "feedback": "🥗 오늘의 영양 분석입니다.\n\n총 섭취 칼로리: 1800kcal (목표 TDEE: 2000kcal)..."
+}
+```
+
+**Error**
+- 401 Unauthorized: 사용자 인증 실패
+- 400 Bad Request: 날짜 형식 오류
+- 404 Not Found: 영양 정보가 없어도 “아직 영양 정보가 없습니다...” 형태 메시지 반환
+
+---
+
