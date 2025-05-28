@@ -52,6 +52,7 @@
 ![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF.svg?&style=for-the-badge&logo=Kotlin&logoColor=white)
 ![Coil](https://img.shields.io/badge/Coil-00D4AA.svg?&style=for-the-badge&logo=Android&logoColor=white)
 ![Coroutines](https://img.shields.io/badge/Coroutines-7F52FF.svg?&style=for-the-badge&logo=Kotlin&logoColor=white)
+<br>
 ![Android Jetpack Compose](https://img.shields.io/badge/Jetpack_Compose-4285F4.svg?&style=for-the-badge&logo=Jetpack-Compose&logoColor=white)
 ![Material Design 3](https://img.shields.io/badge/Material_Design_3-757575.svg?&style=for-the-badge&logo=Material-Design&logoColor=white)
 
@@ -60,9 +61,11 @@
 ![SpringBoot](https://img.shields.io/badge/SpringBoot-6DB33F.svg?&style=for-the-badge&logo=Spring-Boot&logoColor=white)
 ![Spring Cloud](https://img.shields.io/badge/Spring_Cloud-6DB33F.svg?&style=for-the-badge&logo=Spring&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-DC382D.svg?&style=for-the-badge&logo=Redis&logoColor=white)
+<br>
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1.svg?&style=for-the-badge&logo=MySQL&logoColor=white)
 ![ElasticSearch](https://img.shields.io/badge/ElasticSearch-005571.svg?&style=for-the-badge&logo=Elasticsearch&logoColor=white)
 ![MinIO](https://img.shields.io/badge/MinIO-C72E49.svg?&style=for-the-badge&logo=MinIO&logoColor=white)
+<br>
 ![JAVA](https://img.shields.io/badge/Java-007396.svg?&style=for-the-badge&logo=OpenJDK&logoColor=white)
 ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600.svg?&style=for-the-badge&logo=RabbitMQ&logoColor=white)
 ![JPA](https://img.shields.io/badge/JPA-59666C.svg?&style=for-the-badge&logo=Hibernate&logoColor=white)
@@ -72,9 +75,11 @@
 ![Jenkins](https://img.shields.io/badge/Jenkins-D24939.svg?&style=for-the-badge&logo=Jenkins&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED.svg?&style=for-the-badge&logo=Docker&logoColor=white)
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5.svg?&style=for-the-badge&logo=Kubernetes&logoColor=white)
+<br>
 ![AWS EC2](https://img.shields.io/badge/AWS_EC2-FF9900.svg?&style=for-the-badge&logo=Amazon-EC2&logoColor=white)
 ![Grafana](https://img.shields.io/badge/Grafana-F46800.svg?&style=for-the-badge&logo=Grafana&logoColor=white)
 ![Prometheus](https://img.shields.io/badge/Prometheus-E6522C.svg?&style=for-the-badge&logo=Prometheus&logoColor=white)
+<br>
 ![Nginx](https://img.shields.io/badge/Nginx-009639.svg?&style=for-the-badge&logo=Nginx&logoColor=white)
 
 ### 🗂️ **버전 및 이슈관리**
@@ -91,20 +96,6 @@
 ### 🎨 **디자인**
 
 ![Figma](https://img.shields.io/badge/Figma-F24E1E.svg?&style=for-the-badge&logo=Figma&logoColor=white)
-
-<br>
-
-## 🚀 주요 기술 상세 소개
-
-### Kotlin
-
-### Android Jetpack Compose
-
-### Material Design 3
-
-### Coil
-
-### Coroutines
 
 <br>
 
@@ -343,14 +334,6 @@ FE/
 
 <br>
 
-## ❌ 트러블 슈팅
-
-<br>
-
-## 🎯 향후 목표
-
-<br>
-
 ## 🗒️ 프로젝트 후기
 
 ### 🐶 강현호
@@ -387,7 +370,8 @@ RabbitMQ와 FCM을 활용해 비동기 기반의 확장 가능한 구조를 설�
 이 프로젝트를 통해 기술을 주도적으로 선택하고 설계하는 역량을 키울 수 있었으며,
 무엇보다도 디아비전 멘토님들과 S206팀 팀원들과 함께하며 일에 대한 열정과 책임감의 중요성을 깊이 느낄 수 있었습니다.
 
-소중한 경험을 할 수 있도록 기회를 주신 SSAFY, 디아비전, 그리고 함께한 S206팀에 진심으로 감사드립니다. (*>∇<)ﾉ
+소중한 경험을 할 수 있도록 기회를 주신 SSAFY, 디아비전, 그리고 함께한 S206팀에 진심으로 감사드립니다. (\*>∇<)ﾉ
+
 <br>
 
 ### 🐯 김홍범
@@ -396,9 +380,13 @@ SSAFY에서의 마지막 프로젝트를 감사하게도 좋은 기회로 디아
 
 기업이 요구하는 요구사항을 최대한 반영하려고 노력하는 과정에서 사용자 관점에서의 개발이 무엇인지 깨닫게 되는 계기가 되었던 것 같습니다.
 
-제가 맡은 인프라 업무에서도 사용자가 서비스를 이용할 때 서비스의 끊김 현상이나 대량의 트래픽이 몰렸을 때 서버가 다운되는 상황을 방지하기 위해서 Kubernetes를 도입하여 HPA를 통해 트래픽에 따라 서비스가 자동으로 확장이 되도록 하였고, 서비스가 다운이 되어도 자가 복구가 되도록 구성 하여 시스템 안정성에 큰 기여를 하였습니다.
+특히 인프라 담당으로서 사용자가 겪을 수 있는 서비스 중단이나 성능 저하를 방지하기 위해 Kubernetes 기반의 자동 확장 및 복구 시스템을 구축했습니다.
 
-이처럼 개발을 할 때 개발자 관점에서 벗어나 사용자 관점에서 어떠한 개발이 사용자에게 긍정적인 영향을 미칠지 생각하면서 개발할 수 있게 되었습니다.
+HPA를 통해 CPU 사용률이 70%를 넘으면 자동으로 파드가 확장되도록 설정하고, ReplicaSet을 통해 항상 안정적인 수의 파드가 운영되도록 하여 서비스의 연속성을 보장했습니다.
+
+이 과정에서 모니터링을 하기 위해서 Grafana와 Prometheus를 통한 실시간 메트릭 수집 및 알림 시스템을 구축하여, 잠재적 문제를 사전에 감지하고 대응할 수 있는 체계를 만들었습니다.
+
+이 경험을 통해 "개발자에게 편한 코드"와 "사용자에게 가치있는 서비스" 사이의 차이를 명확히 이해하게 되었고, 앞으로도 항상 사용자 경험을 최우선으로 고려하는 개발자가 되겠다는 다짐을 하게 되었습니다.
 
 <br>
 
