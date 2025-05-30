@@ -70,6 +70,17 @@
 ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600.svg?&style=for-the-badge&logo=RabbitMQ&logoColor=white)
 ![JPA](https://img.shields.io/badge/JPA-59666C.svg?&style=for-the-badge&logo=Hibernate&logoColor=white)
 
+### 🤖 **AI**
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
+![Pytorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)
+<br>
+![JupyterNotebook](https://img.shields.io/badge/Jupyter%20Notebook-F37626?style=flat-square&logo=jupyter&logoColor=white)
+![Colab](https://img.shields.io/badge/Google_Colab-F9AB00?style=plastic&logo=google-colab&logoColor=white)
+![Langchain](https://img.shields.io/badge/LangChain-ffffff?logo=langchain&logoColor=green)
+<br>
+![ChatGpt](https://img.shields.io/badge/chatGPT-74aa9c?logo=openai&logoColor=white)
+
 ### 🌐 **서비스 배포 환경**
 
 ![Jenkins](https://img.shields.io/badge/Jenkins-D24939.svg?&style=for-the-badge&logo=Jenkins&logoColor=white)
@@ -292,6 +303,90 @@ FE/
 
 ```
 
+</details>
+<details> 
+<summary>AI</summary>
+
+```
+AI/
+├── app/
+│   ├── common/
+│   │   └── responses.py
+│   ├── config/
+│   │   ├── log.py
+│   │   └── settings.py
+│   ├── core/
+│   │   ├── rag/
+│   │   │   ├── __init__.py
+│   │   │   ├── indexer.py
+│   │   │   └── rag.py
+│   │   ├── t5/
+│   │   │   ├── __init__.py
+│   │   │   ├── diet_predictor.py
+│   │   │   └── models.py
+│   ├── db/
+│   │   ├── __init__.py
+│   │   ├── mongo.py
+│   │   └── mysql.py
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── nutrition.py
+│   │   ├── user.py
+│   │   └── workout.py
+│   ├── repositories/
+│   │   ├── body_info_repository.py
+│   │   ├── exercise_repository.py
+│   │   ├── feedback_repository.py
+│   │   ├── nutrition_repository.py
+│   │   └── user_repository.py
+│   ├── routes/
+│   │   ├── __init__.py
+│   │   ├── chat.py
+│   │   ├── nutrition.py
+│   │   ├── session.py
+│   │   └── workout.py
+│   ├── scheduler/
+│   │   └── exercise_scheduler.py
+│   ├── schemas/
+│   │   ├── chat.py
+│   │   ├── notification.py
+│   │   ├── nutrition.py
+│   │   ├── session.py
+│   │   └── workout.py
+│   ├── services/
+│   │   ├── bodyinfo/
+│   │   │   └── bodyinfo_service.py
+│   │   ├── chat/
+│   │   │   ├── chat_service.py
+│   │   │   └── chat_session.py
+│   │   ├── feedback/
+│   │   │   └── feedback_service.py
+│   │   ├── memory/
+│   │   │   └── mongo_memory.py
+│   │   ├── nutrition/
+│   │   │   ├── __init__.py
+│   │   │   ├── feedback_service.py
+│   │   │   ├── generate_advice_service.py
+│   │   │   ├── get_food_nutrition_service.py
+│   │   │   ├── health_calculator_service.py
+│   │   │   └── nutrition_chat_service.py
+│   │   └── workout/
+│   │       ├── __init__.py
+│   │       ├── feedback.py
+│   │       ├── workout_service.py
+│   │       └── prompt/
+│   │           └── prompt_templates.py
+│   └── utils/
+│       ├── __init__.py
+│       ├── validation.py
+│       └── weight_predictor.py
+├── .gitignore
+├── Dockerfile
+├── main.py
+└── requirements.txt
+
+
+```
 </details>
 <br>
 
