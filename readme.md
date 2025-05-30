@@ -1,6 +1,6 @@
 # ❤️‍🩹 개인 AI 건강 관리 서비스앱 Dia Viseo
 
-![alt text](<서비스 장표.png>)
+![서비스 장표](./readme_source/서비스%20장표.png)
 <br>
 
 ## ✨ 프로젝트 소개
@@ -41,7 +41,7 @@
 
 ## 👥 팀원 구성
 
-![alt text](팀원소개.png)
+![팀원소개](./readme_source/팀원소개.png)
 
 <br>
 
@@ -69,6 +69,17 @@
 ![JAVA](https://img.shields.io/badge/Java-007396.svg?&style=for-the-badge&logo=OpenJDK&logoColor=white)
 ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600.svg?&style=for-the-badge&logo=RabbitMQ&logoColor=white)
 ![JPA](https://img.shields.io/badge/JPA-59666C.svg?&style=for-the-badge&logo=Hibernate&logoColor=white)
+
+### 🤖 **AI**
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
+![Pytorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)
+<br>
+![JupyterNotebook](https://img.shields.io/badge/Jupyter%20Notebook-F37626?style=flat-square&logo=jupyter&logoColor=white)
+![Colab](https://img.shields.io/badge/Google_Colab-F9AB00?style=plastic&logo=google-colab&logoColor=white)
+![Langchain](https://img.shields.io/badge/LangChain-ffffff?logo=langchain&logoColor=green)
+<br>
+![ChatGpt](https://img.shields.io/badge/chatGPT-74aa9c?logo=openai&logoColor=white)
 
 ### 🌐 **서비스 배포 환경**
 
@@ -293,6 +304,90 @@ FE/
 ```
 
 </details>
+<details> 
+<summary>AI</summary>
+
+```
+AI/
+├── app/
+│   ├── common/
+│   │   └── responses.py
+│   ├── config/
+│   │   ├── log.py
+│   │   └── settings.py
+│   ├── core/
+│   │   ├── rag/
+│   │   │   ├── __init__.py
+│   │   │   ├── indexer.py
+│   │   │   └── rag.py
+│   │   ├── t5/
+│   │   │   ├── __init__.py
+│   │   │   ├── diet_predictor.py
+│   │   │   └── models.py
+│   ├── db/
+│   │   ├── __init__.py
+│   │   ├── mongo.py
+│   │   └── mysql.py
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── nutrition.py
+│   │   ├── user.py
+│   │   └── workout.py
+│   ├── repositories/
+│   │   ├── body_info_repository.py
+│   │   ├── exercise_repository.py
+│   │   ├── feedback_repository.py
+│   │   ├── nutrition_repository.py
+│   │   └── user_repository.py
+│   ├── routes/
+│   │   ├── __init__.py
+│   │   ├── chat.py
+│   │   ├── nutrition.py
+│   │   ├── session.py
+│   │   └── workout.py
+│   ├── scheduler/
+│   │   └── exercise_scheduler.py
+│   ├── schemas/
+│   │   ├── chat.py
+│   │   ├── notification.py
+│   │   ├── nutrition.py
+│   │   ├── session.py
+│   │   └── workout.py
+│   ├── services/
+│   │   ├── bodyinfo/
+│   │   │   └── bodyinfo_service.py
+│   │   ├── chat/
+│   │   │   ├── chat_service.py
+│   │   │   └── chat_session.py
+│   │   ├── feedback/
+│   │   │   └── feedback_service.py
+│   │   ├── memory/
+│   │   │   └── mongo_memory.py
+│   │   ├── nutrition/
+│   │   │   ├── __init__.py
+│   │   │   ├── feedback_service.py
+│   │   │   ├── generate_advice_service.py
+│   │   │   ├── get_food_nutrition_service.py
+│   │   │   ├── health_calculator_service.py
+│   │   │   └── nutrition_chat_service.py
+│   │   └── workout/
+│   │       ├── __init__.py
+│   │       ├── feedback.py
+│   │       ├── workout_service.py
+│   │       └── prompt/
+│   │           └── prompt_templates.py
+│   └── utils/
+│       ├── __init__.py
+│       ├── validation.py
+│       └── weight_predictor.py
+├── .gitignore
+├── Dockerfile
+├── main.py
+└── requirements.txt
+
+
+```
+</details>
 <br>
 
 ## 🗓️ 개발 기간 및 작업 관리
@@ -309,28 +404,36 @@ FE/
 
 - #### **GitLab**을 사용하여 MergeRequest에 서로 코드 리뷰를 하면서 피드백을 공유 했습니다.
 
-  ![alt text](image.png)
+  ![코드리뷰](./readme_source/code_review.png)
 
 - #### **Jira**를 통해서 서로의 작업 현황을 파악하고 개발 일정을 관리했습니다.
-  ![alt text](image-1.png)
+  ![jira](./readme_source/jira.png)
 
 <br>
 
 ## 🏗️ 시스템 아키텍처
 
-![alt text](<자율PJT 아키텍처.png>)
+![시스템아키텍처](./readme_source/자율PJT%20아키텍처.png)
 
 <br>
 
 ## ✨ 페이지별 기능
 
-### [스플래시]
+| **스플래시**                            | **소셜로그인**                            | **홈**                                            |
+| --------------------------------------- | ----------------------------------------- | ------------------------------------------------- |
+| ![스플래시](./readme_source/splash.gif) | ![소셜로그인](./readme_source/signin.gif) | <img src="./readme_source/home.jpg" width="380"/> |
 
-### [소셜 로그인]
+| **평가**                            | **챗봇**                             | **마이페이지**                                      |
+| ----------------------------------- | ------------------------------------ | --------------------------------------------------- |
+| ![평가](./readme_source/statis.gif) | ![챗봇](./readme_source/chatbot.gif) | <img src="./readme_source/mypage.jpg" width="380"/> |
 
-### [온보딩]
+| **식단 등록**                                  | **식단 상세**                                |
+| ---------------------------------------------- | -------------------------------------------- |
+| ![식단등록](./readme_source/register_meal.gif) | ![식단상세](./readme_source/detail_meal.gif) |
 
-### [홈 화면]
+| **운동 등록**                                | **운동 상세**                              |
+| -------------------------------------------- | ------------------------------------------ |
+| ![운동등록](./readme_source/register_ex.gif) | ![운동상세](./readme_source/detail_ex.gif) |
 
 <br>
 
