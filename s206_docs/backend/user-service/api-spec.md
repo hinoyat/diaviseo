@@ -1063,9 +1063,9 @@ public void sendSms(String to, String code) {
 ```yaml
 # 보안 개선 필요
 coolsms:
-  api-key: NCSJTLVYLEHGKS7D
-  api-secret: NSHGJP6JGLYJCMK8GJXFKNXJNFGD6KON
-  from-number: 01028992564
+  api-key: --
+  api-secret: --
+  from-number: --
 ```
 
 ### 데이터베이스 스키마
