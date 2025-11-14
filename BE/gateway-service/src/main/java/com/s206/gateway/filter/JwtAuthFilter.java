@@ -1,6 +1,6 @@
 package com.s206.gateway.filter;
 
-import com.s206.gateway.blacklist.TokenBlacklistService;
+import com.s206.gateway.blacklist.BlacklistService;
 import com.s206.gateway.util.GatewayResponseUtil;
 import com.s206.gateway.util.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -17,13 +17,14 @@ public class JwtAuthFilter extends AbstractGatewayFilterFactory<JwtAuthFilter.Co
 
     private final JwtUtil jwtUtil;
     private final GatewayResponseUtil gatewayResponseUtil;
-    private final TokenBlacklistService tokenBlacklistService;
+    private final BlacklistService blacklistService;
 
-    public JwtAuthFilter(JwtUtil jwtUtil, GatewayResponseUtil gatewayResponseUtil, TokenBlacklistService tokenBlacklistService) {
+
+    public JwtAuthFilter(JwtUtil jwtUtil, GatewayResponseUtil gatewayResponseUtil, BlacklistService tokenBlacklistService) {
         super(JwtAuthFilter.Config.class);
         this.jwtUtil = jwtUtil;
         this.gatewayResponseUtil = gatewayResponseUtil;
-        this.tokenBlacklistService = tokenBlacklistService;
+        this.blacklistService = tokenBlacklistService;
     }
 
     public static class Config {}
@@ -38,7 +39,7 @@ public class JwtAuthFilter extends AbstractGatewayFilterFactory<JwtAuthFilter.Co
                 return gatewayResponseUtil.writeJsonError(exchange, HttpStatus.UNAUTHORIZED, "Authorization 헤더가 없습니다.");
             }
 
-            return tokenBlacklistService.isBlacklisted(token)
+            return blacklistService.isBlacklisted(token)
                     .flatMap(isBlacklisted -> {
                         if (isBlacklisted) {
                             log.warn("[JWT 필터] 블랙리스트 토큰 접근 차단");
