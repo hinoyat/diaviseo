@@ -50,4 +50,28 @@ public class RedisConfig {
         log.info("ReactiveRedisTemplate 직렬화 설정 완료");
         return new ReactiveRedisTemplate<>(connectionFactory, serializationContext);
     }
+
+    @Bean
+    public org.springframework.data.redis.connection.RedisConnectionFactory syncRedisConnectionFactory(
+            @Value("${spring.data.redis.host}") String host,
+            @Value("${spring.data.redis.port}") int port
+    ) {
+        return new org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory(host, port);
+    }
+
+    @Bean
+    public org.springframework.data.redis.core.RedisTemplate<String, Object> redisTemplate(
+            org.springframework.data.redis.connection.RedisConnectionFactory syncRedisConnectionFactory
+    ) {
+        var t = new org.springframework.data.redis.core.RedisTemplate<String, Object>();
+        t.setConnectionFactory(syncRedisConnectionFactory);
+
+        t.setKeySerializer(new org.springframework.data.redis.serializer.StringRedisSerializer());
+        t.setValueSerializer(new org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer<>(Object.class));
+        t.setHashKeySerializer(new org.springframework.data.redis.serializer.StringRedisSerializer());
+        t.setHashValueSerializer(new org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer<>(Object.class));
+        t.afterPropertiesSet();
+        return t;
+    }
+
 }
